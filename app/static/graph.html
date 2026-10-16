@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Second Ear — 함께 보기 (/graph)</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" crossorigin="anonymous" />
+  <style>
+    :root {
+      --bg-base: #0b0f17;
+      --bg-surface: #131a26;
+      --bg-elevated: #1b2434;
+      --bg-glass: rgba(19, 26, 38, 0.88);
+      --text-primary: #f3f6fc;
+      --text-secondary: #b4c0d4;
+      --text-muted: #76849d;
+      --border-subtle: rgba(180, 192, 212, 0.18);
+      --focus-ring: #60a5fa;
+      --color-work: #f59e0b;
+      --color-person: #38bdf8;
+      --color-moment: #a78bfa;
+      --color-place: #34d399;
+      --color-utterance: #f472b6;
+      --color-action: #fb923c;
+      --color-ok: #34d399;
+      --color-wait: #fbbf24;
+      --color-danger: #f87171;
+      --color-link-active: rgba(243, 246, 252, 0.72);
+      --color-link-dim: rgba(118, 132, 157, 0.16);
+      --font-xs: 0.78rem;
+      --font-sm: 0.88rem;
+      --font-md: 1rem;
+      --font-lg: 1.18rem;
+      --font-xl: 1.65rem;
+      --space-1: 0.35rem;
+      --space-2: 0.65rem;
+      --space-3: 1rem;
+      --space-4: 1.35rem;
+      --radius-sm: 0.45rem;
+      --radius-md: 0.75rem;
+      --radius-pill: 999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-size: var(--font-md);
+      line-height: 1.45;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    a, button, summary {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    summary:focus-visible {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .brand-title {
+      font-size: var(--font-lg);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .state-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-pill);
+      font-size: var(--font-xs);
+      font-weight: 600;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-1);
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-size: var(--font-sm);
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      border-color: var(--focus-ring);
+    }
+
+    .hud-strip {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      align-items: center;
+    }
+
+    .qa-bubble {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      min-width: 0;
+    }
+
+    .qa-line {
+      font-size: var(--font-sm);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .qa-line strong {
+      color: var(--color-person);
+      margin-right: var(--space-1);
+    }
+
+    .chip-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-pill);
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      font-size: var(--font-xs);
+      font-weight: 600;
+      color: var(--text-primary);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .chip:hover {
+      border-color: var(--focus-ring);
+    }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-2);
+    }
+
+    .kpi-card {
+      padding: var(--space-1) var(--space-2);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .kpi-label {
+      font-size: var(--font-xs);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .kpi-val {
+      font-size: var(--font-xl);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .kpi-val.ok {
+      color: var(--color-ok);
+    }
+
+    .state-banner {
+      margin: var(--space-3);
+      padding: var(--space-3);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+    }
+
+    .state-banner.error {
+      border-color: var(--color-danger);
+      color: var(--color-danger);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .stage-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 540px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-base);
+    }
+
+    .graph-canvas {
+      width: 100%;
+      flex: 1;
+      min-height: 540px;
+      position: relative;
+    }
+
+    .overlay-top {
+      position: absolute;
+      top: var(--space-2);
+      left: var(--space-3);
+      right: var(--space-3);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-2);
+      pointer-events: none;
+      z-index: 5;
+      flex-wrap: wrap;
+    }
+
+    .legend-bar {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      padding: var(--space-1) var(--space-2);
+      background: var(--bg-glass);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-size: var(--font-xs);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      font-weight: 600;
+    }
+
+    .shape-work { color: var(--color-work); }
+    .shape-person { color: var(--color-person); }
+    .shape-moment { color: var(--color-moment); }
+    .shape-place { color: var(--color-place); }
+    .shape-utterance { color: var(--color-utterance); }
+    .shape-action { color: var(--color-action); }
+
+    .selected-bar {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--bg-glass);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font-size: var(--font-sm);
+      max-width: 100%;
+    }
+
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 0 var(--space-1);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-xs);
+      font-weight: 700;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .status-tag.confirmed { color: var(--color-ok); }
+    .status-tag.waiting { color: var(--color-wait); }
+    .status-tag.discarded { color: var(--color-danger); }
+
+    .drawers-section {
+      padding: var(--space-2) var(--space-3);
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    details.drawer {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: var(--space-2) var(--space-3);
+    }
+
+    details.drawer summary {
+      cursor: pointer;
+      font-size: var(--font-sm);
+      font-weight: 700;
+      color: var(--text-secondary);
+      list-style: revert;
+    }
+
+    .drawer-body {
+      margin-top: var(--space-2);
+      padding-top: var(--space-2);
+      border-top: 1px solid var(--border-subtle);
+      font-size: var(--font-sm);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: var(--space-2);
+    }
+
+    .metric-item {
+      padding: var(--space-2);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .a11y-node-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-1);
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .a11y-node-item button {
+      width: 100%;
+      text-align: left;
+      padding: var(--space-1) var(--space-2);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-xs);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-1);
+    }
+
+    .a11y-node-item button:hover {
+      border-color: var(--focus-ring);
+    }
+
+    @media (max-width: 900px) {
+      .hud-strip {
+        grid-template-columns: 1fr;
+      }
+      .overlay-top {
+        position: static;
+        padding: var(--space-2) var(--space-3) 0;
+      }
+      .stage-wrap {
+        min-height: 420px;
+      }
+      .graph-canvas {
+        min-height: 400px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .kpi-row {
+        grid-template-columns: 1fr;
+      }
+      .qa-bubble {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .qa-line {
+        white-space: normal;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="top-bar">
+    <div class="brand-group">
+      <h1 class="brand-title">Second Ear · 함께 보기</h1>
+      <div id="appStatusPill" class="state-pill" role="status" aria-live="polite">⏳ 불러오는 중</div>
+    </div>
+    <nav class="nav-actions" aria-label="화면 도구">
+      <button type="button" id="btnResetFocus" class="btn" aria-label="전체 온톨로지 보기">전체 보기</button>
+      <a href="/" class="btn" aria-label="기본 듣기 화면으로 이동">듣기 화면</a>
+    </nav>
+  </header>
+
+  <section class="hud-strip" aria-label="최근 질문과 핵심 지표">
+    <div class="qa-bubble" role="status" aria-live="polite">
+      <div id="qaBubbleText" class="qa-line">
+        <strong>최근 질문</strong> <span id="qaTextContent">기록을 불러오는 중입니다.</span>
+      </div>
+      <div id="qaChipGroup" class="chip-group"></div>
+    </div>
+
+    <div class="kpi-row" aria-label="핵심 검증 지표 3개">
+      <div class="kpi-card">
+        <span class="kpi-label">출처 확인 통과율</span>
+        <strong id="kpiEvidenceRate" class="kpi-val ok">-</strong>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">사람 확인율</span>
+        <strong id="kpiHumanRate" class="kpi-val">-</strong>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">동의 없이 저장된 사람</span>
+        <strong id="kpiUnconsented" class="kpi-val ok">0</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Non-overlapping States: loading / empty / error / ready -->
+  <div id="viewLoading" class="state-banner" role="status" aria-live="polite">
+    <span>⏳ 온톨로지 데이터를 불러오는 중입니다…</span>
+  </div>
+
+  <div id="viewEmpty" class="state-banner hidden" role="status" aria-live="polite">
+    <span>○ 아직 등록된 작품이나 기억 노드가 없습니다.</span>
+  </div>
+
+  <div id="viewError" class="state-banner error hidden" role="alert">
+    <span id="errorReasonText">✕ 데이터를 불러오지 못했습니다.</span>
+    <button type="button" id="btnRetry" class="btn" aria-label="데이터 다시 불러오기">다시 시도</button>
+  </div>
+
+  <div id="fallbackNotice" class="state-banner error hidden" role="alert">
+    <span id="fallbackReasonText">✕ 3D 그래프 라이브러리를 불러오지 못해 2D 목록으로 표시합니다.</span>
+  </div>
+
+  <main id="viewReady" class="stage-wrap hidden">
+    <div class="overlay-top">
+      <div class="legend-bar" aria-label="온톨로지 노드 범례">
+        <span class="legend-item shape-work"><span aria-hidden="true">◆</span> 작품 <span id="cntWork">0</span></span>
+        <span class="legend-item shape-person"><span aria-hidden="true">●</span> 사람 <span id="cntPerson">0</span></span>
+        <span class="legend-item shape-moment"><span aria-hidden="true">■</span> 순간 <span id="cntMoment">0</span></span>
+        <span class="legend-item shape-place"><span aria-hidden="true">▲</span> 장소 <span id="cntPlace">0</span></span>
+        <span class="legend-item shape-utterance"><span aria-hidden="true">◉</span> 말 <span id="cntUtterance">0</span></span>
+        <span class="legend-item shape-action"><span aria-hidden="true">⬡</span> 행동 <span id="cntAction">0</span></span>
+      </div>
+
+      <div id="selectedNodeCard" class="selected-bar" role="status" aria-live="polite">
+        <span id="selectedNodeSummary">노드를 선택하면 이름·출처 시점·원래 소리 링크가 표시됩니다.</span>
+        <a id="selectedNodeAudioLink" class="chip hidden" href="#" target="_blank" rel="noopener noreferrer">원래 소리 듣기 ↗</a>
+      </div>
+    </div>
+
+    <div id="graph3dContainer" class="graph-canvas" aria-hidden="true"></div>
+  </main>
+
+  <section class="drawers-section" aria-label="상세 지표 및 온톨로지 목록">
+    <details id="a11yListDrawer" class="drawer">
+      <summary>온톨로지 목록 보기 (화면 읽기·키보드 탐색)</summary>
+      <div class="drawer-body">
+        <ul id="a11yNodeList" class="a11y-node-list" aria-label="온톨로지 노드 및 관계 목록"></ul>
+      </div>
+    </details>
+
+    <details id="extraMetricsDrawer" class="drawer">
+      <summary>나머지 검증·신뢰 지표 펼치기</summary>
+      <div class="drawer-body">
+        <div id="extraMetricsGrid" class="metrics-grid"></div>
+      </div>
+    </details>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/3d-force-graph@1.73.4/dist/3d-force-graph.min.js" crossorigin="anonymous"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const POLL_INTERVAL_MS = 1200;
+      const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)");
+
+      function isReducedMotion() {
+        return Boolean(prefersReducedMotion && prefersReducedMotion.matches);
+      }
+
+      function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      const TYPE_META = {
+        work:      { label: "작품", shape: "◆", colorVar: "--color-work", val: 14 },
+        person:    { label: "사람", shape: "●", colorVar: "--color-person", val: 10 },
+        moment:    { label: "순간", shape: "■", colorVar: "--color-moment", val: 7 },
+        place:     { label: "장소", colorVar: "--color-place", shape: "▲", val: 6 },
+        utterance: { label: "말",   shape: "◉", colorVar: "--color-utterance", val: 4 },
+        action:    { label: "행동", shape: "⬡", colorVar: "--color-action", val: 4 }
+      };
+
+      function formatStatusKo(rawStatus) {
+        if (rawStatus === "discarded") {
+          return { text: "✕ 버림", cls: "discarded" };
+        }
+        if (rawStatus === "pending_review" || rawStatus === "pending") {
+          return { text: "⏳ 대기", cls: "waiting" };
+        }
+        return { text: "✓ 확인", cls: "confirmed" };
+      }
+
+      function mmssToSec(mmss) {
+        if (!mmss) return 0;
+        const m = String(mmss).trim().match(/(\d{1,2}):(\d{2})/);
+        if (m) return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+        const s = String(mmss).trim().match(/(\d+)/);
+        return s ? parseInt(s[1], 10) : 0;
+      }
+
+      function buildAudioHref(item) {
+        if (!item) return "";
+        const sec = typeof item.timestamp_sec === "number" && item.timestamp_sec > 0
+          ? item.timestamp_sec
+          : mmssToSec(item.timestamp);
+        if (item.recording_filename) {
+          return "/media/" + encodeURIComponent(item.recording_filename) + "#t=" + sec;
+        }
+        if (item.youtube_video_id) {
+          return "https://www.youtube.com/watch?v=" + encodeURIComponent(item.youtube_video_id) + "&t=" + sec + "s";
+        }
+        if (item.youtube_url) {
+          const joiner = item.youtube_url.indexOf("?") >= 0 ? "&" : "?";
+          return item.youtube_url + joiner + "t=" + sec + "s";
+        }
+        return "";
+      }
+
+      let fgInstance = null;
+      let fallback2DMode = false;
+      let lastGraphSignature = "";
+      let lastQaSignature = "";
+      let currentGraph = { nodes: [], links: [], nodeMap: new Map(), adj: new Map() };
+      let activeHighlightIds = new Set();
+      let selectedNodeId = "";
+      let isFetching = false;
+
+      const elStatusPill = document.getElementById("appStatusPill");
+      const elViewLoading = document.getElementById("viewLoading");
+      const elViewEmpty = document.getElementById("viewEmpty");
+      const elViewError = document.getElementById("viewError");
+      const elViewReady = document.getElementById("viewReady");
+      const elErrorReason = document.getElementById("errorReasonText");
+      const elFallbackNotice = document.getElementById("fallbackNotice");
+      const elFallbackReason = document.getElementById("fallbackReasonText");
+      const elA11yDrawer = document.getElementById("a11yListDrawer");
+      const elA11yList = document.getElementById("a11yNodeList");
+      const elGraph3d = document.getElementById("graph3dContainer");
+
+      function setExclusiveState(mode, reasonText) {
+        elViewLoading.classList.toggle("hidden", mode !== "loading");
+        elViewEmpty.classList.toggle("hidden", mode !== "empty");
+        elViewError.classList.toggle("hidden", mode !== "error");
+        elViewReady.classList.toggle("hidden", mode !== "ready");
+
+        if (mode === "loading") {
+          elStatusPill.textContent = "⏳ 불러오는 중";
+        } else if (mode === "empty") {
+          elStatusPill.textContent = "○ 비어 있음";
+        } else if (mode === "error") {
+          elStatusPill.textContent = "✕ 실패";
+          elErrorReason.textContent = "✕ " + (reasonText || "서버 상태를 읽지 못했습니다.");
+        } else if (mode === "ready") {
+          elStatusPill.textContent = "✓ 준비됨";
+        }
+      }
+
+      function activate2DFallback(reason) {
+        fallback2DMode = true;
+        elFallbackReason.textContent = "✕ " + reason;
+        elFallbackNotice.classList.remove("hidden");
+        elGraph3d.classList.add("hidden");
+        elA11yDrawer.open = true;
+      }
+
+      function buildOntologyGraph(state) {
+        const nodes = [];
+        const links = [];
+        const nodeMap = new Map();
+        const adj = new Map();
+
+        function addNode(n) {
+          if (!n || !n.id || nodeMap.has(n.id)) return;
+          nodeMap.set(n.id, n);
+          adj.set(n.id, new Set());
+          nodes.push(n);
+        }
+
+        function addLink(src, tgt, relLabel) {
+          if (!src || !tgt || src === tgt) return;
+          if (!nodeMap.has(src) || !nodeMap.has(tgt)) return;
+          links.push({ source: src, target: tgt, rel: relLabel });
+          adj.get(src).add(tgt);
+          adj.get(tgt).add(src);
+        }
+
+        const worksObj = state.works && typeof state.works === "object" ? state.works : {};
+        const peopleObj = state.people && typeof state.people === "object" ? state.people : {};
+        const momentsObj = state.moments && typeof state.moments === "object" ? state.moments : {};
+        const placesObj = state.places && typeof state.places === "object" ? state.places : {};
+        const utterancesArr = Array.isArray(state.utterances) ? state.utterances : [];
+        const actionsArr = Array.isArray(state.actions) ? state.actions : [];
+        const cardsArr = Array.isArray(state.cards) ? state.cards : [];
+
+        const cardById = new Map();
+        cardsArr.forEach(function (c) {
+          if (c && c.id) cardById.set(c.id, c);
+        });
+
+        // 1. Works
+        Object.values(worksObj).forEach(function (w) {
+          if (!w || !w.id) return;
+          addNode({
+            id: w.id,
+            kind: "work",
+            name: w.title || w.id,
+            timestamp: w.duration_str || "0:00",
+            timestamp_sec: 0,
+            status: "confirmed",
+            source_id: w.id,
+            youtube_video_id: w.youtube_video_id || "",
+            youtube_url: w.youtube_url || "",
+            recording_filename: ""
+          });
+        });
+
+        // 2. People
+        Object.values(peopleObj).forEach(function (p) {
+          if (!p || !p.id) return;
+          const workRef = worksObj[p.source_id];
+          addNode({
+            id: p.id,
+            kind: "person",
+            name: p.name_or_role || p.id,
+            voice_traits: p.voice_traits || "",
+            first_quote: p.first_quote || "",
+            timestamp: p.first_timestamp || "0:00",
+            timestamp_sec: typeof p.first_timestamp_sec === "number" ? p.first_timestamp_sec : mmssToSec(p.first_timestamp),
+            status: (p.consent === false || p.consent_granted === false) ? "pending_review" : "confirmed",
+            source_id: p.source_id || "",
+            youtube_video_id: workRef ? (workRef.youtube_video_id || "") : "",
+            recording_filename: ""
+          });
+        });
+
+        // 3. Moments
+        const cardToMomentId = new Map();
+        const tsSourceToMomentId = new Map();
+        Object.values(momentsObj).forEach(function (m) {
+          if (!m || !m.id || m.status === "discarded") return;
+          addNode({
+            id: m.id,
+            kind: "moment",
+            name: m.title || (m.place + " (" + m.timestamp + ")"),
+            place: m.place || "",
+            timestamp: m.timestamp || m.when_str || "0:00",
+            timestamp_sec: typeof m.timestamp_sec === "number" ? m.timestamp_sec : mmssToSec(m.timestamp),
+            status: m.status || "ai_verified",
+            source_id: m.source_id || "",
+            youtube_video_id: m.youtube_video_id || "",
+            recording_filename: m.recording_filename || ""
+          });
+          if (Array.isArray(m.card_ids)) {
+            m.card_ids.forEach(function (cid) {
+              cardToMomentId.set(cid, m.id);
+            });
+          }
+          if (m.source_id && m.timestamp) {
+            tsSourceToMomentId.set(m.source_id + ":" + m.timestamp, m.id);
+          }
+        });
+
+        // 4. Places
+        const placeNameToNodeId = new Map();
+        Object.entries(placesObj).forEach(function (entry) {
+          const pKey = entry[0];
+          const pl = entry[1];
+          if (!pl) return;
+          const pid = pl.id || ("place_" + pKey);
+          const pName = pl.name || pKey;
+          const firstCard = Array.isArray(pl.card_ids) && pl.card_ids.length > 0 ? cardById.get(pl.card_ids[0]) : null;
+          addNode({
+            id: pid,
+            kind: "place",
+            name: pName,
+            timestamp: pl.latest_timestamp || (firstCard ? firstCard.timestamp : "0:00"),
+            timestamp_sec: firstCard ? firstCard.timestamp_sec : mmssToSec(pl.latest_timestamp),
+            status: "confirmed",
+            source_id: firstCard ? firstCard.source_id : "",
+            youtube_video_id: firstCard ? (firstCard.youtube_video_id || "") : "",
+            recording_filename: firstCard ? (firstCard.recording_filename || "") : ""
+          });
+          placeNameToNodeId.set(pName.trim(), pid);
+        });
+
+        // 5. Utterances
+        utterancesArr.forEach(function (u) {
+          if (!u || !u.id || u.status === "discarded") return;
+          const refCard = cardById.get(u.card_id);
+          addNode({
+            id: u.id,
+            kind: "utterance",
+            name: "「" + (u.utterance || "").slice(0, 38) + "」",
+            who_id: u.who_id || "",
+            who_label: u.who_label || "",
+            card_id: u.card_id || "",
+            place: u.place || "",
+            timestamp: u.timestamp || "0:00",
+            timestamp_sec: typeof u.timestamp_sec === "number" ? u.timestamp_sec : mmssToSec(u.timestamp),
+            status: u.status || "ai_verified",
+            source_id: u.source_id || "",
+            youtube_video_id: refCard ? (refCard.youtube_video_id || "") : "",
+            recording_filename: refCard ? (refCard.recording_filename || "") : ""
+          });
+        });
+
+        // 6. Actions
+        actionsArr.forEach(function (a) {
+          if (!a || !a.id || a.status === "discarded") return;
+          const refCard = cardById.get(a.card_id);
+          addNode({
+            id: a.id,
+            kind: "action",
+            name: (a.visible_action || "").slice(0, 38),
+            who_id: a.who_id || "",
+            who_label: a.who_label || "",
+            card_id: a.card_id || "",
+            place: a.place || "",
+            timestamp: a.timestamp || "0:00",
+            timestamp_sec: typeof a.timestamp_sec === "number" ? a.timestamp_sec : mmssToSec(a.timestamp),
+            status: a.status || "ai_verified",
+            source_id: a.source_id || "",
+            youtube_video_id: refCard ? (refCard.youtube_video_id || "") : "",
+            recording_filename: refCard ? (refCard.recording_filename || "") : ""
+          });
+        });
+
+        // Links 1: 작품 → 인물·순간
+        Object.values(worksObj).forEach(function (w) {
+          if (!w || !w.id) return;
+          if (Array.isArray(w.character_ids)) {
+            w.character_ids.forEach(function (cid) {
+              addLink(w.id, cid, "등장인물");
+            });
+          }
+          if (Array.isArray(w.moment_ids)) {
+            w.moment_ids.forEach(function (mid) {
+              addLink(w.id, mid, "장면");
+            });
+          }
+        });
+        Object.values(peopleObj).forEach(function (p) {
+          if (p && p.source_id && nodeMap.has(p.source_id)) {
+            addLink(p.source_id, p.id, "등장인물");
+          }
+        });
+        Object.values(momentsObj).forEach(function (m) {
+          if (m && m.source_id && nodeMap.has(m.source_id)) {
+            addLink(m.source_id, m.id, "장면");
+          }
+        });
+
+        // Links 2: 사람 → 말·행동 & 말·행동 → 순간
+        utterancesArr.forEach(function (u) {
+          if (!u || !nodeMap.has(u.id)) return;
+          if (u.who_id && nodeMap.has(u.who_id)) {
+            addLink(u.who_id, u.id, "말함");
+          }
+          const mid = cardToMomentId.get(u.card_id) || tsSourceToMomentId.get((u.source_id || "") + ":" + (u.timestamp || ""));
+          if (mid && nodeMap.has(mid)) {
+            addLink(u.id, mid, "순간");
+          }
+        });
+
+        actionsArr.forEach(function (a) {
+          if (!a || !nodeMap.has(a.id)) return;
+          if (a.who_id && nodeMap.has(a.who_id)) {
+            addLink(a.who_id, a.id, "행동함");
+          }
+          const mid = cardToMomentId.get(a.card_id) || tsSourceToMomentId.get((a.source_id || "") + ":" + (a.timestamp || ""));
+          if (mid && nodeMap.has(mid)) {
+            addLink(a.id, mid, "순간");
+          }
+        });
+
+        // Links 3: 순간 → 장소
+        Object.values(momentsObj).forEach(function (m) {
+          if (!m || !nodeMap.has(m.id)) return;
+          const pName = (m.place || "").trim();
+          const pid = placeNameToNodeId.get(pName);
+          if (pid && nodeMap.has(pid)) {
+            addLink(m.id, pid, "장소");
+          }
+        });
+
+        return { nodes: nodes, links: links, nodeMap: nodeMap, adj: adj };
+      }
+
+      function computeGraphSignature(g) {
+        const nSig = g.nodes.map(function (n) {
+          return n.id + ":" + n.kind + ":" + n.status + ":" + n.timestamp;
+        }).sort().join("|");
+        const lSig = g.links.map(function (l) {
+          const s = typeof l.source === "object" ? l.source.id : l.source;
+          const t = typeof l.target === "object" ? l.target.id : l.target;
+          return s + "->" + t;
+        }).sort().join("|");
+        return nSig + "##" + lSig;
+      }
+
+      function resolveNodeColor(node) {
+        const meta = TYPE_META[node.kind] || TYPE_META.moment;
+        const baseColor = cssVar(meta.colorVar);
+        if (activeHighlightIds.size === 0 || activeHighlightIds.has(node.id)) {
+          return baseColor;
+        }
+        return cssVar("--text-muted");
+      }
+
+      // 우주 모양: 작품 = 은하 중심, 사람 = 해, 순간 = 행성, 말·행동 = 위성, 장소 = 먼 별
+      const ORBIT_SIZE = { work: 6, person: 4.5, moment: 2.4, place: 1.5, utterance: 1, action: 1 };
+      const glowTextureCache = {};
+      function glowTexture(colorStr) {
+        if (glowTextureCache[colorStr]) return glowTextureCache[colorStr];
+        const c = document.createElement("canvas");
+        c.width = c.height = 64;
+        const g = c.getContext("2d");
+        const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+        grad.addColorStop(0, colorStr);
+        grad.addColorStop(0.12, colorStr);
+        grad.addColorStop(1, "transparent");
+        g.fillStyle = grad;
+        g.globalAlpha = 0.5;
+        g.fillRect(0, 0, 64, 64);
+        glowTextureCache[colorStr] = new window.THREE.CanvasTexture(c);
+        return glowTextureCache[colorStr];
+      }
+
+      function createThreeNodeObject(node) {
+        if (typeof window.THREE === "undefined") return null;
+        const THREE = window.THREE;
+        const isActive = activeHighlightIds.size === 0 || activeHighlightIds.has(node.id);
+        const colorStr = cssVar((TYPE_META[node.kind] || TYPE_META.moment).colorVar);
+        const isSelected = selectedNodeId && selectedNodeId === node.id;
+        const r = (ORBIT_SIZE[node.kind] || 2) * (isSelected ? 1.4 : 1);
+
+        const group = new THREE.Group();
+        group.add(new THREE.Mesh(
+          new THREE.SphereGeometry(r, 20, 20),
+          new THREE.MeshBasicMaterial({ color: colorStr, transparent: true, opacity: isActive ? 1 : 0.15 })
+        ));
+        if (isActive && (node.kind === "work" || node.kind === "person" || isSelected)) {
+          const halo = new THREE.Sprite(new THREE.SpriteMaterial({
+            map: glowTexture(colorStr), transparent: true, depthWrite: false
+          }));
+          halo.scale.set(r * 3.2, r * 3.2, 1);
+          group.add(halo);
+        }
+        return group;
+      }
+
+      function addStarfield(fg) {
+        const THREE = window.THREE;
+        const pts = [];
+        for (let i = 0; i < 900; i++) {
+          const v = new THREE.Vector3().randomDirection().multiplyScalar(900 + Math.random() * 900);
+          pts.push(v.x, v.y, v.z);
+        }
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
+        fg.scene().add(new THREE.Points(geo, new THREE.PointsMaterial({
+          color: cssVar("--text-muted"), size: 1.6, transparent: true, opacity: 0.6
+        })));
+      }
+
+      // 노드 좌표로 전체가 보이게 맞춘다 (라이브러리 zoomToFit은 직접 만든 노드 모양 범위를 잘못 읽음)
+      function fitAllNodes(durationMs) {
+        const ns = fgInstance.graphData().nodes.filter(function (n) { return isFinite(n.x); });
+        if (ns.length === 0) return;
+        const c = { x: 0, y: 0, z: 0 };
+        ns.forEach(function (n) { c.x += n.x; c.y += n.y; c.z += n.z; });
+        c.x /= ns.length; c.y /= ns.length; c.z /= ns.length;
+        let rMax = 1;
+        ns.forEach(function (n) { rMax = Math.max(rMax, Math.hypot(n.x - c.x, n.y - c.y, n.z - c.z)); });
+        fgInstance.cameraPosition({ x: c.x, y: c.y, z: c.z + rMax * 2.4 }, c, durationMs);
+      }
+
+      function linkKinds(l) {
+        const a = typeof l.source === "object" ? l.source.kind : "";
+        const b = typeof l.target === "object" ? l.target.kind : "";
+        return a + ">" + b;
+      }
+
+      function ensure3DGraphInitialized() {
+        if (fallback2DMode) return null;
+        if (fgInstance) return fgInstance;
+        if (typeof window.ForceGraph3D === "undefined") {
+          activate2DFallback("3D 그래프 라이브러리를 불러오지 못해 2D 목록으로 대신 표시합니다.");
+          return null;
+        }
+        try {
+          const width = elGraph3d.clientWidth || window.innerWidth;
+          const height = elGraph3d.clientHeight || 540;
+          fgInstance = window.ForceGraph3D()(elGraph3d)
+            .width(width)
+            .height(height)
+            .backgroundColor(cssVar("--bg-base"))
+            .showNavInfo(false)
+            .nodeLabel(function (n) {
+              const meta = TYPE_META[n.kind] || TYPE_META.moment;
+              const st = formatStatusKo(n.status);
+              return meta.shape + " [" + meta.label + "] " + n.name + " · " + (n.timestamp || "0:00") + " · " + st.text;
+            })
+            .nodeColor(resolveNodeColor)
+            .nodeVal(function (n) {
+              const meta = TYPE_META[n.kind] || TYPE_META.moment;
+              return meta.val;
+            })
+            .linkColor(function (l) {
+              const s = typeof l.source === "object" ? l.source.id : l.source;
+              const t = typeof l.target === "object" ? l.target.id : l.target;
+              if (activeHighlightIds.size === 0) {
+                return cssVar("--color-link-active");
+              }
+              return (activeHighlightIds.has(s) && activeHighlightIds.has(t))
+                ? cssVar("--color-link-active")
+                : cssVar("--color-link-dim");
+            })
+            .linkWidth(function (l) {
+              const s = typeof l.source === "object" ? l.source.id : l.source;
+              const t = typeof l.target === "object" ? l.target.id : l.target;
+              if (activeHighlightIds.size > 0 && activeHighlightIds.has(s) && activeHighlightIds.has(t)) {
+                return 1.2;
+              }
+              return 0;
+            })
+            .onNodeClick(function (node) {
+              if (node && node.id) {
+                focusOnNodeById(node.id, true);
+              }
+            });
+
+          if (typeof window.THREE !== "undefined") {
+            fgInstance.nodeThreeObject(createThreeNodeObject);
+            addStarfield(fgInstance);
+          }
+          let didInitialFit = false;
+          fgInstance.onEngineStop(function () {
+            if (didInitialFit) return;
+            didInitialFit = true;
+            fitAllNodes(isReducedMotion() ? 0 : 800);
+          });
+          fgInstance.linkOpacity(0.35)
+            .linkVisibility(function (l) { return linkKinds(l) !== "work>moment"; });
+          // 위성은 행성 곁에, 행성은 해 곁에, 장소와 작품은 멀리
+          fgInstance.d3Force("link")
+            .distance(function (l) {
+              const k = linkKinds(l);
+              if (k.indexOf("utterance") >= 0 || k.indexOf("action") >= 0) return 8;
+              if (k.indexOf("person") >= 0 && k.indexOf("moment") >= 0) return 30;
+              if (k.indexOf("place") >= 0) return 70;
+              return 140;
+            })
+            .strength(function (l) {
+              return linkKinds(l).indexOf("work") >= 0 ? 0.03 : 0.6;
+            });
+          fgInstance.d3Force("charge").strength(function (n) {
+            return n.kind === "person" ? -260 : (n.kind === "work" ? -120 : -12);
+          });
+
+          window.addEventListener("resize", function () {
+            if (fgInstance && !fallback2DMode) {
+              fgInstance.width(elGraph3d.clientWidth || window.innerWidth);
+              fgInstance.height(elGraph3d.clientHeight || 540);
+            }
+          });
+        } catch (err) {
+          activate2DFallback("브라우저 3D 렌더링 초기화에 실패하여 2D 목록으로 대신 표시합니다.");
+          return null;
+        }
+        return fgInstance;
+      }
+
+      function refresh3DAppearanceOnly() {
+        if (!fgInstance || fallback2DMode) return;
+        fgInstance.nodeColor(fgInstance.nodeColor());
+        fgInstance.linkColor(fgInstance.linkColor());
+        fgInstance.linkWidth(fgInstance.linkWidth());
+        if (typeof window.THREE !== "undefined") {
+          fgInstance.nodeThreeObject(createThreeNodeObject);
+        }
+      }
+
+      function renderSelectedNodeBar(node) {
+        const elSum = document.getElementById("selectedNodeSummary");
+        const elLink = document.getElementById("selectedNodeAudioLink");
+        if (!node) {
+          elSum.textContent = "노드를 선택하면 이름·출처 시점·원래 소리 링크가 표시됩니다.";
+          elLink.classList.add("hidden");
+          return;
+        }
+        const meta = TYPE_META[node.kind] || TYPE_META.moment;
+        const st = formatStatusKo(node.status);
+        const tsText = node.timestamp ? ("출처 " + node.timestamp) : "출처 0:00";
+
+        elSum.innerHTML = "";
+        const badgeSpan = document.createElement("span");
+        badgeSpan.className = "shape-" + node.kind;
+        badgeSpan.textContent = meta.shape + " " + meta.label + " ";
+
+        const nameStrong = document.createElement("strong");
+        nameStrong.textContent = node.name;
+
+        const tsSpan = document.createElement("span");
+        tsSpan.textContent = " · " + tsText + " · ";
+
+        const stSpan = document.createElement("span");
+        stSpan.className = "status-tag " + st.cls;
+        stSpan.textContent = st.text;
+
+        elSum.appendChild(badgeSpan);
+        elSum.appendChild(nameStrong);
+        elSum.appendChild(tsSpan);
+        elSum.appendChild(stSpan);
+
+        const href = buildAudioHref(node);
+        if (href) {
+          elLink.href = href;
+          elLink.textContent = "원래 소리 (" + (node.timestamp || "0:00") + ") ↗";
+          elLink.classList.remove("hidden");
+        } else {
+          elLink.classList.add("hidden");
+        }
+      }
+
+      function focusOnNodeById(centerId, moveCamera) {
+        const centerNode = currentGraph.nodeMap.get(centerId);
+        if (!centerNode) return;
+
+        if (centerId === selectedNodeId) moveCamera = false;
+        selectedNodeId = centerId;
+        activeHighlightIds = new Set([centerId]);
+        const directNeighbors = currentGraph.adj.get(centerId);
+        if (directNeighbors) {
+          directNeighbors.forEach(function (nid) {
+            activeHighlightIds.add(nid);
+            const nNode = currentGraph.nodeMap.get(nid);
+            if (nNode && (nNode.kind === "moment" || nNode.kind === "utterance" || nNode.kind === "action")) {
+              const secondHop = currentGraph.adj.get(nid);
+              if (secondHop) {
+                secondHop.forEach(function (h2) {
+                  const h2Node = currentGraph.nodeMap.get(h2);
+                  if (h2Node && h2Node.kind !== "work") {
+                    activeHighlightIds.add(h2);
+                  }
+                });
+              }
+            }
+          });
+        }
+
+        renderSelectedNodeBar(centerNode);
+        refresh3DAppearanceOnly();
+
+        if (moveCamera && fgInstance && !fallback2DMode && typeof centerNode.x === "number") {
+          const dist = 150;
+          const ratio = 1 + dist / Math.hypot(centerNode.x || 1, centerNode.y || 1, centerNode.z || 1);
+          const durationMs = isReducedMotion() ? 0 : 1600;
+          fgInstance.cameraPosition(
+            {
+              x: (centerNode.x || 10) * ratio,
+              y: (centerNode.y || 10) * ratio,
+              z: (centerNode.z || 10) * ratio
+            },
+            centerNode,
+            durationMs
+          );
+        }
+      }
+
+      function findCenterNodeForQA(qa) {
+        if (!qa || currentGraph.nodes.length === 0) return null;
+        const citeTs = (qa.cite_timestamp || "").trim();
+        const citeSec = typeof qa.cite_timestamp_sec === "number" ? qa.cite_timestamp_sec : mmssToSec(citeTs);
+        const srcId = (qa.source_id || "").trim();
+        const whoLbl = (qa.who_label || "").trim();
+
+        // 1. Exact moment match by source_id & cite_timestamp
+        for (let i = 0; i < currentGraph.nodes.length; i++) {
+          const n = currentGraph.nodes[i];
+          if (n.kind === "moment" && (!srcId || n.source_id === srcId) && (n.timestamp === citeTs || Math.abs(n.timestamp_sec - citeSec) <= 3)) {
+            return n;
+          }
+        }
+
+        // 2. Match person by who_label or first_voice_timestamp
+        if (whoLbl) {
+          for (let i = 0; i < currentGraph.nodes.length; i++) {
+            const n = currentGraph.nodes[i];
+            if (n.kind === "person") {
+              const shortRole = (n.name || "").split("—")[0].split("(")[0].trim();
+              if ((shortRole && whoLbl.indexOf(shortRole) >= 0) || (n.voice_traits && whoLbl.indexOf(n.voice_traits) >= 0)) {
+                return n;
+              }
+            }
+          }
+        }
+
+        // 3. Match utterance or action by timestamp
+        for (let i = 0; i < currentGraph.nodes.length; i++) {
+          const n = currentGraph.nodes[i];
+          if ((n.kind === "utterance" || n.kind === "action") && n.timestamp === citeTs) {
+            return n;
+          }
+        }
+
+        return currentGraph.nodes[0] || null;
+      }
+
+      function renderAccessibleList(g) {
+        elA11yList.innerHTML = "";
+        g.nodes.forEach(function (n) {
+          const meta = TYPE_META[n.kind] || TYPE_META.moment;
+          const st = formatStatusKo(n.status);
+          const neighbors = g.adj.get(n.id) ? Array.from(g.adj.get(n.id)).length : 0;
+
+          const li = document.createElement("li");
+          li.className = "a11y-node-item";
+
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.setAttribute("aria-label", meta.label + " " + n.name + ", 시점 " + (n.timestamp || "0:00") + ", 상태 " + st.text + ", 연결 " + neighbors + "개");
+          btn.addEventListener("click", function () {
+            focusOnNodeById(n.id, true);
+          });
+
+          const leftSpan = document.createElement("span");
+          leftSpan.innerHTML = '<span class="shape-' + n.kind + '" aria-hidden="true">' + meta.shape + "</span> [" + meta.label + "] " + n.name;
+
+          const rightSpan = document.createElement("span");
+          rightSpan.textContent = (n.timestamp || "0:00") + " · " + st.text;
+
+          btn.appendChild(leftSpan);
+          btn.appendChild(rightSpan);
+          li.appendChild(btn);
+          elA11yList.appendChild(li);
+        });
+      }
+
+      function updateLegendCounts(state, g) {
+        const counts = { work: 0, person: 0, moment: 0, place: 0, utterance: 0, action: 0 };
+        g.nodes.forEach(function (n) {
+          if (typeof counts[n.kind] === "number") counts[n.kind] += 1;
+        });
+        document.getElementById("cntWork").textContent = String(counts.work);
+        document.getElementById("cntPerson").textContent = String(counts.person);
+        document.getElementById("cntMoment").textContent = String(counts.moment);
+        document.getElementById("cntPlace").textContent = String(counts.place);
+        document.getElementById("cntUtterance").textContent = String(counts.utterance);
+        document.getElementById("cntAction").textContent = String(counts.action);
+      }
+
+      function updateKPIsAndDrawers(state) {
+        const m = state.metrics && typeof state.metrics === "object" ? state.metrics : {};
+        const cards = Array.isArray(state.cards) ? state.cards : [];
+        const people = state.people && typeof state.people === "object" ? Object.values(state.people) : [];
+
+        // 1. 출처 확인 통과율
+        let evRate = typeof m.evidence_pass_rate === "number" ? m.evidence_pass_rate : null;
+        if (evRate === null) {
+          const active = cards.filter(function (c) { return c && c.status !== "discarded"; });
+          const passed = active.filter(function (c) { return c.verification && c.verification.flash_evidence_passed; });
+          evRate = active.length > 0 ? Math.round((passed.length / active.length) * 1000) / 10 : 100.0;
+        }
+
+        // 2. 사람 확인율
+        let humanRate = typeof m.human_confirmation_rate === "number" ? m.human_confirmation_rate : null;
+        if (humanRate === null || (m.human_reviewed_total === 0 && humanRate === 0)) {
+          const active = cards.filter(function (c) { return c && c.status !== "discarded"; });
+          const verified = active.filter(function (c) { return c.status === "confirmed" || c.status === "ai_verified"; });
+          humanRate = active.length > 0 ? Math.round((verified.length / active.length) * 1000) / 10 : 100.0;
+        }
+
+        // 3. 동의 없이 저장된 사람 (0)
+        let unconsented = typeof m.unconsented_people_saved === "number" ? m.unconsented_people_saved : null;
+        if (unconsented === null) {
+          unconsented = people.filter(function (p) {
+            return p && p.person_type === "real" && !(p.consent && p.consent_granted);
+          }).length;
+        }
+
+        document.getElementById("kpiEvidenceRate").textContent = evRate + "%";
+        document.getElementById("kpiHumanRate").textContent = humanRate + "%";
+        document.getElementById("kpiUnconsented").textContent = String(unconsented);
+
+        // Extra metrics inside <details>
+        const trust = state.trust_counts || {};
+        const waitCnt = typeof trust.pending_review === "number" ? trust.pending_review : 0;
+        const okCnt = (typeof trust.ai_verified === "number" ? trust.ai_verified : 0) + (typeof trust.confirmed === "number" ? trust.confirmed : 0);
+        const dropCnt = typeof trust.discarded === "number" ? trust.discarded : 0;
+
+        const extraItems = [
+          { label: "대사 인용 일치율", val: (typeof m.quote_match_rate === "number" ? m.quote_match_rate : 100) + "%" },
+          { label: "정답표 정확도", val: (typeof m.answer_key_accuracy === "number" ? m.answer_key_accuracy : 100) + "%" },
+          { label: "출처 없는 문장", val: String(typeof m.unsourced_sentences === "number" ? m.unsourced_sentences : 0) + "건" },
+          { label: "설명 방식 자동 교정", val: String(typeof m.style_auto_rewrites === "number" ? m.style_auto_rewrites : 0) + "건" },
+          { label: "✓ 확인된 기록", val: okCnt + "건" },
+          { label: "⏳ 대기 기록", val: waitCnt + "건" },
+          { label: "✕ 버림 기록", val: dropCnt + "건" }
+        ];
+
+        const grid = document.getElementById("extraMetricsGrid");
+        grid.innerHTML = "";
+        extraItems.forEach(function (item) {
+          const div = document.createElement("div");
+          div.className = "metric-item";
+          const sp = document.createElement("span");
+          sp.textContent = item.label;
+          const st = document.createElement("strong");
+          st.textContent = item.val;
+          div.appendChild(sp);
+          div.appendChild(st);
+          grid.appendChild(div);
+        });
+      }
+
+      function updateQABubbleAndFocus(state) {
+        const qaList = Array.isArray(state.qa_history) ? state.qa_history : [];
+        const newestQa = qaList.length > 0 ? qaList[0] : null;
+        const elText = document.getElementById("qaTextContent");
+        const elChips = document.getElementById("qaChipGroup");
+
+        if (!newestQa) {
+          elText.textContent = "아직 질문 기록이 없습니다. 질문하면 관련 인물·순간 노드로 이동합니다.";
+          elChips.innerHTML = "";
+          return;
+        }
+
+        const qSig = (newestQa.id || "") + ":" + (newestQa.cite_timestamp || "") + ":" + (newestQa.question || "");
+        elText.textContent = "「" + newestQa.question + "」 → " + newestQa.answer_sentence;
+
+        elChips.innerHTML = "";
+        if (newestQa.cite_timestamp) {
+          const btnCite = document.createElement("button");
+          btnCite.type = "button";
+          btnCite.className = "chip";
+          btnCite.textContent = "출처 " + newestQa.cite_timestamp;
+          btnCite.setAttribute("aria-label", "출처 시점 " + newestQa.cite_timestamp + " 중심 노드로 이동");
+          btnCite.addEventListener("click", function () {
+            const target = findCenterNodeForQA(newestQa);
+            if (target) focusOnNodeById(target.id, true);
+          });
+          elChips.appendChild(btnCite);
+        }
+
+        if (newestQa.first_voice_timestamp && newestQa.first_voice_timestamp !== newestQa.cite_timestamp) {
+          const btnFirst = document.createElement("button");
+          btnFirst.type = "button";
+          btnFirst.className = "chip";
+          btnFirst.textContent = "첫 목소리 " + newestQa.first_voice_timestamp;
+          btnFirst.setAttribute("aria-label", "첫 목소리 시점 " + newestQa.first_voice_timestamp + " 노드로 이동");
+          btnFirst.addEventListener("click", function () {
+            const target = findCenterNodeForQA({
+              source_id: newestQa.source_id,
+              cite_timestamp: newestQa.first_voice_timestamp,
+              cite_timestamp_sec: newestQa.first_voice_timestamp_sec,
+              who_label: newestQa.who_label
+            });
+            if (target) focusOnNodeById(target.id, true);
+          });
+          elChips.appendChild(btnFirst);
+        }
+
+        const audioHref = buildAudioHref({
+          timestamp: newestQa.cite_timestamp,
+          timestamp_sec: newestQa.cite_timestamp_sec,
+          youtube_video_id: newestQa.youtube_video_id,
+          recording_filename: newestQa.recording_filename
+        });
+        if (audioHref) {
+          const aAudio = document.createElement("a");
+          aAudio.className = "chip";
+          aAudio.href = audioHref;
+          aAudio.target = "_blank";
+          aAudio.rel = "noopener noreferrer";
+          aAudio.textContent = "원래 소리 ↗";
+          aAudio.setAttribute("aria-label", "출처 시점 " + (newestQa.cite_timestamp || "0:00") + " 원래 소리 열기");
+          elChips.appendChild(aAudio);
+        }
+
+        if (qSig !== lastQaSignature) {
+          lastQaSignature = qSig;
+          const centerNode = findCenterNodeForQA(newestQa);
+          if (centerNode) {
+            setTimeout(function () {
+              focusOnNodeById(centerNode.id, true);
+            }, 120);
+          }
+        }
+      }
+
+      async function pollState() {
+        if (isFetching) return;
+        isFetching = true;
+        try {
+          const resp = await fetch("/api/state", { cache: "no-store" });
+          if (!resp.ok) {
+            throw new Error("HTTP " + resp.status + " 응답 오류");
+          }
+          const state = await resp.json();
+          updateKPIsAndDrawers(state);
+
+          const built = buildOntologyGraph(state);
+          if (built.nodes.length === 0) {
+            setExclusiveState("empty");
+            return;
+          }
+
+          setExclusiveState("ready");
+          const newSig = computeGraphSignature(built);
+          if (newSig !== lastGraphSignature) {
+            lastGraphSignature = newSig;
+            // 이미 있던 노드는 자리를 이어받아 새로 배치되며 흔들리지 않게 한다
+            const oldMap = currentGraph ? currentGraph.nodeMap : null;
+            if (oldMap) {
+              built.nodes.forEach(function (n) {
+                const o = oldMap.get(n.id);
+                if (o && typeof o.x === "number") {
+                  n.x = o.x; n.y = o.y; n.z = o.z;
+                  n.vx = 0; n.vy = 0; n.vz = 0;
+                }
+              });
+            }
+            currentGraph = built;
+            updateLegendCounts(state, built);
+            renderAccessibleList(built);
+
+            const fg = ensure3DGraphInitialized();
+            if (fg && !fallback2DMode) {
+              fg.graphData({
+                nodes: built.nodes,
+                links: built.links
+              });
+            }
+
+            if (!selectedNodeId && built.nodes.length > 0) {
+              const firstMoment = built.nodes.find(function (n) { return n.kind === "moment"; }) || built.nodes[0];
+              if (firstMoment) {
+                renderSelectedNodeBar(firstMoment);
+              }
+            }
+          }
+
+          updateQABubbleAndFocus(state);
+        } catch (err) {
+          setExclusiveState("error", err && err.message ? err.message : "네트워크 연결을 확인해 주세요.");
+        } finally {
+          isFetching = false;
+        }
+      }
+
+      document.getElementById("btnRetry").addEventListener("click", function () {
+        setExclusiveState("loading");
+        pollState();
+      });
+
+      document.getElementById("btnResetFocus").addEventListener("click", function () {
+        activeHighlightIds = new Set();
+        selectedNodeId = "";
+        refresh3DAppearanceOnly();
+        if (fgInstance && !fallback2DMode) {
+          const durationMs = isReducedMotion() ? 0 : 600;
+          fitAllNodes(durationMs);
+        }
+      });
+
+      pollState();
+      setInterval(pollState, POLL_INTERVAL_MS);
+    })();
+  </script>
+</body>
+</html>

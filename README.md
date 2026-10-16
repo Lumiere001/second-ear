@@ -18,4 +18,6 @@ See [docs/PLAN.md](docs/PLAN.md) for the problem definition, design, and verific
   - Google Cloud Storage Python Client (`google-cloud-storage`)
   - FastAPI, Uvicorn, Pydantic (`fastapi`, `uvicorn`, `pydantic`, `python-multipart`)
   - Apple Design System tokens reference: `VoltAgent/awesome-design-md` (`apple/DESIGN.md`)
+  - 3D ontology view (`/graph`): `3d-force-graph` 1.73.4 (MIT, https://github.com/vasturiano/3d-force-graph) and `three.js` 0.160.0 (MIT, https://threejs.org), loaded from jsDelivr
+  - Font: Pretendard 1.3.9 (SIL Open Font License 1.1, https://github.com/orioncactus/pretendard)
 

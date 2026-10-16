@@ -149,6 +149,11 @@ async def index_page():
     return HTMLResponse(html_file.read_text(encoding="utf-8"))
 
 
+@app.get("/graph", response_class=HTMLResponse)
+async def graph_page():
+    return HTMLResponse((STATIC_DIR / "graph.html").read_text(encoding="utf-8"))
+
+
 @app.get("/healthz")
 @app.get("/health")
 @app.get("/api/healthz")
