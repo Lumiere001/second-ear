@@ -55,7 +55,9 @@ class PersonNode(BaseModel):
     first_timestamp: str = Field(description="처음 말한 시점 MM:SS")
     first_timestamp_sec: int = 0
     first_met_when_where: str = ""
+    is_new_person: bool = False
     consent: bool = True
+    consent_granted: bool = True
     is_guessed: bool = False
     guessed_note: str = ""
     memorable_quotes: List[Dict[str, str]] = Field(default_factory=list)
@@ -90,7 +92,7 @@ class FactCard(BaseModel):
     timestamp_sec: int = 0
     keywords: List[str] = Field(default_factory=list)
     summary_sentence: str = Field(description="사용자에게 소리로 읽어 줄 한 문장 카드 요약 (출처 시점 포함)")
-    status: Literal["ai_verified", "pending", "confirmed", "discarded"] = "ai_verified"
+    status: Literal["pending_review", "pending", "ai_verified", "confirmed", "discarded"] = "ai_verified"
     confirmed_by: str = "AI"
     confirmed_at: str = Field(default_factory=now_iso)
     discard_reason: str = ""
@@ -115,7 +117,7 @@ class MomentNode(BaseModel):
     visible_summary: str
     sound_cause_summary: str = ""
     card_ids: List[str] = Field(default_factory=list)
-    status: Literal["ai_verified", "pending", "confirmed", "discarded"] = "ai_verified"
+    status: Literal["pending_review", "pending", "ai_verified", "confirmed", "discarded"] = "ai_verified"
     updated_at: str = Field(default_factory=now_iso)
 
 
@@ -134,7 +136,74 @@ class WorkNode(BaseModel):
     updated_at: str = Field(default_factory=now_iso)
 
 
+class PlaceNode(BaseModel):
+    id: str
+    name: str
+    source_type: Literal["work", "memory"] = "work"
+    moment_ids: List[str] = Field(default_factory=list)
+    card_ids: List[str] = Field(default_factory=list)
+    latest_timestamp: str = "0:00"
+
+
+class UtteranceNode(BaseModel):
+    id: str
+    who_id: str
+    who_label: str
+    utterance: str
+    timestamp: str
+    timestamp_sec: int = 0
+    place: str = ""
+    source_id: str = ""
+    card_id: str = ""
+    status: str = "ai_verified"
+
+
+class ActionNode(BaseModel):
+    id: str
+    who_id: str
+    who_label: str
+    visible_action: str
+    sound_event_and_cause: str = ""
+    timestamp: str
+    timestamp_sec: int = 0
+    place: str = ""
+    source_id: str = ""
+    card_id: str = ""
+    status: str = "ai_verified"
+
+
+class SourceNode(BaseModel):
+    id: str
+    source_id: str
+    source_title: str
+    source_type: Literal["youtube", "recording"] = "youtube"
+    timestamp: str
+    timestamp_sec: int = 0
+    youtube_video_id: str = ""
+    recording_filename: str = ""
+    card_id: str = ""
+
+
+class OntologyCounts(BaseModel):
+    works: int = 0
+    people: int = 0
+    moments: int = 0
+    places: int = 0
+    utterances: int = 0
+    actions: int = 0
+    sources: int = 0
+
+
+class TrustStageCounts(BaseModel):
+    pending_review: int = 0
+    ai_verified: int = 0
+    confirmed: int = 0
+    discarded: int = 0
+
+
 class AnswerKeyItem(BaseModel):
+    model_config = {"protected_namespaces": ()}
+
     id: str
     question: str
     query_timestamp: str
@@ -174,8 +243,12 @@ class DashboardMetrics(BaseModel):
     quote_checked_total: int = 0
     quote_matched_total: int = 0
     quote_match_rate: float = 100.0
+    quote_accuracy: float = 100.0
+    citation_rate: float = 100.0
     unsourced_sentences: int = 0
     unconsented_people_saved: int = 0
+    unconsented_new_people: int = 0
+    unconfirmed_wiki_writes: int = 0
     style_violations_remaining: int = 0
     style_auto_rewrites: int = 0
     answer_key_total: int = 8
@@ -185,3 +258,4 @@ class DashboardMetrics(BaseModel):
     human_confirmed_total: int = 0
     human_discarded_total: int = 0
     human_confirmation_rate: float = 100.0
+

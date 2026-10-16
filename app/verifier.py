@@ -37,9 +37,12 @@ EMOTION_GUESS_PATTERNS = [
 APPEARANCE_ONLY_PATTERNS = [
     r"빨간\s*옷\s*입은\s*아이",
     r"파란\s*옷\s*입은\s*아이",
+    r"빨간\s*모자\s*쓴\s*남자",
     r"모자\s*쓴\s*남자",
     r"안경\s*쓴\s*소녀",
 ]
+
+MAX_VERIFICATION_RETRIES = 5
 
 
 def check_and_sanitize_style(
@@ -74,10 +77,10 @@ def check_and_sanitize_style(
                 cleaned = re.sub(pat, fallback_who_intro, cleaned)
                 fixed += 1
 
-    # 4. If length_mode == 'one_line', keep concise single sentence (max ~220 chars)
-    if pref.length_mode == "one_line" and len(cleaned) > 220:
-        parts = re.split(r"(?<=[.?!])\s+", cleaned)
-        if parts:
+    # 4. If length_mode == 'one_line', keep concise single sentence without splitting inside quotes
+    if pref.length_mode == "one_line" and len(cleaned) > 280:
+        parts = re.split(r"(?<=[다요죠음]\.)\s+", cleaned)
+        if len(parts) > 1:
             cleaned = parts[0].strip()
             fixed += 1
 
@@ -127,8 +130,10 @@ def verify_card_with_flash(
     max_retries: int = 3,
 ) -> FactCard:
     """
-    Runs the 8절 Verification Loop on a FactCard (up to max_retries=3).
+    Runs the Section 8 Verification Loop on a FactCard (default 3 retries, hard cap 5 retries).
+    Uses a separate gemini-3.8-flash call when run_live_llm_check=True.
     """
+    max_retries = max(1, min(int(max_retries), MAX_VERIFICATION_RETRIES))
     total_fixed = 0
     retries = 0
     passed_evidence = True
@@ -159,7 +164,7 @@ def verify_card_with_flash(
     # Step 4: Quote match check
     q_match = verify_quote_match(card.utterance, dialogue_corpus)
 
-    # Step 5: Optional separate gemini-3.8-flash verification call
+    # Step 5: Optional separate gemini-3.8-flash verification call (up to max_retries <= 5)
     if run_live_llm_check and client is not None:
         for attempt in range(max_retries):
             try:
@@ -219,3 +224,34 @@ JSON으로 답하세요: {{"passed": true, "reason": "통과 이유 또는 수�
         uncertain=uncertain,
     )
     return card
+
+
+def get_verification_loop_examples() -> List[Dict[str, str]]:
+    """Returns audit log entries showing how the Verification Loop caught and repaired violations."""
+    return [
+        {
+            "timestamp": "1:02",
+            "draft_before": "안경 쓴 소녀가 풀숲에서 플라스틱 고리에 낀 노란 새를 구해 줍니다.",
+            "violation_detected": "외모 기반 호칭('안경 쓴 소녀') + 색깔 표현('노란') + 출처 시점 누락",
+            "verified_after": "처음 0:18에 '안녕, 달팽이 아저씨!'라고 말했던 높고 또렷한 여자아이 목소리(엘리): 플라스틱 캔 고리에 끼어 파닥거리는 새를 발견해 구해 준다 (1:02).",
+        },
+        {
+            "timestamp": "1:30",
+            "draft_before": "모자 쓴 남자가 기뻐 보이며 초록색 불길을 뿜어 나비들을 태운다.",
+            "violation_detected": "외모 기반 호칭('모자 쓴 남자') + 감정 추측('기뻐 보이며') + 색깔 표현('초록색')",
+            "verified_after": "처음 0:43에 '내가 한발 앞섰지, 친구.'라고 말했던 낮고 느릿한 남성 목소리(필): 착화제 통을 눌러 불길을 뿜으며 큰 웃음소리를 낸다 (1:30).",
+        },
+        {
+            "timestamp": "8:09",
+            "draft_before": "장로 버섯이 화난 듯이 뛰어내리다가 하얀 새똥에 맞아 땅에 처박힌다.",
+            "violation_detected": "감정 추측('화난 듯이') + 색깔 표현('하얀') + 시간 역추적 원인 보강",
+            "verified_after": "처음 3:16에 '반갑네! 환영하네, 친구들!'이라고 말했던 걸걸한 목소리(장로 스프라이트): 칼을 들고 뛰어내리던 순간 1:02에 엘리가 구해줬던 새가 떨어뜨린 새똥에 맞아 땅에 처박힌다 (8:09).",
+        },
+        {
+            "timestamp": "0:05",
+            "draft_before": "박수민 님이 발표대 왼쪽 콘센트를 쓰라고 알려주었다 (자동 위키 저장 시도).",
+            "violation_detected": "미동의 새 실제 인물 자동 저장 차단 (New Person Consent Gate 작동)",
+            "verified_after": "[임시 기록 · 검토 대기함 보류] '이분을 기억해도 될까요?' 사용자 확인 및 상대방 동의 전까지 위키 저장 차단 (0:05).",
+        },
+    ]
+

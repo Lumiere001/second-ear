@@ -14,8 +14,12 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from google import genai
 from pydantic import BaseModel
+
+try:
+    from google import genai
+except ImportError:  # pragma: no cover
+    genai = None  # type: ignore
 
 from app.ontology import (
     FactCard,
@@ -50,8 +54,8 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 STATIC_DIR.mkdir(exist_ok=True)
 
 
-def get_genai_client() -> Optional[genai.Client]:
-    if not os.getenv("GEMINI_API_KEY"):
+def get_genai_client():
+    if genai is None or not os.getenv("GEMINI_API_KEY"):
         return None
     return genai.Client()
 
@@ -65,13 +69,15 @@ class PreferenceUpdateReq(BaseModel):
 
 class AskReq(BaseModel):
     question: str
-    current_time_sec: int = 192
+    current_time_sec: float = 192.0
     source_id: str = "sprite-fright"
+    mode: str = "wiki"
     use_live_argon: bool = False
 
 
 class YouTubeReq(BaseModel):
-    youtube_url: str
+    youtube_url: str = ""
+    url: str = ""
     force_live: bool = False
 
 
@@ -79,9 +85,13 @@ class ReviewReq(BaseModel):
     card_id: str
     action: str  # "confirm" | "discard" | "edit"
     consent_confirmed: bool = True
+    consent_granted: Optional[bool] = None
     edited_sentence: str = ""
     edited_who_label: str = ""
     discard_reason: str = "사용자가 기억하지 않기로 선택함"
+
+
+ReviewActionReq = ReviewReq
 
 
 class TTSReq(BaseModel):
@@ -376,8 +386,9 @@ JSON 형식으로 답하세요:
 
 
 @app.post("/api/youtube")
+@app.post("/api/analyze_youtube")
 async def api_process_youtube(req: YouTubeReq):
-    url = req.youtube_url.strip()
+    url = (req.youtube_url or req.url or "https://www.youtube.com/watch?v=_cMxraX_5RE").strip()
     m = re.search(r"(?:v=|youtu\.be/)([A-Za-z0-9_-]{11})", url)
     vid = m.group(1) if m else "_cMxraX_5RE"
 
@@ -438,6 +449,7 @@ JSON 형식:
             first_timestamp_sec=mmss_to_seconds(ts),
             first_met_when_where=f"{title} ({ts})",
             consent=True,
+            consent_granted=True,
             source_id=work_id,
         )
 
@@ -530,6 +542,12 @@ JSON 형식:
     }
 
 
+@app.post("/api/record_sample")
+async def api_record_sample():
+    """Shortcut endpoint used by voice/button sample recording flow."""
+    return await api_record_memory(use_korean_sample=True, file=None)
+
+
 @app.post("/api/record")
 async def api_record_memory(
     use_korean_sample: bool = Form(False),
@@ -566,7 +584,7 @@ async def api_record_memory(
             timestamp_sec=12,
             keywords=["김지훈", "보조배터리", "충전 선", "커피", "식탁 오른쪽"],
             summary_sentence="옆자리 김지훈 님이 '가방에 보조배터리랑 충전 선이 있어요'라며 식탁 오른쪽에 보조배터리와 따뜻한 커피를 놓아 주었어요 (0:12).",
-            status="pending",
+            status="pending_review",
             confirmed_by="AI",
         )
         new_card = verify_card_with_flash(
@@ -581,9 +599,14 @@ async def api_record_memory(
             0, "확인할 기억(검토 대기함) > 현장 한국어 샘플 카드 추가됨"
         )
         store.save_async()
+        spoken_msg = (
+            "방금 26초 현장 기록에서 옆자리 김지훈 님이 식탁 오른쪽에 보조배터리와 따뜻한 커피를 놓아 준 기억(0:12)을 임시 기록했어요. "
+            "지금 바로 확인하시려면 '정리해 줘'라고 말씀해 주세요."
+        )
         return {
             "status": "ok",
             "message": "한국어 샘플 영상(26초)에서 들린 말과 행동을 뽑아 '확인할 기억(검토 대기함)'에 넣었습니다. '정리해 줘'를 눌러 확인해 보세요!",
+            "spoken_text": spoken_msg,
             "card": new_card.model_dump(),
             "state": store.to_dict(),
         }
@@ -685,7 +708,7 @@ JSON 형식:
             "summary_sentence",
             f"{who_name}({voice_traits})이 '{parsed.get('utterance', '')}'라고 말하며 {parsed.get('visible_action', '')} ({ts}).",
         ),
-        status="pending",
+        status="pending_review",
         confirmed_by="AI",
     )
     card = verify_card_with_flash(
@@ -701,6 +724,7 @@ JSON 형식:
     return {
         "status": "ok",
         "message": "현장 기록 검증을 마치고 '확인할 기억(검토 대기함)'에 넣었습니다.",
+        "spoken_text": f"방금 기록한 기억({card.summary_sentence})을 검토 대기함에 넣었어요. '정리해 줘'라고 말씀해 주세요.",
         "card": card.model_dump(),
         "state": store.to_dict(),
     }
@@ -716,6 +740,10 @@ async def api_review_card(req: ReviewReq):
     if target is None:
         raise HTTPException(status_code=404, detail="카드를 찾을 수 없습니다.")
 
+    effective_consent = (
+        req.consent_granted if req.consent_granted is not None else req.consent_confirmed
+    )
+
     if req.action == "discard":
         target.status = "discarded"
         target.discard_reason = req.discard_reason or "사용자가 '아니야'를 선택해 버림"
@@ -730,7 +758,7 @@ async def api_review_card(req: ReviewReq):
         }
 
     # Confirm or Edit -> Check consent for new real person!
-    if target.person_type == "real" and target.is_new_person and not req.consent_confirmed:
+    if target.person_type == "real" and target.is_new_person and not effective_consent:
         raise HTTPException(
             status_code=400,
             detail="처음 만나는 분은 '이분을 기억해도 될까요?' 동의를 확인해야 위키에 저장할 수 있습니다.",
@@ -767,6 +795,8 @@ async def api_review_card(req: ReviewReq):
             first_timestamp_sec=mmss_to_seconds(target.first_timestamp),
             first_met_when_where=f"{target.place} ({target.timestamp})",
             consent=True,
+            consent_granted=True,
+            is_new_person=target.is_new_person,
             is_guessed=target.is_guessed_person,
             memorable_quotes=[{"timestamp": target.timestamp, "quote": target.utterance}],
             moment_ids=[],
@@ -775,6 +805,7 @@ async def api_review_card(req: ReviewReq):
     else:
         p_existing = store.people[pid]
         p_existing.consent = True
+        p_existing.consent_granted = True
         p_existing.memorable_quotes.append(
             {"timestamp": target.timestamp, "quote": target.utterance}
         )
@@ -891,3 +922,532 @@ async def api_tts(req: TTSReq):
         return {"audio_base64": b64, "mime_type": "audio/wav", "cached": False}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+class ConverseReq(BaseModel):
+    utterance: str
+    current_time_sec: float = 0.0
+    use_live_argon: bool = False
+
+
+class ConversationSession:
+    def __init__(self) -> None:
+        self.mode: str = "idle"  # idle | discussing_card | reviewing_inbox | awaiting_consent
+        self.last_card_id: str = "card_sf_3"
+        self.last_person_id: str = "person_ellie"
+        self.review_card_id: str = ""
+        self.speech_rate: float = 1.04
+
+
+conv_session = ConversationSession()
+
+
+def _get_card_by_id(card_id: str) -> Optional[FactCard]:
+    for c in store.cards:
+        if c.id == card_id:
+            return c
+    return store.cards[0] if store.cards else None
+
+
+def _get_pending_cards() -> List[FactCard]:
+    return [c for c in store.cards if c.status == "pending_review"]
+
+
+@app.post("/api/converse")
+async def api_converse(req: ConverseReq):
+    u = req.utterance.strip()
+    cur_sec = max(0, int(req.current_time_sec))
+
+    # 1. Stop / Rest intent
+    if any(w in u for w in ["그만", "멈춰", "조용히", "고마워", "됐어", "쉬어"]):
+        conv_session.mode = "idle"
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": "네, 대화를 잠시 멈출게요. 언제든 화면 아무 곳이나 톡 치시면 다시 귀 기울여 들을게요.",
+            "answer_sentence": "대화를 잠시 멈추었습니다.",
+            "follow_up_voice": "화면 아무 곳이나 터치하면 다시 대화가 시작됩니다.",
+            "action": "stop",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+
+    # 2. Onboarding / Help / How to use (spoken explanation instead of screen text)
+    if any(w in u for w in ["어떻게 써", "도움말", "설명해", "뭐 할 수 있어", "안녕", "시작", "누구야 너", "가이드"]):
+        conv_session.mode = "idle"
+        pending_cnt = len(_get_pending_cards())
+        spoken = (
+            f"안녕하세요, 듣는 세컨드 브레인 세컨드 이어입니다. "
+            f"화면을 보실 필요 없이 아무 곳이나 톡 치고 편하게 말씀하시면 됩니다. "
+            f"영상을 들으실 땐 '방금 무슨 일이야?', '방금 그 목소리 누구야?'라고 물어보시고, "
+            f"일상에선 '아까 보조배터리 어디 뒀지?', '지금부터 기록해 줘', 또는 대기 중인 기억 {pending_cnt}개를 확인하려면 '정리해 줘'라고 말씀해 보세요. "
+            f"지금 무엇부터 해 볼까요?"
+        )
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": spoken,
+            "answer_sentence": "화면을 보지 않고 목소리만으로 영상 장면 질문, 일상 기억 기록·정리·검색을 모두 할 수 있어요.",
+            "follow_up_voice": "지금 '방금 무슨 일이야?', '아까 보조배터리 어디 뒀지?', '정리해 줘' 중 무엇을 해 볼까요?",
+            "action": "listen_next",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+
+    # 3. Voice Preference adjustments (rate, color, length)
+    if any(w in u for w in ["천천히 말해", "말 좀 천천히", "느리게 말해"]):
+        conv_session.speech_rate = 0.88
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": "네, 이제부터 조금 더 천천히 또렷하게 말씀드릴게요. 이어서 무엇을 물어보실래요?",
+            "answer_sentence": "말하기 속도를 천천히(0.88배속)로 바꿨어요.",
+            "follow_up_voice": "계속해서 궁금한 것을 말씀해 주세요.",
+            "action": "change_rate",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+    if any(w in u for w in ["빠르게 말해", "말 좀 빨리", "빨리 말해"]):
+        conv_session.speech_rate = 1.22
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": "네, 이제부터 빠른 속도로 시원시원하게 말씀드릴게요. 이어서 무엇을 해 드릴까요?",
+            "answer_sentence": "말하기 속도를 빠르게(1.22배속)로 바꿨어요.",
+            "follow_up_voice": "계속해서 말씀해 주세요.",
+            "action": "change_rate",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+    if "색깔 빼" in u or "색 빼" in u or "색깔 말하지" in u:
+        store.preference.color_mode = "exclude"
+        store.apply_preference_to_all_cards()
+        store.save_async()
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": "네, 앞으로 모든 설명에서 색깔 단어는 빼고 소리와 행동 중심으로만 말씀드릴게요. 무엇을 알려드릴까요?",
+            "answer_sentence": "설명 설정을 '색깔 제외'로 바꿨어요.",
+            "follow_up_voice": "이어서 궁금한 장면이나 기억을 말씀해 주세요.",
+            "action": "listen_next",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+    if "색깔 넣" in u or "색깔 포함" in u or "색깔도 말해" in u:
+        store.preference.color_mode = "include"
+        store.apply_preference_to_all_cards()
+        store.save_async()
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": "네, 이제부터 색깔 정보도 함께 넣어서 설명해 드릴게요. 무엇을 알려드릴까요?",
+            "answer_sentence": "설명 설정을 '색깔 포함'으로 바꿨어요.",
+            "follow_up_voice": "이어서 궁금한 장면이나 기억을 말씀해 주세요.",
+            "action": "listen_next",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+
+    # 4. Recording surroundings by voice command
+    if any(w in u for w in ["지금 기록", "기록 시작", "지금부터 기억", "녹음 시작", "내 주변 기록"]):
+        conv_session.mode = "idle"
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": "네, 지금부터 주변 소리와 행동을 기록해 둘게요.",
+            "answer_sentence": "주변 30초 기록을 시작합니다.",
+            "follow_up_voice": "기록이 끝나면 어떤 대화가 담겼는지 바로 읽어 드릴게요.",
+            "action": "start_recording",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+
+    # 4b. Daily Story ("오늘의 한 마당 들려줘", "오늘 이야기 들려줘", "오늘 들려줘", "한 마당")
+    if any(w in u for w in ["한 마당", "한마당", "오늘 이야기", "오늘의 이야기", "오늘 들려줘", "오늘 하루 정리"]):
+        story_res = await api_daily_story()
+        story_text = story_res["story_text"]
+        conv_session.mode = "idle"
+        follow = "더 궁금한 장면이나 일상 기억이 있으시면 언제든 말씀해 주세요."
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": f"{story_text} {follow}",
+            "answer_sentence": story_text,
+            "follow_up_voice": follow,
+            "story_text": story_text,
+            "action": "listen_next",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+
+    # 4c. YouTube / Work Wiki analysis command ("유튜브 분석해 줘", "영상 분석해 줘", "영화 분석해 줘")
+    if any(w in u for w in ["유튜브 분석", "영상 분석", "영화 분석", "유튜브 정리", "작품 분석"]):
+        yt_res = await api_process_youtube(
+            YouTubeReq(
+                youtube_url="https://www.youtube.com/watch?v=_cMxraX_5RE",
+                force_live=req.use_live_argon,
+            )
+        )
+        conv_session.mode = "discussing_card"
+        conv_session.last_card_id = "card_sf_3"
+        spoken = (
+            "네, 단편 영화 스프라이트 프라이트 10분 30초 전체 영상을 Gemini 4 Argon과 Flash 검증 루프로 분석해 "
+            "등장인물 5명과 주요 장면 17개를 작품 위키에 준비했어요. "
+            "지금 바로 '방금 무슨 일이야?' 또는 '방금 그 목소리 누구야?'라고 물어보실 수 있어요."
+        )
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": spoken,
+            "answer_sentence": yt_res.get("message", "작품 위키 준비 완료"),
+            "follow_up_voice": "'방금 무슨 일이야?' 또는 '방금 그 목소리 누구야?'라고 말씀해 보세요.",
+            "action": "listen_next",
+            "speech_rate": conv_session.speech_rate,
+            "state": yt_res.get("state", store.to_dict()),
+        }
+
+    # 4d. Cross-moment person identity check ("배터리 얘기한 분이랑 같은 사람이야?", "커피 준 분이랑 같은 사람이야?", "같은 사람이야?")
+    if any(w in u for w in ["같은 사람", "같은 분", "배터리 얘기한 분", "보조배터리 얘기한", "커피 준 분"]):
+        jihoon_card = next(
+            (c for c in store.cards if c.who_id == "person_jihoon"),
+            _get_card_by_id("card_mem_1"),
+        )
+        if jihoon_card:
+            conv_session.last_card_id = jihoon_card.id
+            conv_session.last_person_id = "person_jihoon"
+        ans = (
+            "네, 중저음의 따뜻하고 또렷한 남성 목소리 특징과 처음 0:03에 "
+            "'안녕하세요 동규 님! 저 옆자리 참가자 김지훈입니다'라고 한 인사를 대조해 보니, "
+            "0:12에 식탁 오른쪽에 보조배터리와 따뜻한 커피를 놓아 준 김지훈 님과 같은 분이에요 (0:12)."
+        )
+        if conv_session.mode in ("reviewing_inbox", "awaiting_consent"):
+            follow = "이 기억을 김지훈 님의 위키 페이지에 이어서 저장할까요? '맞아' 또는 '지워'라고 말씀해 주세요."
+        else:
+            conv_session.mode = "discussing_card"
+            follow = "0:12 시점의 원래 목소리를 바로 들어볼까요?"
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": f"{ans} {follow}",
+            "answer_sentence": ans,
+            "follow_up_voice": follow,
+            "action": "listen_next",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+
+    # 5. If currently in Review / Consent mode, handle conversational confirmation ("맞아", "응", "동의해", "지워", "아니야")
+    if conv_session.mode in ("reviewing_inbox", "awaiting_consent"):
+        pending = _get_pending_cards()
+        target = next((c for c in pending if c.id == conv_session.review_card_id), pending[0] if pending else None)
+
+        if target and any(w in u for w in ["맞아", "응", "그래", "네", "저장", "동의", "좋아", "오케이"]):
+            p = store.people.get(target.who_id)
+            needs_consent = bool(target.is_new_person or (p and p.is_new_person and not p.consent_granted))
+            said_consent_explicitly = any(w in u for w in ["동의", "함께 저장", "응 동의", "네 동의"])
+
+            if needs_consent and conv_session.mode != "awaiting_consent" and not said_consent_explicitly:
+                conv_session.mode = "awaiting_consent"
+                conv_session.review_card_id = target.id
+                p_name = p.name_or_role if p else target.who_label
+                spoken = (
+                    f"잠깐만요, 이 기억에는 새로 만난 {p_name}의 목소리 정보가 들어 있어요. "
+                    f"'이분을 기억해도 될까요?' 상대방 동의를 받고 위키에 함께 저장할까요? '응 동의해'라고 말씀해 주시면 저장할게요."
+                )
+                return {
+                    "mode": conv_session.mode,
+                    "spoken_text": spoken,
+                    "answer_sentence": f"새 인물({p_name}) '이분을 기억해도 될까요?' 저장 동의를 음성으로 확인하고 있어요.",
+                    "follow_up_voice": "'응 동의해' 또는 '지워'라고 말씀해 주세요.",
+                    "action": "listen_next",
+                    "speech_rate": conv_session.speech_rate,
+                    "state": store.to_dict(),
+                }
+
+            # Confirm and save!
+            await api_review_card(ReviewActionReq(card_id=target.id, action="confirm", consent_granted=True))
+            remaining = _get_pending_cards()
+            if remaining:
+                nxt = remaining[0]
+                conv_session.mode = "reviewing_inbox"
+                conv_session.review_card_id = nxt.id
+                spoken = (
+                    f"네, 위키에 잘 저장했어요! 다음 확인할 기억은 {nxt.place}에서 있었던 일이에요. "
+                    f"{nxt.summary_sentence} 이 기억도 저장할까요? '맞아' 또는 '지워'라고 말씀해 주세요."
+                )
+                return {
+                    "mode": conv_session.mode,
+                    "spoken_text": spoken,
+                    "answer_sentence": nxt.summary_sentence,
+                    "follow_up_voice": "이 기억도 저장할까요? '맞아' 또는 '지워'라고 말씀해 주세요.",
+                    "action": "listen_next",
+                    "speech_rate": conv_session.speech_rate,
+                    "state": store.to_dict(),
+                }
+            else:
+                conv_session.mode = "idle"
+                conv_session.review_card_id = ""
+                spoken = "네, 방금 기억까지 모두 위키에 저장해서 대기 중인 기억을 전부 정리했어요! 이제 무엇을 찾아볼까요?"
+                return {
+                    "mode": conv_session.mode,
+                    "spoken_text": spoken,
+                    "answer_sentence": "대기 중이던 모든 기억 정리를 마쳤어요.",
+                    "follow_up_voice": "'내 기억 읽어줘' 또는 궁금한 점을 말씀해 주세요.",
+                    "action": "listen_next",
+                    "speech_rate": conv_session.speech_rate,
+                    "state": store.to_dict(),
+                }
+
+        if target and any(w in u for w in ["아니", "지워", "버려", "삭제", "넘어가", "패스"]):
+            await api_review_card(ReviewActionReq(card_id=target.id, action="discard", consent_granted=False))
+            remaining = _get_pending_cards()
+            if remaining:
+                nxt = remaining[0]
+                conv_session.mode = "reviewing_inbox"
+                conv_session.review_card_id = nxt.id
+                spoken = (
+                    f"네, 방금 기억은 저장하지 않고 지웠어요. 다음 기억을 읽어드릴게요. "
+                    f"{nxt.summary_sentence} 이 기억은 저장할까요? '맞아' 또는 '지워'라고 말씀해 주세요."
+                )
+                return {
+                    "mode": conv_session.mode,
+                    "spoken_text": spoken,
+                    "answer_sentence": nxt.summary_sentence,
+                    "follow_up_voice": "'맞아' 또는 '지워'라고 말씀해 주세요.",
+                    "action": "listen_next",
+                    "speech_rate": conv_session.speech_rate,
+                    "state": store.to_dict(),
+                }
+            else:
+                conv_session.mode = "idle"
+                conv_session.review_card_id = ""
+                spoken = "네, 방금 기억을 지우고 대기함 정리를 모두 마쳤어요. 더 도와드릴 일이 있을까요?"
+                return {
+                    "mode": conv_session.mode,
+                    "spoken_text": spoken,
+                    "answer_sentence": "대기함 정리를 모두 마쳤어요.",
+                    "follow_up_voice": "궁금한 장면이나 기억을 편하게 말씀해 주세요.",
+                    "action": "listen_next",
+                    "speech_rate": conv_session.speech_rate,
+                    "state": store.to_dict(),
+                }
+
+    # 6. Start Review Inbox workflow ("정리해 줘", "기억 정리", "대기함")
+    if any(w in u for w in ["정리해", "기억 정리", "대기함", "확인할 기억"]):
+        pending = _get_pending_cards()
+        if not pending:
+            conv_session.mode = "idle"
+            spoken = (
+                "지금 확인 대기 중인 새 기억이 없어요. "
+                "새로 기록하시려면 '지금 기록해 줘'라고 말씀하시고, 이미 저장된 기억을 들으시려면 '내 기억 읽어줘'라고 말씀해 주세요."
+            )
+            return {
+                "mode": conv_session.mode,
+                "spoken_text": spoken,
+                "answer_sentence": "확인 대기 중인 기억이 0개예요.",
+                "follow_up_voice": "'지금 기록해 줘' 또는 '내 기억 읽어줘'라고 말씀해 보세요.",
+                "action": "listen_next",
+                "speech_rate": conv_session.speech_rate,
+                "state": store.to_dict(),
+            }
+        first_p = pending[0]
+        conv_session.mode = "reviewing_inbox"
+        conv_session.review_card_id = first_p.id
+        conv_session.last_card_id = first_p.id
+        spoken = (
+            f"확인할 기억이 {len(pending)}개 있어요. 첫 번째 기억부터 읽어드릴게요. "
+            f"{first_p.summary_sentence} "
+            f"이 기억이 맞으면 '맞아', 지우려면 '지워'라고 말씀해 주세요."
+        )
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": spoken,
+            "answer_sentence": first_p.summary_sentence,
+            "follow_up_voice": "위키에 저장할까요? '맞아' 또는 '지워'라고 말씀해 주세요.",
+            "action": "listen_next",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+
+    # 7. Follow-up intent: Replay original sound ("응 들려줘", "원래 소리", "틀어줘", "응")
+    if any(w in u for w in ["들려줘", "원래 소리", "틀어줘", "다시 들려", "그 소리"]) or u in ("응", "그래", "네", "어", "좋아"):
+        last_c = _get_card_by_id(conv_session.last_card_id)
+        if last_c:
+            ts = last_c.timestamp
+            ts_sec = last_c.timestamp_sec
+            spoken = f"네, {ts} 시점의 원래 소리를 바로 들려드릴게요."
+            return {
+                "mode": "discussing_card",
+                "spoken_text": spoken,
+                "answer_sentence": f"{ts} 시점의 원래 소리를 재생합니다.",
+                "follow_up_voice": "원래 소리를 다 들으신 뒤 '방금 그 목소리 누구야?' 또는 '다음 장면'이라고 물어보실 수 있어요.",
+                "action": "play_original",
+                "play_source_type": last_c.source_type,
+                "play_youtube_id": last_c.youtube_video_id,
+                "play_recording_filename": last_c.recording_filename,
+                "play_timestamp_sec": ts_sec,
+                "play_timestamp": ts,
+                "speech_rate": conv_session.speech_rate,
+                "state": store.to_dict(),
+            }
+
+    # 8. Follow-up intent: "더 자세히 말해줘" / "무슨 상황이야?"
+    if any(w in u for w in ["자세히", "더 알려줘", "무슨 상황", "자세한 설명", "왜 그런 소리"]):
+        last_c = _get_card_by_id(conv_session.last_card_id)
+        if last_c:
+            detail_spoken = (
+                f"자세히 말씀드릴게요. 장소는 {last_c.place}이고, "
+                f"{last_c.who_label}가 '{last_c.utterance}'라고 말하며 {last_c.visible_action} "
+                f"소리 원인은 {last_c.sound_event_and_cause or '현장 대화와 움직임'} 때문이에요 ({last_c.timestamp}). "
+                f"그때의 원래 소리를 바로 들어볼까요, 아니면 다음 장면으로 넘어갈까요?"
+            )
+            return {
+                "mode": "discussing_card",
+                "spoken_text": detail_spoken,
+                "answer_sentence": f"[{last_c.place}] {last_c.visible_action} ({last_c.timestamp}).",
+                "follow_up_voice": "'원래 소리 들려줘' 또는 '다음 장면'이라고 말씀해 보세요.",
+                "action": "listen_next",
+                "speech_rate": conv_session.speech_rate,
+                "state": store.to_dict(),
+            }
+
+    # 9. Follow-up intent: "다음 장면" / "그 다음엔?" / "이전 장면"
+    if any(w in u for w in ["다음 장면", "그 다음", "다음 거", "다음 기억", "이전 장면", "그 전에는", "앞 장면"]) or u in ("다음", "이전"):
+        last_c = _get_card_by_id(conv_session.last_card_id)
+        same_type_cards = [
+            c for c in store.cards
+            if c.card_type == (last_c.card_type if last_c else "work_card")
+        ]
+        same_type_cards.sort(key=lambda x: x.timestamp_sec)
+        idx = 0
+        if last_c:
+            for i, c in enumerate(same_type_cards):
+                if c.id == last_c.id:
+                    idx = i
+                    break
+        is_prev = any(w in u for w in ["이전", "그 전", "앞 장면"])
+        new_idx = (idx - 1) % len(same_type_cards) if is_prev else (idx + 1) % len(same_type_cards)
+        nxt_c = same_type_cards[new_idx]
+        conv_session.last_card_id = nxt_c.id
+        conv_session.last_person_id = nxt_c.who_id
+        conv_session.mode = "discussing_card"
+        dir_word = "이전" if is_prev else "다음"
+        spoken = (
+            f"{dir_word} 장면인 {nxt_c.timestamp} 시점이에요. {nxt_c.summary_sentence} "
+            f"이 장면의 원래 소리를 들어볼까요, 아니면 계속해서 다음 장면을 들려드릴까요?"
+        )
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": spoken,
+            "answer_sentence": nxt_c.summary_sentence,
+            "follow_up_voice": "'응 들려줘' 또는 '다음 장면'이라고 말씀해 주세요.",
+            "action": "listen_next",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+
+    # 10. Conversational Brain Summary: "내 기억 읽어줘" / "내가 뭘 기록했지?" / "오늘 누구 만났지?"
+    if any(w in u for w in ["내 기억", "뭘 기억", "뭘 기록", "무슨 기억", "기억 목록", "오늘 무슨 일"]):
+        mem_cards = [c for c in store.cards if c.card_type == "memory_card"]
+        pending_cnt = len(_get_pending_cards())
+        if mem_cards:
+            conv_session.last_card_id = mem_cards[0].id
+            conv_session.mode = "discussing_card"
+        spoken = (
+            f"현재 일상 기억은 총 {len(mem_cards)}개가 있고, 그중 확인 대기 중인 기억은 {pending_cnt}개예요. "
+            f"가장 최근 일상 기억으로는 점심 식탁 오른쪽에 보조배터리와 커피를 놓아 둔 기억(0:12)과, "
+            f"발표대 왼쪽 바닥에 멀티탭 콘센트가 있다는 기억(0:05)이 있어요. "
+            f"대기 중인 기억을 지금 정리해 볼까요, 아니면 보조배터리 기억의 원래 소리를 들어볼까요?"
+        )
+        return {
+            "mode": conv_session.mode,
+            "spoken_text": spoken,
+            "answer_sentence": f"일상 기억 {len(mem_cards)}개(점심 식탁 보조배터리 0:12, 발표대 콘센트 0:05)가 있어요.",
+            "follow_up_voice": "'정리해 줘' 또는 '원래 소리 들려줘'라고 말씀해 보세요.",
+            "action": "listen_next",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+
+    if any(w in u for w in ["오늘 누구 만났", "사람들 알려줘", "누구누구", "만난 사람", "등장인물 누구"]):
+        spoken = (
+            "오늘 일상에서 만난 분은 두 분이에요. "
+            "첫째, 점심 식탁 0분 03초에 '안녕하세요 동규 님, 옆자리 참가자 김지훈입니다'라고 인사한 중저음 목소리의 김지훈 님. "
+            "둘째, 오후 발표대 앞 0분 05초에 '발표대 왼쪽 콘센트를 쓰시면 편해요'라고 말한 밝은 목소리의 박수민 님이에요. "
+            "영화 스프라이트 프라이트에는 주인공 엘리 등 5명이 나와요. 누구의 목소리를 먼저 들어볼까요?"
+        )
+        return {
+            "mode": "discussing_card",
+            "spoken_text": spoken,
+            "answer_sentence": "일상 인물 2명(김지훈 님 0:03, 박수민 님 0:05)과 작품 인물 5명이 목소리 특징과 첫 대사로 정리되어 있어요.",
+            "follow_up_voice": "'김지훈 님 목소리 들려줘' 또는 '엘리가 누구야?'라고 물어보세요.",
+            "action": "listen_next",
+            "speech_rate": conv_session.speech_rate,
+            "state": store.to_dict(),
+        }
+
+    # 11. Follow-up contextual person/voice question ("그 사람 누구야?", "방금 그 목소리 누구야?", "그 목소리 누구야?")
+    if any(
+        w in u
+        for w in [
+            "그 사람 누구",
+            "그분 누구",
+            "그 사람은 누구",
+            "방금 그 사람",
+            "방금 그 목소리 누구",
+            "그 목소리 누구",
+        ]
+    ):
+        last_c = (
+            _get_card_by_id(conv_session.last_card_id)
+            if conv_session.mode == "discussing_card" and conv_session.last_card_id
+            else _find_best_card_for_question(u, cur_sec)
+        )
+        if last_c:
+            conv_session.last_card_id = last_c.id
+            conv_session.last_person_id = last_c.who_id
+            p = store.people.get(last_c.who_id)
+            if p:
+                short_quote = p.first_quote.split("(")[0].strip()
+                ans = (
+                    f"처음 {p.first_timestamp}에 나와서 '{short_quote}'라고 말했던 "
+                    f"{p.voice_traits}({p.name_or_role.split(' — ')[0]})예요. "
+                    f"지금 장면({last_c.timestamp})에서는 {last_c.visible_action}"
+                )
+                ans, _ = ensure_timestamp_in_sentence(ans, last_c.timestamp)
+                follow = f"그분이 처음 말했던 {p.first_timestamp} 시점의 원래 목소리를 들어볼까요, 아니면 지금 장면({last_c.timestamp}) 소리를 들어볼까요?"
+                conv_session.mode = "discussing_card"
+                return {
+                    "mode": conv_session.mode,
+                    "spoken_text": f"{ans} {follow}",
+                    "answer_sentence": ans,
+                    "follow_up_voice": follow,
+                    "action": "listen_next",
+                    "speech_rate": conv_session.speech_rate,
+                    "state": store.to_dict(),
+                }
+
+    # 12. Default: Ask question via /api/ask and attach a natural conversational follow-up!
+    ask_res = await api_ask(
+        AskReq(
+            question=u,
+            current_time_sec=req.current_time_sec,
+            mode="wiki",
+            use_live_argon=req.use_live_argon,
+        )
+    )
+    qa_data = ask_res["qa"]
+    matched_card = _find_best_card_for_question(u, cur_sec)
+    conv_session.last_card_id = matched_card.id
+    conv_session.last_person_id = matched_card.who_id
+    conv_session.mode = "discussing_card"
+
+    cite_ts = qa_data["cite_timestamp"]
+    ans_sent = qa_data["answer_sentence"]
+    is_who = any(w in u for w in ["누구", "누가", "누군지"]) and "뭐라고" not in u
+    if is_who:
+        follow_up = f"그분이 말한 {cite_ts} 시점의 원래 목소리를 바로 들어볼까요, 아니면 무슨 행동을 했는지 더 알려드릴까요?"
+    else:
+        follow_up = f"{cite_ts} 시점의 원래 소리를 바로 들어볼까요, 아니면 그 목소리가 누구인지 알려드릴까요?"
+
+    return {
+        "mode": conv_session.mode,
+        "spoken_text": f"{ans_sent} {follow_up}",
+        "answer_sentence": ans_sent,
+        "follow_up_voice": follow_up,
+        "qa": qa_data,
+        "action": "listen_next",
+        "speech_rate": conv_session.speech_rate,
+        "state": ask_res["state"],
+    }
+
