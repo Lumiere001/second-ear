@@ -1,0 +1,23 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# node
+node_modules/
+
+# personal data never goes to the public repo
+private/
+*.mp4
+*.mov
+*.webm
+*.m4a
+
+# os
+.DS_Store
