@@ -150,6 +150,8 @@ async def index_page():
 
 
 @app.get("/healthz")
+@app.get("/health")
+@app.get("/api/healthz")
 async def healthz():
     return {"status": "ok", "service": "second-ear"}
 
