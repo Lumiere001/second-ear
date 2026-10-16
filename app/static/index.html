@@ -148,6 +148,8 @@
     #voiceCanvas.state-speaking {
       background: var(--canvas-parchment);
     }
+    #resumeClipBtn[hidden] { display: none; }
+    #resumeClipBtn { position: relative; z-index: 5; margin: 0 auto; }
     #voiceCanvas.state-playing,
     #voiceCanvas.state-recording {
       background: var(--surface-tile-1);
@@ -968,6 +970,7 @@
       <div id="ytPlayer"></div>
       <video id="localVideoPlayer" playsinline controls></video>
     </div>
+    <button type="button" id="resumeClipBtn" class="silent-pill-btn" hidden onclick="event.stopPropagation(); resumeOriginal()" onpointerdown="event.stopPropagation()">▶ Keep playing</button>
 
     <!-- 단 하나의 미니멀 사운드 원 (Monochrome & Action Blue) -->
     <div class="acoustic-stage" aria-hidden="true">
@@ -1956,6 +1959,7 @@
       "Why did the birds come at 8:09?": "8분 09초에 왜 새들이 날아왔어?",
       "Next scene": "다음 장면",
       "Previous scene": "이전 장면",
+      "Keep playing": "계속 듣기",
       "next scene": "다음 장면",
       "previous scene": "이전 장면"
     };
@@ -2274,7 +2278,36 @@
       });
     }
 
+    // Original sound plays a short clip, then pauses itself; one tap on "Keep playing" plays the next clip.
+    const ORIGINAL_CLIP_SEC = 8;
+    let originalClipTimer = null;
+    let lastClipLabel = '';
+    function scheduleClipPause() {
+      clearTimeout(originalClipTimer);
+      originalClipTimer = setTimeout(() => {
+        pauseAllMedia();
+        setCanvasState('', `⏸ ${lastClipLabel}`, undefined, '');
+        const btn = document.getElementById('resumeClipBtn');
+        if (btn) btn.hidden = false;
+      }, ORIGINAL_CLIP_SEC * 1000);
+    }
+    function resumeOriginal() {
+      const btn = document.getElementById('resumeClipBtn');
+      if (btn) btn.hidden = true;
+      stopAllSpeech();
+      if (currentSourceType === 'recording') {
+        document.getElementById('localVideoPlayer').play().catch(() => {});
+      } else if (ytReady && ytPlayer) {
+        ytPlayer.playVideo();
+      }
+      setCanvasState('playing', `🔈 ${lastClipLabel}`, undefined, '');
+      scheduleClipPause();
+    }
+
     function pauseAllMedia() {
+      clearTimeout(originalClipTimer);
+      const resumeBtn = document.getElementById('resumeClipBtn');
+      if (resumeBtn) resumeBtn.hidden = true;
       try {
         if (ytReady && ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo();
       } catch (e) {}
@@ -2319,6 +2352,10 @@
           ytPlayer.playVideo();
         }
       }
+      lastClipLabel = `Original sound ${mmss}`;
+      const resumeBtn = document.getElementById('resumeClipBtn');
+      if (resumeBtn) resumeBtn.hidden = true;
+      scheduleClipPause();
     }
 
     async function triggerSurroundingsRecording(e) {
