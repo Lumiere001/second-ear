@@ -2,7 +2,7 @@ Built during Google DeepMind AI Hackathon Seoul, 2026-10-16 11:20–15:20 KST
 Idea and design notes (docs/PLAN.md) were prepared before the event; all code was written during the event.
 
 - **Live Cloud Run URL**: https://second-ear-300068085210.asia-northeast3.run.app
-- **How to use (1-line)**: Open the link, press **Speak** or type in the input bar to ask about any scene (`"What just happened?"`, `"Whose voice was that?"`), turn on **📷 Live camera** for proactive visual guidance, or upload a 30-second video via **🎥 Upload 30s recording** to extract verified personal memory cards. Ask in English or Korean; answers follow your language.
+- **How to use (1-line)**: Open the link, press **Speak** or type in the input bar to ask about any scene (`"What just happened?"`, `"Whose voice was that?"`), turn on **📷 Live camera** for proactive visual guidance, or upload a 30-second video via **🎥 Upload 30s recording** to extract verified personal memory cards. Korean and English speakers are both supported: the **한국어 / English** button switches speech recognition and the quick commands (it starts in the phone's language), and answers follow the language you speak.
 - **Shared 3D view (laptop)**: open [`/graph`](https://second-ear-300068085210.asia-northeast3.run.app/graph) (or **View together** on the phone screen) to ask from the laptop and watch the ontology follow the latest question.
 
 # Second Ear

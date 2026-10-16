@@ -927,6 +927,7 @@
         <input type="checkbox" id="autoListenToggle" />
         <span>Always-on mic</span>
       </label>
+      <button type="button" class="nav-link-btn" id="langToggle" onclick="toggleLang()">한국어</button>
       <a class="nav-link-btn" href="/graph" target="_blank" rel="noopener">View together</a>
       <button class="nav-link-btn" id="sheetToggleBtn" onclick="toggleStudioSheet(event)">
         Open demo &amp; wiki check
@@ -1929,9 +1930,68 @@
       return activeSceneContext.timestampSec || 80;
     }
 
+    // Korean and English speakers: one language state drives speech recognition and the quick-command buttons.
+    // Answers already follow the language of the question on the server.
+    const KO_CMD = {
+      "What just happened?": "방금 무슨 일이야?",
+      "Whose voice was that?": "그 목소리 누구야?",
+      "Who is that voice?": "그 목소리 누구야?",
+      "Play the original sound": "원래 소리 들려줘",
+      "What's in front of me?": "앞에 뭐 있어?",
+      "Summarize my memories": "기억 정리해 줘",
+      "Summarize it": "정리해 줘",
+      "That's right": "맞아",
+      "Tell me more": "더 자세히 말해줘",
+      "Hello, how do I use this?": "안녕, 어떻게 써?",
+      "Yes, play it": "응 들려줘",
+      "Yes, I agree": "응 동의해",
+      "Discard": "지워",
+      "Read my memories": "내 기억 읽어줘",
+      "Who did I meet today?": "오늘 누구 만났지?",
+      "Switch to a male voice": "남자 목소리로 바꿔줘",
+      "Switch to a female voice": "여자 목소리로 바꿔줘",
+      "Speak slower": "말 좀 천천히 해줘",
+      "Skip colors": "색깔 빼고 말해줘",
+      "What happened at 1:20?": "1분 20초에 무슨 일이야?",
+      "Why did the birds come at 8:09?": "8분 09초에 왜 새들이 날아왔어?",
+      "Next scene": "다음 장면",
+      "Previous scene": "이전 장면",
+      "next scene": "다음 장면",
+      "previous scene": "이전 장면"
+    };
+    let uiLang = 'en';
+    try {
+      uiLang = localStorage.getItem('secondEarLang') || ((navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en');
+    } catch (e) {}
+
+    function applyLang() {
+      document.documentElement.lang = uiLang;
+      if (recognition) recognition.lang = uiLang === 'ko' ? 'ko-KR' : 'en-US';
+      const btn = document.getElementById('langToggle');
+      if (btn) {
+        btn.textContent = uiLang === 'ko' ? 'English' : '한국어';
+        btn.setAttribute('aria-label', uiLang === 'ko' ? 'Switch to English' : '한국어로 바꾸기');
+      }
+      document.querySelectorAll('[onclick]').forEach(el => {
+        if (el.children.length || el.id === 'langToggle') return;
+        if (el.dataset.en === undefined) el.dataset.en = el.textContent;
+        let t = el.dataset.en;
+        if (uiLang === 'ko') {
+          for (const en of Object.keys(KO_CMD).sort((a, b) => b.length - a.length)) t = t.split(en).join(KO_CMD[en]);
+        }
+        if (t !== el.textContent) el.textContent = t;
+      });
+    }
+
+    function toggleLang() {
+      uiLang = uiLang === 'ko' ? 'en' : 'ko';
+      try { localStorage.setItem('secondEarLang', uiLang); } catch (e) {}
+      applyLang();
+    }
+
     async function sendVoiceTurn(utterance, options = {}) {
       if (!utterance || !utterance.trim()) return;
-      const cleanText = utterance.trim();
+      const cleanText = (uiLang === 'ko' && KO_CMD[utterance.trim()]) || utterance.trim();
       hasGreetedOnce = true;
 
       // Direct camera / proactive vision voice triggers
@@ -2146,7 +2206,7 @@
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) return;
       recognition = new SR();
-      recognition.lang = 'en-US';
+      recognition.lang = uiLang === 'ko' ? 'ko-KR' : 'en-US';
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
 
@@ -2572,6 +2632,7 @@
       setupFullCanvasTouch();
       initSpeechRecognition();
       setSpeechRateUI(1.5);
+      applyLang();
       updateContextualScene('youtube', '_cMxraX_5RE', '', 80, '1:20');
       try {
         const res = await fetch('/api/state');
