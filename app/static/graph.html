@@ -145,6 +145,13 @@
       align-items: center;
     }
 
+    .ask-form { display: flex; gap: var(--space-2); align-items: center; margin-bottom: var(--space-2); }
+    .ask-label { font-size: var(--font-sm); color: var(--text-secondary); }
+    .ask-input { flex: 1; min-width: 0; padding: var(--space-2); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); background: var(--bg-elevated); color: var(--text-primary); font: inherit; }
+    .ask-input:focus-visible { outline: 2px solid var(--focus-ring); }
+    .ask-status { font-size: var(--font-sm); color: var(--color-wait); }
+    .ask-error { color: var(--color-danger); font-size: var(--font-sm); margin: 0; }
+    .ask-error:empty { display: none; }
     .qa-bubble {
       display: flex;
       align-items: center;
@@ -468,11 +475,20 @@
   </header>
 
   <section class="hud-strip" aria-label="최근 질문과 핵심 지표">
+    <div class="qa-col">
+    <form id="askForm" class="ask-form">
+      <label for="askInput" class="ask-label">질문</label>
+      <input id="askInput" class="ask-input" type="text" placeholder="예: 방금 무슨 일이야?" autocomplete="off" required />
+      <button type="submit" class="btn" id="askBtn">묻기</button>
+      <span id="askStatus" class="ask-status" role="status" aria-live="polite"></span>
+    </form>
+    <p id="askError" class="ask-error" role="alert"></p>
     <div class="qa-bubble" role="status" aria-live="polite">
       <div id="qaBubbleText" class="qa-line">
         <strong>최근 질문</strong> <span id="qaTextContent">기록을 불러오는 중입니다.</span>
       </div>
       <div id="qaChipGroup" class="chip-group"></div>
+    </div>
     </div>
 
     <div class="kpi-row" aria-label="핵심 검증 지표 3개">
@@ -1452,6 +1468,35 @@
         if (fgInstance && !fallback2DMode) {
           const durationMs = isReducedMotion() ? 0 : 600;
           fitAllNodes(durationMs);
+        }
+      });
+
+      // 노트북에서도 바로 물어볼 수 있게: 답이 오면 다음 읽기에서 카메라가 그 대상으로 이동한다
+      document.getElementById("askForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const input = document.getElementById("askInput");
+        const btn = document.getElementById("askBtn");
+        const st = document.getElementById("askStatus");
+        const er = document.getElementById("askError");
+        const q = input.value.trim();
+        if (!q) return;
+        btn.disabled = true;
+        er.textContent = "";
+        st.textContent = "⏳ 찾는 중";
+        try {
+          const res = await fetch("/api/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: q })
+          });
+          if (!res.ok) throw new Error("서버 응답 " + res.status);
+          input.value = "";
+          pollState();
+        } catch (err) {
+          er.textContent = "답을 받지 못했어요 (" + (err && err.message ? err.message : "연결 오류") + "). 다시 묻기를 눌러 주세요.";
+        } finally {
+          st.textContent = "";
+          btn.disabled = false;
         }
       });
 

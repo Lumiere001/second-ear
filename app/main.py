@@ -471,21 +471,23 @@ async def api_ask(req: AskReq):
 반드시 JSON 형식으로 답하세요:
 {{"answer_sentence": "한 문장 답 (MM:SS).", "detailed_answer": "자세한 근거 설명", "cite_timestamp": "MM:SS", "first_voice_timestamp": "MM:SS", "who_label": "인물 소개"}}"""
 
-        model_used = "gemini-4-argon"
+        # 대화 답은 빠른 Flash로 (기다림 줄이기), 실패하면 Argon
+        model_used = "gemini-3.8-flash"
         inter = None
         try:
             inter = client.interactions.create(
-                model="gemini-4-argon",
+                model="gemini-3.8-flash",
                 input=prompt,
                 generation_config={"thinking_level": "low"},
                 response_format={"type": "text", "mime_type": "application/json"},
             )
         except Exception:
             try:
-                model_used = "gemini-3.8-flash"
+                model_used = "gemini-4-argon"
                 inter = client.interactions.create(
-                    model="gemini-3.8-flash",
+                    model="gemini-4-argon",
                     input=prompt,
+                    generation_config={"thinking_level": "low"},
                     response_format={"type": "text", "mime_type": "application/json"},
                 )
             except Exception:
