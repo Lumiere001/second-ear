@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Second Ear — 함께 보기 (/graph)</title>
+  <title>Second Ear — Shared view</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" crossorigin="anonymous" />
   <style>
     :root {
@@ -465,43 +465,43 @@
 <body>
   <header class="top-bar">
     <div class="brand-group">
-      <h1 class="brand-title">Second Ear · 함께 보기</h1>
-      <div id="appStatusPill" class="state-pill" role="status" aria-live="polite">⏳ 불러오는 중</div>
+      <h1 class="brand-title">Second Ear · Shared view</h1>
+      <div id="appStatusPill" class="state-pill" role="status" aria-live="polite">⏳ Loading</div>
     </div>
-    <nav class="nav-actions" aria-label="화면 도구">
-      <button type="button" id="btnResetFocus" class="btn" aria-label="전체 온톨로지 보기">전체 보기</button>
-      <a href="/" class="btn" aria-label="기본 듣기 화면으로 이동">듣기 화면</a>
+    <nav class="nav-actions" aria-label="Screen tools">
+      <button type="button" id="btnResetFocus" class="btn" aria-label="Show the whole ontology">Show all</button>
+      <a href="/" class="btn" aria-label="Go to the listening screen">Listening screen</a>
     </nav>
   </header>
 
-  <section class="hud-strip" aria-label="최근 질문과 핵심 지표">
+  <section class="hud-strip" aria-label="Latest question and key metrics">
     <div class="qa-col">
     <form id="askForm" class="ask-form">
-      <label for="askInput" class="ask-label">질문</label>
-      <input id="askInput" class="ask-input" type="text" placeholder="예: 방금 무슨 일이야?" autocomplete="off" required />
-      <button type="submit" class="btn" id="askBtn">묻기</button>
+      <label for="askInput" class="ask-label">Question</label>
+      <input id="askInput" class="ask-input" type="text" placeholder="e.g. What just happened?" autocomplete="off" required />
+      <button type="submit" class="btn" id="askBtn">Ask</button>
       <span id="askStatus" class="ask-status" role="status" aria-live="polite"></span>
     </form>
     <p id="askError" class="ask-error" role="alert"></p>
     <div class="qa-bubble" role="status" aria-live="polite">
       <div id="qaBubbleText" class="qa-line">
-        <strong>최근 질문</strong> <span id="qaTextContent">기록을 불러오는 중입니다.</span>
+        <strong>Latest question</strong> <span id="qaTextContent">Loading…</span>
       </div>
       <div id="qaChipGroup" class="chip-group"></div>
     </div>
     </div>
 
-    <div class="kpi-row" aria-label="핵심 검증 지표 3개">
+    <div class="kpi-row" aria-label="Three key verification metrics">
       <div class="kpi-card">
-        <span class="kpi-label">출처 확인 통과율</span>
+        <span class="kpi-label">Source check pass rate</span>
         <strong id="kpiEvidenceRate" class="kpi-val ok">-</strong>
       </div>
       <div class="kpi-card">
-        <span class="kpi-label">사람 확인율</span>
+        <span class="kpi-label">Human confirmation rate</span>
         <strong id="kpiHumanRate" class="kpi-val">-</strong>
       </div>
       <div class="kpi-card">
-        <span class="kpi-label">동의 없이 저장된 사람</span>
+        <span class="kpi-label">People saved without consent</span>
         <strong id="kpiUnconsented" class="kpi-val ok">0</strong>
       </div>
     </div>
@@ -509,52 +509,52 @@
 
   <!-- 4 Non-overlapping States: loading / empty / error / ready -->
   <div id="viewLoading" class="state-banner" role="status" aria-live="polite">
-    <span>⏳ 온톨로지 데이터를 불러오는 중입니다…</span>
+    <span>⏳ Loading the ontology…</span>
   </div>
 
   <div id="viewEmpty" class="state-banner hidden" role="status" aria-live="polite">
-    <span>○ 아직 등록된 작품이나 기억 노드가 없습니다.</span>
+    <span>○ No works or memories yet.</span>
   </div>
 
   <div id="viewError" class="state-banner error hidden" role="alert">
-    <span id="errorReasonText">✕ 데이터를 불러오지 못했습니다.</span>
-    <button type="button" id="btnRetry" class="btn" aria-label="데이터 다시 불러오기">다시 시도</button>
+    <span id="errorReasonText">✕ Could not load data.</span>
+    <button type="button" id="btnRetry" class="btn" aria-label="Reload data">Retry</button>
   </div>
 
   <div id="fallbackNotice" class="state-banner error hidden" role="alert">
-    <span id="fallbackReasonText">✕ 3D 그래프 라이브러리를 불러오지 못해 2D 목록으로 표시합니다.</span>
+    <span id="fallbackReasonText">✕ Could not load the 3D library. Showing a 2D list.</span>
   </div>
 
   <main id="viewReady" class="stage-wrap hidden">
     <div class="overlay-top">
-      <div class="legend-bar" aria-label="온톨로지 노드 범례">
-        <span class="legend-item shape-work"><span aria-hidden="true">◆</span> 작품 <span id="cntWork">0</span></span>
-        <span class="legend-item shape-person"><span aria-hidden="true">●</span> 사람 <span id="cntPerson">0</span></span>
-        <span class="legend-item shape-moment"><span aria-hidden="true">■</span> 순간 <span id="cntMoment">0</span></span>
-        <span class="legend-item shape-place"><span aria-hidden="true">▲</span> 장소 <span id="cntPlace">0</span></span>
-        <span class="legend-item shape-utterance"><span aria-hidden="true">◉</span> 말 <span id="cntUtterance">0</span></span>
-        <span class="legend-item shape-action"><span aria-hidden="true">⬡</span> 행동 <span id="cntAction">0</span></span>
+      <div class="legend-bar" aria-label="Ontology legend">
+        <span class="legend-item shape-work"><span aria-hidden="true">◆</span> Work <span id="cntWork">0</span></span>
+        <span class="legend-item shape-person"><span aria-hidden="true">●</span> Person <span id="cntPerson">0</span></span>
+        <span class="legend-item shape-moment"><span aria-hidden="true">■</span> Moment <span id="cntMoment">0</span></span>
+        <span class="legend-item shape-place"><span aria-hidden="true">▲</span> Place <span id="cntPlace">0</span></span>
+        <span class="legend-item shape-utterance"><span aria-hidden="true">◉</span> Utterance <span id="cntUtterance">0</span></span>
+        <span class="legend-item shape-action"><span aria-hidden="true">⬡</span> Action <span id="cntAction">0</span></span>
       </div>
 
       <div id="selectedNodeCard" class="selected-bar" role="status" aria-live="polite">
-        <span id="selectedNodeSummary">노드를 선택하면 이름·출처 시점·원래 소리 링크가 표시됩니다.</span>
-        <a id="selectedNodeAudioLink" class="chip hidden" href="#" target="_blank" rel="noopener noreferrer">원래 소리 듣기 ↗</a>
+        <span id="selectedNodeSummary">Select a node.</span>
+        <a id="selectedNodeAudioLink" class="chip hidden" href="#" target="_blank" rel="noopener noreferrer">Original sound ↗</a>
       </div>
     </div>
 
     <div id="graph3dContainer" class="graph-canvas" aria-hidden="true"></div>
   </main>
 
-  <section class="drawers-section" aria-label="상세 지표 및 온톨로지 목록">
+  <section class="drawers-section" aria-label="Detailed metrics and ontology list">
     <details id="a11yListDrawer" class="drawer">
-      <summary>온톨로지 목록 보기 (화면 읽기·키보드 탐색)</summary>
+      <summary>Ontology list (screen reader · keyboard)</summary>
       <div class="drawer-body">
-        <ul id="a11yNodeList" class="a11y-node-list" aria-label="온톨로지 노드 및 관계 목록"></ul>
+        <ul id="a11yNodeList" class="a11y-node-list" aria-label="Ontology nodes and relations"></ul>
       </div>
     </details>
 
     <details id="extraMetricsDrawer" class="drawer">
-      <summary>나머지 검증·신뢰 지표 펼치기</summary>
+      <summary>More verification metrics</summary>
       <div class="drawer-body">
         <div id="extraMetricsGrid" class="metrics-grid"></div>
       </div>
@@ -579,22 +579,22 @@
       }
 
       const TYPE_META = {
-        work:      { label: "작품", shape: "◆", colorVar: "--color-work", val: 14 },
-        person:    { label: "사람", shape: "●", colorVar: "--color-person", val: 10 },
-        moment:    { label: "순간", shape: "■", colorVar: "--color-moment", val: 7 },
-        place:     { label: "장소", colorVar: "--color-place", shape: "▲", val: 6 },
-        utterance: { label: "말",   shape: "◉", colorVar: "--color-utterance", val: 4 },
-        action:    { label: "행동", shape: "⬡", colorVar: "--color-action", val: 4 }
+        work:      { label: "Work", shape: "◆", colorVar: "--color-work", val: 14 },
+        person:    { label: "Person", shape: "●", colorVar: "--color-person", val: 10 },
+        moment:    { label: "Moment", shape: "■", colorVar: "--color-moment", val: 7 },
+        place:     { label: "Place", colorVar: "--color-place", shape: "▲", val: 6 },
+        utterance: { label: "Utterance",   shape: "◉", colorVar: "--color-utterance", val: 4 },
+        action:    { label: "Action", shape: "⬡", colorVar: "--color-action", val: 4 }
       };
 
       function formatStatusKo(rawStatus) {
         if (rawStatus === "discarded") {
-          return { text: "✕ 버림", cls: "discarded" };
+          return { text: "✕ Discarded", cls: "discarded" };
         }
         if (rawStatus === "pending_review" || rawStatus === "pending") {
-          return { text: "⏳ 대기", cls: "waiting" };
+          return { text: "⏳ Pending", cls: "waiting" };
         }
-        return { text: "✓ 확인", cls: "confirmed" };
+        return { text: "✓ Confirmed", cls: "confirmed" };
       }
 
       function mmssToSec(mmss) {
@@ -651,14 +651,14 @@
         elViewReady.classList.toggle("hidden", mode !== "ready");
 
         if (mode === "loading") {
-          elStatusPill.textContent = "⏳ 불러오는 중";
+          elStatusPill.textContent = "⏳ Loading";
         } else if (mode === "empty") {
-          elStatusPill.textContent = "○ 비어 있음";
+          elStatusPill.textContent = "○ Empty";
         } else if (mode === "error") {
-          elStatusPill.textContent = "✕ 실패";
-          elErrorReason.textContent = "✕ " + (reasonText || "서버 상태를 읽지 못했습니다.");
+          elStatusPill.textContent = "✕ Failed";
+          elErrorReason.textContent = "✕ " + (reasonText || "Could not read server state.");
         } else if (mode === "ready") {
-          elStatusPill.textContent = "✓ 준비됨";
+          elStatusPill.textContent = "✓ Ready";
         }
       }
 
@@ -832,61 +832,61 @@
           });
         });
 
-        // Links 1: 작품 → 인물·순간
+        // Links 1: work → people, moments
         Object.values(worksObj).forEach(function (w) {
           if (!w || !w.id) return;
           if (Array.isArray(w.character_ids)) {
             w.character_ids.forEach(function (cid) {
-              addLink(w.id, cid, "등장인물");
+              addLink(w.id, cid, "Characters");
             });
           }
           if (Array.isArray(w.moment_ids)) {
             w.moment_ids.forEach(function (mid) {
-              addLink(w.id, mid, "장면");
+              addLink(w.id, mid, "Scenes");
             });
           }
         });
         Object.values(peopleObj).forEach(function (p) {
           if (p && p.source_id && nodeMap.has(p.source_id)) {
-            addLink(p.source_id, p.id, "등장인물");
+            addLink(p.source_id, p.id, "Characters");
           }
         });
         Object.values(momentsObj).forEach(function (m) {
           if (m && m.source_id && nodeMap.has(m.source_id)) {
-            addLink(m.source_id, m.id, "장면");
+            addLink(m.source_id, m.id, "Scenes");
           }
         });
 
-        // Links 2: 사람 → 말·행동 & 말·행동 → 순간
+        // Links 2: person → utterances/actions, utterances/actions → moment
         utterancesArr.forEach(function (u) {
           if (!u || !nodeMap.has(u.id)) return;
           if (u.who_id && nodeMap.has(u.who_id)) {
-            addLink(u.who_id, u.id, "말함");
+            addLink(u.who_id, u.id, "said");
           }
           const mid = cardToMomentId.get(u.card_id) || tsSourceToMomentId.get((u.source_id || "") + ":" + (u.timestamp || ""));
           if (mid && nodeMap.has(mid)) {
-            addLink(u.id, mid, "순간");
+            addLink(u.id, mid, "Moment");
           }
         });
 
         actionsArr.forEach(function (a) {
           if (!a || !nodeMap.has(a.id)) return;
           if (a.who_id && nodeMap.has(a.who_id)) {
-            addLink(a.who_id, a.id, "행동함");
+            addLink(a.who_id, a.id, "did");
           }
           const mid = cardToMomentId.get(a.card_id) || tsSourceToMomentId.get((a.source_id || "") + ":" + (a.timestamp || ""));
           if (mid && nodeMap.has(mid)) {
-            addLink(a.id, mid, "순간");
+            addLink(a.id, mid, "Moment");
           }
         });
 
-        // Links 3: 순간 → 장소
+        // Links 3: moment → place
         Object.values(momentsObj).forEach(function (m) {
           if (!m || !nodeMap.has(m.id)) return;
           const pName = (m.place || "").trim();
           const pid = placeNameToNodeId.get(pName);
           if (pid && nodeMap.has(pid)) {
-            addLink(m.id, pid, "장소");
+            addLink(m.id, pid, "Place");
           }
         });
 
@@ -914,7 +914,7 @@
         return cssVar("--text-muted");
       }
 
-      // 우주 모양: 작품 = 은하 중심, 사람 = 해, 순간 = 행성, 말·행동 = 위성, 장소 = 먼 별
+      // Universe look: work = galaxy core, person = sun, moment = planet, utterance/action = moon, place = far star
       const ORBIT_SIZE = { work: 6, person: 4.5, moment: 2.4, place: 1.5, utterance: 1, action: 1 };
       const glowTextureCache = {};
       function glowTexture(colorStr) {
@@ -970,7 +970,7 @@
         })));
       }
 
-      // 노드 좌표로 전체가 보이게 맞춘다 (라이브러리 zoomToFit은 직접 만든 노드 모양 범위를 잘못 읽음)
+      // Fit the camera to node positions (library zoomToFit misreads custom node objects)
       function fitAllNodes(durationMs) {
         const ns = fgInstance.graphData().nodes.filter(function (n) { return isFinite(n.x); });
         if (ns.length === 0) return;
@@ -992,7 +992,7 @@
         if (fallback2DMode) return null;
         if (fgInstance) return fgInstance;
         if (typeof window.ForceGraph3D === "undefined") {
-          activate2DFallback("3D 그래프 라이브러리를 불러오지 못해 2D 목록으로 대신 표시합니다.");
+          activate2DFallback("Could not load the 3D library. Showing a 2D list instead.");
           return null;
         }
         try {
@@ -1049,7 +1049,7 @@
           });
           fgInstance.linkOpacity(0.35)
             .linkVisibility(function (l) { return linkKinds(l) !== "work>moment"; });
-          // 위성은 행성 곁에, 행성은 해 곁에, 장소와 작품은 멀리
+          // Moons stay near planets, planets near suns, places and the work far away
           fgInstance.d3Force("link")
             .distance(function (l) {
               const k = linkKinds(l);
@@ -1072,7 +1072,7 @@
             }
           });
         } catch (err) {
-          activate2DFallback("브라우저 3D 렌더링 초기화에 실패하여 2D 목록으로 대신 표시합니다.");
+          activate2DFallback("3D rendering failed in this browser. Showing a 2D list instead.");
           return null;
         }
         return fgInstance;
@@ -1092,13 +1092,13 @@
         const elSum = document.getElementById("selectedNodeSummary");
         const elLink = document.getElementById("selectedNodeAudioLink");
         if (!node) {
-          elSum.textContent = "노드를 선택하면 이름·출처 시점·원래 소리 링크가 표시됩니다.";
+          elSum.textContent = "Select a node.";
           elLink.classList.add("hidden");
           return;
         }
         const meta = TYPE_META[node.kind] || TYPE_META.moment;
         const st = formatStatusKo(node.status);
-        const tsText = node.timestamp ? ("출처 " + node.timestamp) : "출처 0:00";
+        const tsText = node.timestamp ? ("Source " + node.timestamp) : "Source 0:00";
 
         elSum.innerHTML = "";
         const badgeSpan = document.createElement("span");
@@ -1123,7 +1123,7 @@
         const href = buildAudioHref(node);
         if (href) {
           elLink.href = href;
-          elLink.textContent = "원래 소리 (" + (node.timestamp || "0:00") + ") ↗";
+          elLink.textContent = "Original sound (" + (node.timestamp || "0:00") + ") ↗";
           elLink.classList.remove("hidden");
         } else {
           elLink.classList.add("hidden");
@@ -1226,7 +1226,7 @@
 
           const btn = document.createElement("button");
           btn.type = "button";
-          btn.setAttribute("aria-label", meta.label + " " + n.name + ", 시점 " + (n.timestamp || "0:00") + ", 상태 " + st.text + ", 연결 " + neighbors + "개");
+          btn.setAttribute("aria-label", meta.label + " " + n.name + ", at " + (n.timestamp || "0:00") + ", status " + st.text + ", links " + neighbors + "");
           btn.addEventListener("click", function () {
             focusOnNodeById(n.id, true);
           });
@@ -1262,7 +1262,7 @@
         const cards = Array.isArray(state.cards) ? state.cards : [];
         const people = state.people && typeof state.people === "object" ? Object.values(state.people) : [];
 
-        // 1. 출처 확인 통과율
+        // 1. Source check pass rate
         let evRate = typeof m.evidence_pass_rate === "number" ? m.evidence_pass_rate : null;
         if (evRate === null) {
           const active = cards.filter(function (c) { return c && c.status !== "discarded"; });
@@ -1270,7 +1270,7 @@
           evRate = active.length > 0 ? Math.round((passed.length / active.length) * 1000) / 10 : 100.0;
         }
 
-        // 2. 사람 확인율
+        // 2. Human confirmation rate
         let humanRate = typeof m.human_confirmation_rate === "number" ? m.human_confirmation_rate : null;
         if (humanRate === null || (m.human_reviewed_total === 0 && humanRate === 0)) {
           const active = cards.filter(function (c) { return c && c.status !== "discarded"; });
@@ -1278,7 +1278,7 @@
           humanRate = active.length > 0 ? Math.round((verified.length / active.length) * 1000) / 10 : 100.0;
         }
 
-        // 3. 동의 없이 저장된 사람 (0)
+        // 3. People saved without consent (0)
         let unconsented = typeof m.unconsented_people_saved === "number" ? m.unconsented_people_saved : null;
         if (unconsented === null) {
           unconsented = people.filter(function (p) {
@@ -1297,13 +1297,13 @@
         const dropCnt = typeof trust.discarded === "number" ? trust.discarded : 0;
 
         const extraItems = [
-          { label: "대사 인용 일치율", val: (typeof m.quote_match_rate === "number" ? m.quote_match_rate : 100) + "%" },
-          { label: "정답표 정확도", val: (typeof m.answer_key_accuracy === "number" ? m.answer_key_accuracy : 100) + "%" },
-          { label: "출처 없는 문장", val: String(typeof m.unsourced_sentences === "number" ? m.unsourced_sentences : 0) + "건" },
-          { label: "설명 방식 자동 교정", val: String(typeof m.style_auto_rewrites === "number" ? m.style_auto_rewrites : 0) + "건" },
-          { label: "✓ 확인된 기록", val: okCnt + "건" },
-          { label: "⏳ 대기 기록", val: waitCnt + "건" },
-          { label: "✕ 버림 기록", val: dropCnt + "건" }
+          { label: "Quote match rate", val: (typeof m.quote_match_rate === "number" ? m.quote_match_rate : 100) + "%" },
+          { label: "Answer key accuracy", val: (typeof m.answer_key_accuracy === "number" ? m.answer_key_accuracy : 100) + "%" },
+          { label: "Sentences without source", val: String(typeof m.unsourced_sentences === "number" ? m.unsourced_sentences : 0) + "" },
+          { label: "Style auto-corrections", val: String(typeof m.style_auto_rewrites === "number" ? m.style_auto_rewrites : 0) + "" },
+          { label: "✓ Confirmed records", val: okCnt + "" },
+          { label: "⏳ Pending records", val: waitCnt + "" },
+          { label: "✕ Discarded records", val: dropCnt + "" }
         ];
 
         const grid = document.getElementById("extraMetricsGrid");
@@ -1328,7 +1328,7 @@
         const elChips = document.getElementById("qaChipGroup");
 
         if (!newestQa) {
-          elText.textContent = "아직 질문 기록이 없습니다. 질문하면 관련 인물·순간 노드로 이동합니다.";
+          elText.textContent = "No questions yet.";
           elChips.innerHTML = "";
           return;
         }
@@ -1341,8 +1341,8 @@
           const btnCite = document.createElement("button");
           btnCite.type = "button";
           btnCite.className = "chip";
-          btnCite.textContent = "출처 " + newestQa.cite_timestamp;
-          btnCite.setAttribute("aria-label", "출처 시점 " + newestQa.cite_timestamp + " 중심 노드로 이동");
+          btnCite.textContent = "Source " + newestQa.cite_timestamp;
+          btnCite.setAttribute("aria-label", "Source at " + newestQa.cite_timestamp + " go to center node");
           btnCite.addEventListener("click", function () {
             const target = findCenterNodeForQA(newestQa);
             if (target) focusOnNodeById(target.id, true);
@@ -1354,8 +1354,8 @@
           const btnFirst = document.createElement("button");
           btnFirst.type = "button";
           btnFirst.className = "chip";
-          btnFirst.textContent = "첫 목소리 " + newestQa.first_voice_timestamp;
-          btnFirst.setAttribute("aria-label", "첫 목소리 시점 " + newestQa.first_voice_timestamp + " 노드로 이동");
+          btnFirst.textContent = "First voice " + newestQa.first_voice_timestamp;
+          btnFirst.setAttribute("aria-label", "First voice at " + newestQa.first_voice_timestamp + " go to node");
           btnFirst.addEventListener("click", function () {
             const target = findCenterNodeForQA({
               source_id: newestQa.source_id,
@@ -1380,8 +1380,8 @@
           aAudio.href = audioHref;
           aAudio.target = "_blank";
           aAudio.rel = "noopener noreferrer";
-          aAudio.textContent = "원래 소리 ↗";
-          aAudio.setAttribute("aria-label", "출처 시점 " + (newestQa.cite_timestamp || "0:00") + " 원래 소리 열기");
+          aAudio.textContent = "Original sound ↗";
+          aAudio.setAttribute("aria-label", "Source at " + (newestQa.cite_timestamp || "0:00") + " open original sound");
           elChips.appendChild(aAudio);
         }
 
@@ -1402,7 +1402,7 @@
         try {
           const resp = await fetch("/api/state", { cache: "no-store" });
           if (!resp.ok) {
-            throw new Error("HTTP " + resp.status + " 응답 오류");
+            throw new Error("HTTP " + resp.status + " response error");
           }
           const state = await resp.json();
           updateKPIsAndDrawers(state);
@@ -1417,7 +1417,7 @@
           const newSig = computeGraphSignature(built);
           if (newSig !== lastGraphSignature) {
             lastGraphSignature = newSig;
-            // 이미 있던 노드는 자리를 이어받아 새로 배치되며 흔들리지 않게 한다
+            // Existing nodes keep their positions so the layout does not jump on updates
             const oldMap = currentGraph ? currentGraph.nodeMap : null;
             if (oldMap) {
               built.nodes.forEach(function (n) {
@@ -1450,7 +1450,7 @@
 
           updateQABubbleAndFocus(state);
         } catch (err) {
-          setExclusiveState("error", err && err.message ? err.message : "네트워크 연결을 확인해 주세요.");
+          setExclusiveState("error", err && err.message ? err.message : "Check the network connection.");
         } finally {
           isFetching = false;
         }
@@ -1471,7 +1471,7 @@
         }
       });
 
-      // 노트북에서도 바로 물어볼 수 있게: 답이 오면 다음 읽기에서 카메라가 그 대상으로 이동한다
+      // Ask from the laptop too: the next poll moves the camera to the answer
       document.getElementById("askForm").addEventListener("submit", async function (e) {
         e.preventDefault();
         const input = document.getElementById("askInput");
@@ -1482,18 +1482,18 @@
         if (!q) return;
         btn.disabled = true;
         er.textContent = "";
-        st.textContent = "⏳ 찾는 중";
+        st.textContent = "⏳ Searching";
         try {
           const res = await fetch("/api/ask", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ question: q })
           });
-          if (!res.ok) throw new Error("서버 응답 " + res.status);
+          if (!res.ok) throw new Error("Server response " + res.status);
           input.value = "";
           pollState();
         } catch (err) {
-          er.textContent = "답을 받지 못했어요 (" + (err && err.message ? err.message : "연결 오류") + "). 다시 묻기를 눌러 주세요.";
+          er.textContent = "No answer received (" + (err && err.message ? err.message : "Connection error") + "). Press Ask again.";
         } finally {
           st.textContent = "";
           btn.disabled = false;

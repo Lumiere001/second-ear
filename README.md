@@ -2,8 +2,8 @@ Built during Google DeepMind AI Hackathon Seoul, 2026-10-16 11:20–15:20 KST
 Idea and design notes (docs/PLAN.md) were prepared before the event; all code was written during the event.
 
 - **Live Cloud Run URL**: https://second-ear-300068085210.asia-northeast3.run.app
-- **How to use (1-line)**: Open the link, press **말하기 (Speak)** or type a command in the silent input bar to ask about any scene (`"방금 무슨 일이야?"`), turn on **📷 실시간 카메라 (Live Camera)** for proactive visual guidance, or upload a 30-second video via **🎥 30초 기록 올리기** to extract verified personal memory cards.
-- **Shared 3D view (laptop)**: open [`/graph`](https://second-ear-300068085210.asia-northeast3.run.app/graph) (or **함께 보기** on the phone screen) to watch the ontology follow the latest question.
+- **How to use (1-line)**: Open the link, press **Speak** or type in the input bar to ask about any scene (`"What just happened?"`, `"Whose voice was that?"`), turn on **📷 Live camera** for proactive visual guidance, or upload a 30-second video via **🎥 Upload 30s recording** to extract verified personal memory cards. Ask in English or Korean; answers follow your language.
+- **Shared 3D view (laptop)**: open [`/graph`](https://second-ear-300068085210.asia-northeast3.run.app/graph) (or **View together** on the phone screen) to ask from the laptop and watch the ontology follow the latest question.
 
 # Second Ear
 

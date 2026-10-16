@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Second Ear — 듣는 세컨드 브레인</title>
+  <title>Second Ear — The Second Brain That Listens</title>
   <style>
     /* =====================================================================
        Apple DESIGN.md Design System Tokens (https://getdesign.md/apple/design-md)
@@ -925,11 +925,11 @@
     <div class="nav-actions">
       <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#cccccc; cursor:pointer;">
         <input type="checkbox" id="autoListenToggle" />
-        <span>연속 마이크 대기</span>
+        <span>Always-on mic</span>
       </label>
-      <a class="nav-link-btn" href="/graph" target="_blank" rel="noopener">함께 보기</a>
+      <a class="nav-link-btn" href="/graph" target="_blank" rel="noopener">View together</a>
       <button class="nav-link-btn" id="sheetToggleBtn" onclick="toggleStudioSheet(event)">
-        시연 및 위키 검증 열기
+        Open demo &amp; wiki check
       </button>
     </div>
   </header>
@@ -939,7 +939,7 @@
     id="voiceCanvas"
     role="button"
     tabindex="0"
-    aria-label="세컨드 이어 음성 대화 공간. 화면 아무 곳이나 터치하고 말씀하시거나 하단 텍스트 명령어 입력창을 사용하세요."
+    aria-label="Second Ear voice conversation space. Touch anywhere on the screen and speak, or use the text command box at the bottom."
   >
     <!-- 실시간 카메라 연결 및 AI 선제 시각 분석 스테이지 (#cameraStage) -->
     <div id="cameraStage" onclick="event.stopPropagation()" onpointerdown="event.stopPropagation()">
@@ -947,17 +947,17 @@
       <canvas id="cameraSnapCanvas" style="display:none;"></canvas>
       <div class="camera-badge-top">
         <span class="camera-dot-live"></span>
-        <span id="cameraTopBadgeText">실시간 카메라 연결됨 · AI 시각 분석</span>
+        <span id="cameraTopBadgeText">Live camera connected · AI vision analysis</span>
       </div>
       <div class="camera-actions-bottom">
         <button class="camera-action-pill primary" onclick="captureAndAnalyzeCameraFrame()">
-          🔍 지금 화면 다시 분석해 말 걸기
+          🔍 Re-analyze the view and speak up
         </button>
         <button class="camera-action-pill" id="liveCamRecordBtn" onclick="handleLiveCamRecordBtnClick()">
-          🔴 이 카메라로 30초 현장 기록 (/api/record)
+          🔴 Record 30 seconds with this camera (/api/record)
         </button>
         <button class="camera-action-pill" onclick="stopLiveCamera()">
-          카메라 끄기
+          Turn off camera
         </button>
       </div>
     </div>
@@ -981,14 +981,14 @@
       </div>
     </div>
 
-    <div class="state-badge" id="stateBadge">대기 중</div>
+    <div class="state-badge" id="stateBadge">Idle</div>
 
     <!-- 실제 Argon / 캐시 실행 시각 / 위키 폴백 출처 배지 (#sourceModeBadge) -->
     <div id="sourceModeBadge" onclick="event.stopPropagation()">
-      미리 처리한 결과 (실행 시각: 2026-10-16 11:56 KST · 대회 중 실제 Argon 실행)
+      Pre-processed result (run at 2026-10-16 11:56 KST · live Argon run during the contest)
     </div>
 
-    <h1 id="liveCaption" aria-live="polite">터치 한 번으로 대화를 시작하세요</h1>
+    <h1 id="liveCaption" aria-live="polite">Tap once to start talking</h1>
     <p id="liveSubCaption"></p>
 
     <!-- 장면/기억 시점이 활성화되었을 때만 나타나는 문맥형 원본 소리 재생 알약 버튼 -->
@@ -997,7 +997,7 @@
       onclick="handleReplayOriginalBtn(event)"
       onpointerdown="event.stopPropagation()"
     >
-      <span id="contextualOriginalLabel">🎬 방금 설명한 장면(1:20)의 실제 원본 영상 소리 들어보기</span>
+      <span id="contextualOriginalLabel">🎬 Hear the original sound of the scene just described (1:20)</span>
     </button>
 
     <!-- 해커톤 행사장 조용한 테스트용 텍스트 명령어 입력창 & 장면 이동 바 -->
@@ -1005,42 +1005,42 @@
       id="silentCommandBar"
       onclick="event.stopPropagation()"
       onpointerdown="event.stopPropagation()"
-      aria-label="조용한 테스트용 텍스트 명령어 입력창 및 장면 이동 도구"
+      aria-label="Quiet text command box and scene navigation tools"
     >
       <div class="silent-top-row">
         <div class="scene-nav-group">
-          <button type="button" class="silent-pill-btn scene-btn" onclick="stepSceneAndPreview('이전 장면')">
-            ◀ 이전 장면
+          <button type="button" class="silent-pill-btn scene-btn" onclick="stepSceneAndPreview('previous scene')">
+            ◀ Previous scene
           </button>
           <span
             id="currentSceneBadge"
             class="scene-indicator-pill"
             onclick="handleReplayOriginalBtn(event)"
-            title="클릭하면 현재 장면의 원본 영상을 재생합니다"
+            title="Click to play the original video of the current scene"
           >
-            현재 장면: 1:20
+            Current scene: 1:20
           </span>
-          <button type="button" class="silent-pill-btn scene-btn" onclick="stepSceneAndPreview('다음 장면')">
-            다음 장면 ▶
+          <button type="button" class="silent-pill-btn scene-btn" onclick="stepSceneAndPreview('next scene')">
+            Next scene ▶
           </button>
         </div>
         <div class="quick-cmd-row">
-          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('방금 무슨 일이야?')">"방금 무슨 일이야?"</button>
-          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('그 목소리 누구야?')">"그 목소리 누구야?"</button>
-          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('원래 소리 들려줘')">"원래 소리 들려줘"</button>
-          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('앞에 뭐 있어?')">"앞에 뭐 있어?"</button>
-          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('정리해 줘')">"정리해 줘"</button>
-          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('맞아')">"맞아"</button>
+          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('What just happened?')">"What just happened?"</button>
+          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('Whose voice was that?')">"Who is that voice?"</button>
+          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('Play the original sound')">"Play the original sound"</button>
+          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('What\'s in front of me?')">"What's in front of me?"</button>
+          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('Summarize it')">"Summarize it"</button>
+          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('That\'s right')">"That's right"</button>
         </div>
       </div>
       <form class="silent-input-row" onsubmit="submitSilentCommand(event)">
         <input
           id="silentCommandInput"
           type="text"
-          placeholder="예: 방금 무슨 일이야?"
-          aria-label="텍스트 명령어 입력"
+          placeholder="e.g. What just happened?"
+          aria-label="Type a text command"
         />
-        <button type="submit" class="silent-send-btn">전송</button>
+        <button type="submit" class="silent-send-btn">Send</button>
       </form>
     </div>
   </main>
@@ -1050,116 +1050,116 @@
     <button
       class="apple-btn-primary"
       onclick="handlePrimaryTalkBtn(event)"
-      aria-label="말하기 시작 또는 음성 안내 듣기"
+      aria-label="Start speaking or listen to voice guidance"
     >
-      <span>말하기</span>
+      <span>Speak</span>
     </button>
 
     <button
       class="apple-btn-secondary"
       id="liveCameraToggleBtn"
       onclick="toggleLiveCamera(event)"
-      aria-label="실시간 카메라 연결 및 AI 선제 시각 분석"
+      aria-label="Connect live camera and AI proactive vision analysis"
     >
-      <span>📷 실시간 카메라</span>
+      <span>📷 Live camera</span>
     </button>
 
     <button
       class="apple-btn-secondary"
       onclick="triggerSurroundingsRecording(event)"
-      aria-label="30초 현장 기록 올리기"
+      aria-label="Upload a 30-second field recording"
     >
-      <span>🎥 30초 기록 올리기</span>
+      <span>🎥 Upload 30s recording</span>
     </button>
 
     <select
       id="voiceSelect"
       class="voice-select-pill"
-      aria-label="제미나이 3.8 TTS 목소리 선택"
+      aria-label="Choose Gemini 3.8 TTS voice"
       onchange="handleVoiceSelectChange(this.value)"
     >
-      <option value="Kore" selected>Kore (코레 · 따뜻한 여성)</option>
-      <option value="Aoede">Aoede (아오이데 · 부드러운 여성)</option>
-      <option value="Puck">Puck (퍽 · 밝은 남성)</option>
-      <option value="Charon">Charon (카론 · 중저음 남성)</option>
-      <option value="Zephyr">Zephyr (제피르 · 또렷한 안내)</option>
+      <option value="Kore" selected>Kore (warm female)</option>
+      <option value="Aoede">Aoede (soft female)</option>
+      <option value="Puck">Puck (bright male)</option>
+      <option value="Charon">Charon (deep male)</option>
+      <option value="Zephyr">Zephyr (clear guide)</option>
     </select>
 
-    <div class="speed-control-pill" aria-label="말하기 속도 조절">
-      <button type="button" class="speed-step-btn" onclick="adjustSpeechRate(-0.1)" aria-label="말 속도 느리게">-</button>
+    <div class="speed-control-pill" aria-label="Speaking speed">
+      <button type="button" class="speed-step-btn" onclick="adjustSpeechRate(-0.1)" aria-label="Slower speech">-</button>
       <span id="speedLabel">1.0x</span>
-      <button type="button" class="speed-step-btn" onclick="adjustSpeechRate(0.1)" aria-label="말 속도 빠르게">+</button>
+      <button type="button" class="speed-step-btn" onclick="adjustSpeechRate(0.1)" aria-label="Faster speech">+</button>
     </div>
   </footer>
 
   <!-- 4. Collapsible Presenter & Judge Verification Sheet (Apple Parchment #f5f5f7) -->
-  <section id="studioSheet" aria-label="시연 및 기획서 검증 시트" onclick="event.stopPropagation()">
+  <section id="studioSheet" aria-label="Demo and plan verification sheet" onclick="event.stopPropagation()">
     <div class="sheet-container">
       <div class="sheet-header">
         <div>
-          <h2 class="sheet-title">대화형 시연 및 온톨로지·검증 대시보드</h2>
+          <h2 class="sheet-title">Interactive demo &amp; ontology / verification dashboard</h2>
           <p style="font-size:14px; color:var(--ink-muted-48); margin-top:4px;">
-            현재 응답 출처 상태:
+            Current answer source:
             <strong id="sheetSourceBadge" style="color:var(--primary);">
-              미리 처리한 결과 (실행 시각: 2026-10-16 11:56 KST · 대회 중 실제 Argon 실행)
+              Pre-processed result (run at 2026-10-16 11:56 KST · live Argon run during the contest)
             </strong>
           </p>
         </div>
         <div class="sheet-tabs">
-          <button class="sheet-tab active" onclick="switchSheetTab('converse', this)">1. 실시간 시연 액션</button>
-          <button class="sheet-tab" onclick="switchSheetTab('wiki', this)">2. 온톨로지 위키 (7가지 틀)</button>
-          <button class="sheet-tab" onclick="switchSheetTab('verify', this)">3. 기계 검증 루프 & 7대 지표</button>
+          <button class="sheet-tab active" onclick="switchSheetTab('converse', this)">1. Live demo actions</button>
+          <button class="sheet-tab" onclick="switchSheetTab('wiki', this)">2. Ontology wiki (7 frames)</button>
+          <button class="sheet-tab" onclick="switchSheetTab('verify', this)">3. Machine verification loop &amp; 7 metrics</button>
         </div>
       </div>
 
       <!-- 패널 1: 실제 입력 기반 실시간 시연 액션 (가짜 샘플 제거 완료) -->
       <div id="sheet-converse" class="sheet-panel active">
         <div class="apple-card">
-          <div class="apple-card-title">흐름 1 · 실시간 카메라 연결 & AI가 화면 보고 먼저 말 걸기 (/api/vision_proactive)</div>
-          <div class="apple-card-sub">카메라가 켜지면 0.9초 뒤 첫 프레임을 캡처해 AI가 눈앞의 사물·글자·사람 행동을 먼저 음성으로 알려 줍니다.</div>
+          <div class="apple-card-title">Flow 1 · Connect live camera &amp; the AI looks and speaks first (/api/vision_proactive)</div>
+          <div class="apple-card-sub">0.9 seconds after the camera turns on, the first frame is captured and the AI tells you by voice what objects, text, and people it sees.</div>
           <div class="pill-row">
-            <button class="voice-pill primary-pill" onclick="openCameraFromSheet()">📷 실시간 카메라 켜고 AI가 먼저 말 걸기</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('앞에 뭐 있어?')">"앞에 뭐 있어?" (현재 카메라 프레임 즉시 분석)</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('안녕, 어떻게 써?')">"안녕, 어떻게 써?"</button>
-            <button class="voice-pill" onclick="runStoryFromSheet()">"오늘의 한 마당 들려줘"</button>
+            <button class="voice-pill primary-pill" onclick="openCameraFromSheet()">📷 Turn on live camera and let the AI speak first</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('What\'s in front of me?')">"What's in front of me?" (analyze the current camera frame now)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('Hello, how do I use this?')">"Hi, how do I use this?"</button>
+            <button class="voice-pill" onclick="runStoryFromSheet()">"Tell me today's story"</button>
           </div>
         </div>
 
         <div class="apple-card">
-          <div class="apple-card-title">흐름 2 · 유튜브 작품 듣기 & 꼬리 질문으로 이어 말하기 (Sprite Fright — 대회 중 실제 Argon 실행)</div>
-          <div class="apple-card-sub">AI가 한 문장(시점 포함)으로 답한 뒤 "원래 소리를 들어볼까요, 그 목소리가 누구인지 알려드릴까요?"라고 물어 대화가 이어집니다.</div>
+          <div class="apple-card-title">Flow 2 · Listen to a YouTube work &amp; keep going with follow-up questions (Sprite Fright — live Argon run during the contest)</div>
+          <div class="apple-card-sub">The AI answers in one sentence (with the timestamp), then asks "Want to hear the original sound, or shall I tell you who that voice is?" and the conversation continues.</div>
           <div class="pill-row">
-            <button class="voice-pill primary-pill" onclick="seekAndRunFromSheet(80, '1분 20초에 무슨 일이야?')">🎬 Sprite Fright 질문 1 (1:20 나뭇가지·둥지)</button>
-            <button class="voice-pill primary-pill" onclick="seekAndRunFromSheet(489, '8분 09초에 왜 새들이 날아왔어?')">🎬 Sprite Fright 질문 2 (8:09 새똥·장로 스프라이트)</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('그 목소리 누구야?')">"그 목소리 누구야?" (직전 맥락 기억)</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('응 들려줘')">"응 들려줘" (그 시점 원래 소리 재생)</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('더 자세히 말해줘')">"더 자세히 말해줘"</button>
-            <button class="voice-pill" onclick="stepSceneAndPreviewFromSheet('다음 장면')">"다음 장면" (시간순 이동 + 영상 프리뷰)</button>
+            <button class="voice-pill primary-pill" onclick="seekAndRunFromSheet(80, 'What happened at 1:20?')">🎬 Sprite Fright question 1 (1:20 twig · nest)</button>
+            <button class="voice-pill primary-pill" onclick="seekAndRunFromSheet(489, 'Why did the birds come at 8:09?')">🎬 Sprite Fright question 2 (8:09 bird droppings · elder sprite)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('Whose voice was that?')">"Who is that voice?" (remembers the previous context)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('Yes, play it')">"Yes, play it" (plays the original sound at that moment)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('Tell me more')">"Tell me in more detail"</button>
+            <button class="voice-pill" onclick="stepSceneAndPreviewFromSheet('다음 장면')">"Next scene" (move in time order + video preview)</button>
           </div>
         </div>
 
         <div class="apple-card">
-          <div class="apple-card-title">흐름 3 · 내 주변 30초 실제 촬영·업로드 (/api/record) → "정리해 줘" → "맞아" → 새 인물 음성 동의</div>
-          <div class="apple-card-sub">실시간 카메라 또는 휴대폰 카메라로 촬영한 실제 영상이 2차 검증을 거쳐 검토 대기함에 담기며, 내가 "맞아"라고 확인해야 위키에 저장됩니다.</div>
+          <div class="apple-card-title">Flow 3 · Record &amp; upload 30 seconds of my surroundings (/api/record) → "Summarize it" → "That's right" → new-person voice consent</div>
+          <div class="apple-card-sub">Real footage from the live camera or a phone camera goes through a second verification and lands in the review queue; it is saved to the wiki only after I confirm with "That's right".</div>
           <div class="pill-row">
-            <button class="voice-pill primary-pill" onclick="triggerRealRecordFromSheet()">🎥 휴대폰 카메라 촬영 / 30초 영상 올리기 (/api/record)</button>
-            <button class="voice-pill primary-pill" onclick="runVoiceFromSheet('기억 정리해 줘')">"기억 정리해 줘" (대기함 하나씩 듣기)</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('맞아')">"맞아" (위키에 저장)</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('응 동의해')">"응 동의해" (새 인물 음성 동의 후 저장)</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('지워')">"지워" (저장 안 하고 버리기)</button>
+            <button class="voice-pill primary-pill" onclick="triggerRealRecordFromSheet()">🎥 Record with phone camera / upload 30s video (/api/record)</button>
+            <button class="voice-pill primary-pill" onclick="runVoiceFromSheet('Summarize my memories')">"Summarize my memories" (listen to the queue one by one)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('That\'s right')">"That's right" (save to wiki)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('Yes, I agree')">"Yes, I consent" (save after new-person voice consent)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('Discard')">"Delete it" (discard without saving)</button>
           </div>
         </div>
 
         <div class="apple-card">
-          <div class="apple-card-title">흐름 4 · 저장된 내 기억 조회 & 대화로 목소리·말투·속도 바꾸기</div>
-          <div class="apple-card-sub">내가 직접 찍어 확인한 기억을 다시 꺼내 듣고, 제미나이 3.8 TTS 목소리와 설명 방식을 음성 명령으로 즉시 바꿉니다.</div>
+          <div class="apple-card-title">Flow 4 · Recall my saved memories &amp; change voice, tone, and speed by talking</div>
+          <div class="apple-card-sub">Replay memories I recorded and confirmed myself, and switch the Gemini 3.8 TTS voice and explanation style instantly with voice commands.</div>
           <div class="pill-row">
-            <button class="voice-pill primary-pill" onclick="runVoiceFromSheet('내 기억 읽어줘')">"내 기억 읽어줘"</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('오늘 누구 만났지?')">"오늘 누구 만났지?"</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('색깔 빼고 말해줘')">"색깔 빼고 말해줘"</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('말 좀 천천히 해줘')">"말 좀 천천히 해줘"</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('남자 목소리로 바꿔줘')">"남자 목소리로 바꿔줘"</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('여자 목소리로 바꿔줘')">"여자 목소리로 바꿔줘"</button>
+            <button class="voice-pill primary-pill" onclick="runVoiceFromSheet('Read my memories')">"Read my memories"</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('Who did I meet today?')">"Who did I meet today?"</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('Skip colors')">"Describe it without colors"</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('Speak slower')">"Speak more slowly"</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('Switch to a male voice')">"Switch to a male voice"</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('Switch to a female voice')">"Switch to a female voice"</button>
           </div>
         </div>
       </div>
@@ -1170,26 +1170,26 @@
 
         <div class="apple-grid-2">
           <div class="apple-card">
-            <div class="apple-card-title">사람 (목소리 특징 · 처음 한 말 · 동의 여부)</div>
-            <div class="apple-card-sub">생김새가 아니라 목소리 특징과 처음 한 말(시점)로만 소개합니다.</div>
+            <div class="apple-card-title">People (voice traits · first words · consent)</div>
+            <div class="apple-card-sub">People are introduced only by voice traits and first words (timestamp), never by appearance.</div>
             <div id="wikiPeopleList"></div>
           </div>
 
           <div class="apple-card">
-            <div class="apple-card-title">검토 대기함 (임시 기록 · 내가 확인 전)</div>
-            <div class="apple-card-sub">"정리해 줘"라고 말한 뒤 "맞아"라고 한 것만 위키로 넘어갑니다.</div>
+            <div class="apple-card-title">Review queue (temporary records · not yet confirmed)</div>
+            <div class="apple-card-sub">Only what I confirm with "That's right" after saying "Summarize it" moves to the wiki.</div>
             <div id="wikiPendingList"></div>
           </div>
 
           <div class="apple-card">
-            <div class="apple-card-title">내 기억 & 장소·물건 (내가 직접 촬영·확인 완료)</div>
-            <div class="apple-card-sub">카메라와 마이크로 직접 기록하고 내가 확인한 일상 기억입니다.</div>
+            <div class="apple-card-title">My memories &amp; places/things (recorded and confirmed by me)</div>
+            <div class="apple-card-sub">Everyday memories I recorded with the camera and mic and confirmed myself.</div>
             <div id="wikiMemoryList"></div>
           </div>
 
           <div class="apple-card">
-            <div class="apple-card-title">작품 위키 장면 (AI 검증 통과 · 출처 시점 포함)</div>
-            <div class="apple-card-sub">들린 말과 보인 행동, 소리 원인이 시점(MM:SS)과 함께 엮여 있습니다.</div>
+            <div class="apple-card-title">Work wiki scenes (AI-verified · source timestamp included)</div>
+            <div class="apple-card-sub">Heard speech, visible actions, and sound causes are linked together with timestamps (MM:SS).</div>
             <div id="wikiWorkList"></div>
           </div>
         </div>
@@ -1198,17 +1198,17 @@
       <!-- 패널 3: 기획서 8절 기계 검증 루프 & 10절 7대 합격 기준 -->
       <div id="sheet-verify" class="sheet-panel">
         <div class="apple-card">
-          <div class="apple-card-title">새 유튜브 영상 분석 & 내 기록 파일 업로드 (32MB 이하 비공개 버킷)</div>
-          <div class="apple-card-sub">Gemini 4 Argon 추출 → 규칙 검사 + Gemini Flash 2차 근거 대조 (최대 5회 재시도)</div>
+          <div class="apple-card-title">Analyze a new YouTube video &amp; upload my recording (up to 32MB, private bucket)</div>
+          <div class="apple-card-sub">Gemini 4 Argon extraction → rule check + Gemini Flash second evidence check (up to 5 retries)</div>
           <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
             <input
               id="ytUrlInput"
               class="apple-input"
               type="text"
               value="https://www.youtube.com/watch?v=_cMxraX_5RE"
-              aria-label="유튜브 영상 주소"
+              aria-label="YouTube video URL"
             />
-            <button class="apple-btn-primary" onclick="analyzeYoutubeByApi()">유튜브 분석 실행</button>
+            <button class="apple-btn-primary" onclick="analyzeYoutubeByApi()">Analyze YouTube</button>
             <input
               id="recordFileInput"
               type="file"
@@ -1216,25 +1216,25 @@
               capture="environment"
               style="display:none;"
               onchange="uploadPersonalFile(this)"
-              aria-label="내 주변 영상 또는 소리 파일 업로드 (32MB 이하)"
+              aria-label="Upload a video or sound file of my surroundings (up to 32MB)"
             />
-            <button class="apple-btn-secondary" onclick="document.getElementById('recordFileInput').click()">🎥 휴대폰 카메라 촬영 / 30초 영상 올리기 (/api/record)</button>
-            <button class="apple-btn-secondary" onclick="evaluateAnswerKey()">8문항 정답표 채점</button>
+            <button class="apple-btn-secondary" onclick="document.getElementById('recordFileInput').click()">🎥 Record with phone camera / upload 30s video (/api/record)</button>
+            <button class="apple-btn-secondary" onclick="evaluateAnswerKey()">Score the 8-question answer key</button>
           </div>
         </div>
 
         <div class="apple-grid-4" id="judgeMetricsGrid"></div>
 
         <div class="apple-card">
-          <div class="apple-card-title">기계 검증 루프 교정 기록 (통과·실패 판정 후 다시 고친 전·후 비교)</div>
-          <div class="apple-card-sub">감정 짐작 금지, 외모 소개 금지, 출처 시점 누락 방지를 기계가 판정해 고친 실제 기록입니다.</div>
+          <div class="apple-card-title">Machine verification loop corrections (before/after comparison of fixes after pass/fail verdicts)</div>
+          <div class="apple-card-sub">Real records where the machine judged and fixed violations: no guessing emotions, no describing appearance, no missing source timestamps.</div>
           <table class="apple-table">
             <thead>
               <tr>
-                <th>시점</th>
-                <th>처음 초안 (위반 포함)</th>
-                <th>검증기가 잡아낸 위반</th>
-                <th>다시 고쳐 통과한 최종 문장</th>
+                <th>Time</th>
+                <th>First draft (with violations)</th>
+                <th>Violation caught by the verifier</th>
+                <th>Final sentence that passed after the fix</th>
               </tr>
             </thead>
             <tbody id="verifyTableBody"></tbody>
@@ -1250,7 +1250,7 @@
     let ytPlayer = null;
     let ytReady = false;
     let currentSourceType = 'youtube';
-    let currentSpeechRate = 1.0;
+    let currentSpeechRate = 1.5;
     let selectedVoice = 'Kore';
     let activeAudio = null;
     let isListening = false;
@@ -1375,7 +1375,7 @@
         data.processing_badge ||
         (data.qa && (data.qa.source_badge || data.qa.processing_badge)) ||
         (data.status === 'loaded_cached'
-          ? '미리 처리한 결과 (실행 시각: 2026-10-16 11:56 KST · 대회 중 실제 Argon 실행)'
+          ? 'Pre-processed result (run at 2026-10-16 11:56 KST · live Argon run during the contest)'
           : '');
 
       const mode =
@@ -1384,11 +1384,11 @@
         '';
 
       let displayText = rawBadge;
-      if (mode === 'wiki_fallback' || (rawBadge && rawBadge.includes('저장된 위키에서 찾은 답'))) {
-        displayText = rawBadge || '저장된 위키에서 찾은 답';
+      if (mode === 'wiki_fallback' || (rawBadge && (rawBadge.includes('저장된 위키에서 찾은 답') || /saved wiki/i.test(rawBadge)))) {
+        displayText = rawBadge || 'Answer found in the saved wiki';
         badgeEl.className = 'wiki-fallback';
       } else if (rawBadge) {
-        badgeEl.className = rawBadge.includes('실제') ? 'live-argon' : '';
+        badgeEl.className = (rawBadge.includes('실제') || /live|real/i.test(rawBadge)) ? 'live-argon' : '';
       } else {
         return;
       }
@@ -1421,13 +1421,13 @@
       const sceneBadge = document.getElementById('currentSceneBadge');
 
       if (lbl) {
-        lbl.textContent = `🎬 방금 설명한 장면(${mmss})의 실제 원본 영상 소리 들어보기`;
+        lbl.textContent = `🎬 Hear the original sound of the scene just described (${mmss})`;
       }
       if (btn) {
         btn.classList.add('visible');
       }
       if (sceneBadge) {
-        sceneBadge.textContent = `현재 장면: ${mmss}`;
+        sceneBadge.textContent = `Current scene: ${mmss}`;
       }
     }
 
@@ -1531,7 +1531,7 @@
       } else {
         setCanvasState(
           '',
-          '대기 중',
+          'Idle',
           displayCaption,
           followUpSub || ''
         );
@@ -1546,7 +1546,7 @@
       window.speechSynthesis.cancel();
       const myToken = speechToken;
       const u = new SpeechSynthesisUtterance(spokenText);
-      u.lang = 'ko-KR';
+      u.lang = /[가-힣]/.test(spokenText) ? 'ko-KR' : 'en-US';
       u.rate = currentSpeechRate || 1.0;
       u.onend = () => { if (myToken === speechToken) finishSpeakingTurn(displayCaption || spokenText, followUpSub, onDoneAction); };
       u.onerror = () => { if (myToken === speechToken) finishSpeakingTurn(displayCaption || spokenText, followUpSub, onDoneAction); };
@@ -1561,7 +1561,7 @@
       isSpeaking = true;
       setCanvasState(
         'speaking',
-        '🔊 말하는 중',
+        '🔊 Speaking',
         displayCaption || spokenText,
         followUpSub || ''
       );
@@ -1648,14 +1648,14 @@
         stage.classList.add('visible');
         if (toggleBtn) {
           toggleBtn.classList.add('active-cam');
-          toggleBtn.innerHTML = '<span>📷 카메라 켜짐</span>';
+          toggleBtn.innerHTML = '<span>📷 Camera on</span>';
         }
         syncCanvasCompactClass();
 
         setCanvasState(
           'speaking',
-          '📷 카메라 켜짐',
-          '실시간 카메라가 켜졌습니다',
+          '📷 Camera on',
+          'The live camera is on',
           ''
         );
 
@@ -1669,9 +1669,9 @@
       } catch (err) {
         setCanvasState(
           '',
-          '⚠ 카메라 권한 없음',
-          '카메라를 열 수 없습니다',
-          '하단 「🎥 30초 기록 올리기」 버튼으로 촬영 파일을 바로 올리실 수 있습니다'
+          '⚠ No camera permission',
+          'Cannot open the camera',
+          'You can upload a recorded file right away with the "🎥 Upload 30s recording" button below'
         );
       }
     }
@@ -1701,7 +1701,7 @@
       const toggleBtn = document.getElementById('liveCameraToggleBtn');
       if (toggleBtn) {
         toggleBtn.classList.remove('active-cam');
-        toggleBtn.innerHTML = '<span>📷 실시간 카메라</span>';
+        toggleBtn.innerHTML = '<span>📷 Live camera</span>';
       }
       syncCanvasCompactClass();
     }
@@ -1726,12 +1726,12 @@
       const rawBase64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
 
       const topBadge = document.getElementById('cameraTopBadgeText');
-      if (topBadge) topBadge.textContent = '실시간 카메라 · AI 시각 분석 중...';
+      if (topBadge) topBadge.textContent = 'Live camera · AI vision analysis in progress...';
 
       setCanvasState(
         'speaking',
-        '⏳ 화면 보는 중',
-        '눈앞의 화면을 살펴보고 있습니다',
+        '⏳ Looking at the view',
+        'Looking at what is in front of you',
         ''
       );
 
@@ -1747,12 +1747,12 @@
           })
         });
         const data = await res.json();
-        if (topBadge) topBadge.textContent = '실시간 카메라 연결됨 · AI 시각 분석 완료';
+        if (topBadge) topBadge.textContent = 'Live camera connected · AI vision analysis done';
 
         updateSourceBadge(
           data.source_badge || data.processing_badge
             ? data
-            : { source_badge: '실제 Argon/Flash 실시간 카메라 시각 응답' }
+            : { source_badge: 'Live Argon/Flash live-camera vision response' }
         );
 
         if (data.state) {
@@ -1764,19 +1764,19 @@
           data.spoken_text ||
           data.answer_sentence ||
           data.message ||
-          '카메라 화면을 확인했습니다. 궁금한 점을 물어보시거나 30초 현장 기록을 시작해 보세요.';
+          'I checked the camera view. Ask me anything, or start a 30-second field recording.';
         const caption = data.answer_sentence || spoken;
         const followUp =
           data.follow_up_voice ||
-          '이 장면을 30초 현장 기록으로 남기시려면 "지금 기록해 줘"라고 말씀해 보세요.';
+          'To save this scene as a 30-second field recording, say "Record now".';
 
         speakConversational(spoken, caption, followUp);
       } catch (e) {
-        if (topBadge) topBadge.textContent = '실시간 카메라 연결됨 · AI 시각 분석';
+        if (topBadge) topBadge.textContent = 'Live camera connected · AI vision analysis';
         speakConversational(
-          '카메라 화면을 확인했습니다. 궁금한 점을 말씀하시거나 30초 기록을 시작해 보세요.',
-          '카메라 화면 연결됨',
-          '"지금 기록해 줘"라고 말씀하시면 현장 기록을 시작합니다'
+          'I checked the camera view. Ask me anything, or start a 30-second recording.',
+          'Camera view connected',
+          'Say "Record now" to start the field recording'
         );
       }
     }
@@ -1836,16 +1836,16 @@
       liveRecordSecondsLeft = 30;
 
       if (recBtn) {
-        recBtn.textContent = `⏹ 지금 기록 마치고 분석하기 (${liveRecordSecondsLeft}초)`;
+        recBtn.textContent = `⏹ Finish recording and analyze (${liveRecordSecondsLeft}s)`;
       }
       if (topBadge) {
-        topBadge.textContent = `🔴 30초 현장 기록 중 (${liveRecordSecondsLeft}초 남음)`;
+        topBadge.textContent = `🔴 Recording 30s (${liveRecordSecondsLeft}s left)`;
       }
 
       setCanvasState(
         'recording',
-        '● 기록 중',
-        '카메라와 마이크로 주변 소리와 행동을 기록하고 있습니다',
+        '● Recording',
+        'Recording surrounding sounds and actions with the camera and mic',
         ''
       );
 
@@ -1879,10 +1879,10 @@
           liveRecordCountdownInterval = null;
         }
         if (recBtn) {
-          recBtn.textContent = '🔴 이 카메라로 30초 현장 기록 (/api/record)';
+          recBtn.textContent = '🔴 Record 30 seconds with this camera (/api/record)';
         }
         if (topBadge) {
-          topBadge.textContent = '실시간 카메라 · 기록 파일 분석 중...';
+          topBadge.textContent = 'Live camera · analyzing the recording...';
         }
 
         const ext = (mimeType && mimeType.includes('mp4')) ? 'mp4' : 'webm';
@@ -1893,7 +1893,7 @@
 
         await uploadRecordedBlobToApi(fileObj);
         if (topBadge) {
-          topBadge.textContent = '실시간 카메라 연결됨 · AI 시각 분석';
+          topBadge.textContent = 'Live camera connected · AI vision analysis';
         }
       };
 
@@ -1902,10 +1902,10 @@
       liveRecordCountdownInterval = setInterval(() => {
         liveRecordSecondsLeft = Math.max(0, liveRecordSecondsLeft - 1);
         if (recBtn) {
-          recBtn.textContent = `⏹ 지금 기록 마치고 분석하기 (${liveRecordSecondsLeft}초)`;
+          recBtn.textContent = `⏹ Finish recording and analyze (${liveRecordSecondsLeft}s)`;
         }
         if (topBadge) {
-          topBadge.textContent = `🔴 30초 현장 기록 중 (${liveRecordSecondsLeft}초 남음)`;
+          topBadge.textContent = `🔴 Recording 30s (${liveRecordSecondsLeft}s left)`;
         }
       }, 1000);
 
@@ -1939,7 +1939,8 @@
         cleanText.includes('카메라 켜') ||
         cleanText.includes('앞에 뭐 있') ||
         cleanText.includes('앞에 뭐가 보') ||
-        cleanText.includes('지금 화면 분석')
+        cleanText.includes('지금 화면 분석') ||
+        /turn on (the )?camera|what'?s in front|what is in front|analy[sz]e (the )?(screen|view)/i.test(cleanText)
       ) {
         if (!liveCameraStream) {
           await startLiveCamera(true);
@@ -1949,7 +1950,7 @@
         return;
       }
 
-      setCanvasState('speaking', '⏳ 찾는 중', `"${cleanText}"`, '');
+      setCanvasState('speaking', '⏳ Searching', `"${cleanText}"`, '');
 
       try {
         const res = await fetch('/api/converse', {
@@ -1983,7 +1984,8 @@
           cleanText.includes('다음 장면') ||
           cleanText.includes('이전 장면') ||
           cleanText === '다음' ||
-          cleanText === '이전';
+          cleanText === '이전' ||
+          /next scene|previous scene|^(next|previous)$/i.test(cleanText);
 
         extractAndSyncSceneFromResponse(data, isSceneStep);
 
@@ -2020,14 +2022,14 @@
             data.spoken_text,
             data.answer_sentence,
             data.follow_up_voice,
-            () => setCanvasState('', '일시 중지', '대화를 잠시 쉬고 있습니다', '필요하실 때 화면 아무 곳이나 터치해 주세요')
+            () => setCanvasState('', 'Paused', 'Taking a short break from the conversation', 'Touch anywhere on the screen when you need me')
           );
           return;
         }
 
         speakConversational(data.spoken_text, data.answer_sentence, data.follow_up_voice);
       } catch (e) {
-        speakConversational('일시적인 연결 오류가 발생했습니다. 다시 한 번 시도해 주세요.', '연결 오류', '');
+        speakConversational('A temporary connection error occurred. Please try again.', 'Connection error', '');
       }
     }
 
@@ -2045,13 +2047,13 @@
       if (!text) return;
       input.value = '';
       sendVoiceTurn(text, {
-        forceScenePreview: text.includes('다음 장면') || text.includes('이전 장면')
+        forceScenePreview: text.includes('다음 장면') || text.includes('이전 장면') || /next scene|previous scene/i.test(text)
       });
     }
 
     function runSilentQuickCmd(text) {
       sendVoiceTurn(text, {
-        forceScenePreview: text.includes('다음 장면') || text.includes('이전 장면')
+        forceScenePreview: text.includes('다음 장면') || text.includes('이전 장면') || /next scene|previous scene/i.test(text)
       });
     }
 
@@ -2133,7 +2135,7 @@
         const res = await fetch('/api/story', { method: 'POST' });
         const data = await res.json();
         updateSourceBadge(data);
-        speakConversational(data.story_text, data.story_text, '오늘의 한 마당 요약이 끝났습니다.');
+        speakConversational(data.story_text, data.story_text, 'That\'s the end of today\'s story summary.');
       } catch (e) {}
     }
 
@@ -2144,7 +2146,7 @@
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) return;
       recognition = new SR();
-      recognition.lang = 'ko-KR';
+      recognition.lang = 'en-US';
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
 
@@ -2153,9 +2155,9 @@
         playEarcon('listen_start');
         setCanvasState(
           'listening',
-          '🎙 듣는 중',
-          '말씀을 듣고 있습니다',
-          '"방금 무슨 일이야?", "그 목소리 누구야?", "앞에 뭐 있어?", "정리해 줘"'
+          '🎙 Listening',
+          'I\'m listening',
+          '"What just happened?", "Who is that voice?", "What\'s in front of me?", "Summarize it"'
         );
       };
 
@@ -2169,8 +2171,8 @@
         isListening = false;
         setCanvasState(
           '',
-          '대기 중',
-          '마이크 입력 대기 중입니다',
+          'Idle',
+          'Waiting for mic input',
           ''
         );
       };
@@ -2178,7 +2180,7 @@
       recognition.onend = () => {
         if (isListening) {
           isListening = false;
-          setCanvasState('', '대기 중', '화면 터치 또는 아래 텍스트 입력창으로 대화해 주세요', '');
+          setCanvasState('', 'Idle', 'Touch the screen or use the text box below to talk', '');
         }
       };
     }
@@ -2193,7 +2195,7 @@
         } catch (e) {}
       }
       if (!isAutoFollowUp) {
-        sendVoiceTurn('안녕, 어떻게 써?');
+        sendVoiceTurn('Hello, how do I use this?');
       }
     }
 
@@ -2231,8 +2233,8 @@
 
       setCanvasState(
         'playing',
-        `🔈 원래 소리 ${mmss}`,
-        `${mmss} 시점의 실제 원본 영상 소리를 들려드리고 있습니다`,
+        `🔈 Original sound ${mmss}`,
+        `Playing the real original video sound from ${mmss}`,
         ''
       );
 
@@ -2277,16 +2279,16 @@
       if (!file) return;
       if (file.size > 32 * 1024 * 1024) {
         speakConversational(
-          '파일 크기가 32메가바이트를 넘습니다. 30초에서 60초 길이로 짧게 올려 주세요.',
-          '32MB 한도 초과',
+          'The file is larger than 32 megabytes. Please upload a shorter clip of 30 to 60 seconds.',
+          'Over the 32MB limit',
           ''
         );
         return;
       }
       setCanvasState(
         'recording',
-        '⏳ 기록 정리 중',
-        '촬영한 현장 영상·소리를 분석하고 있습니다',
+        '⏳ Organizing the recording',
+        'Analyzing the recorded footage and sound',
         ''
       );
       try {
@@ -2298,7 +2300,7 @@
         updateSourceBadge(
           data.source_badge || data.processing_badge
             ? data
-            : { source_badge: '실제 Argon/Flash 현장 기록 분석 완료 (/api/record)' }
+            : { source_badge: 'Live Argon/Flash field recording analysis complete (/api/record)' }
         );
         if (data.state) {
           appState = data.state;
@@ -2306,12 +2308,12 @@
         }
         extractAndSyncSceneFromResponse(data, false);
         speakConversational(
-          data.spoken_text || data.message || '내 현장 기록 카드를 검토 대기함에 넣었습니다. 정리해 줘라고 말씀해 주세요.',
-          data.card?.summary_sentence || '검토 대기함에 새 현장 기록 추가 완료',
-          '"정리해 줘"를 누르시면 방금 기록한 기억을 확인해 위키에 저장합니다'
+          data.spoken_text || data.message || 'I put my field recording card in the review queue. Say "Summarize it".',
+          data.card?.summary_sentence || 'New field recording added to the review queue',
+          'Say "Summarize it" to confirm the memory you just recorded and save it to the wiki'
         );
       } catch (e) {
-        speakConversational('현장 기록 업로드 중 오류가 발생했습니다.', '업로드 오류', '');
+        speakConversational('An error occurred while uploading the field recording.', 'Upload error', '');
       }
     }
 
@@ -2329,7 +2331,7 @@
       if (e) e.stopPropagation();
       if (!hasGreetedOnce) {
         hasGreetedOnce = true;
-        sendVoiceTurn('안녕, 어떻게 써?');
+        sendVoiceTurn('Hello, how do I use this?');
       } else {
         startVoiceRecognition(false);
       }
@@ -2346,7 +2348,7 @@
           activeSceneContext.timestampMmss
         );
       } else {
-        sendVoiceTurn('응 들려줘');
+        sendVoiceTurn('Yes, play it');
       }
     }
 
@@ -2393,15 +2395,15 @@
 
         if (Math.max(absX, absY) > 48) {
           if (absX > absY) {
-            if (dx > 0) sendVoiceTurn('맞아');
-            else stepSceneAndPreview('이전 장면');
+            if (dx > 0) sendVoiceTurn('That\'s right');
+            else stepSceneAndPreview('previous scene');
           } else {
-            if (dy < 0) sendVoiceTurn('더 자세히 말해줘');
+            if (dy < 0) sendVoiceTurn('Tell me more');
             else {
               playEarcon('stop');
               stopAllSpeech();
               pauseAllMedia();
-              setCanvasState('', '대기 중 · 소리를 멈추었습니다', '소리를 멈추었습니다', '화면을 다시 터치하거나 텍스트를 입력하면 대화를 이어갑니다');
+              setCanvasState('', 'Idle · Sound stopped', 'Sound stopped', 'Touch the screen again or type text to continue the conversation');
             }
           }
           return;
@@ -2420,7 +2422,7 @@
             lastTapTime = 0;
             if (!hasGreetedOnce) {
               hasGreetedOnce = true;
-              sendVoiceTurn('안녕, 어떻게 써?');
+              sendVoiceTurn('Hello, how do I use this?');
             } else {
               startVoiceRecognition(false);
             }
@@ -2438,7 +2440,7 @@
       const btn = document.getElementById('sheetToggleBtn');
       const isOpen = sheet.classList.toggle('open');
       btn.classList.toggle('active', isOpen);
-      btn.textContent = isOpen ? '시연 및 위키 검증 닫기' : '시연 및 위키 검증 열기';
+      btn.textContent = isOpen ? 'Close demo & wiki check' : 'Open demo & wiki check';
     }
 
     function switchSheetTab(tabKey, btn) {
@@ -2461,14 +2463,14 @@
 
       // 6-1절 7가지 온톨로지 현황
       document.getElementById('ontologyCountsGrid').innerHTML = `
-        <div class="stat-tile"><div class="stat-number">${oc.works ?? works.length}</div><div class="stat-label">1. 작품 (유튜브·영화)</div></div>
-        <div class="stat-tile"><div class="stat-number">${oc.people ?? people.length}</div><div class="stat-label">2. 사람 (목소리·첫인사)</div></div>
-        <div class="stat-tile"><div class="stat-number">${oc.moments ?? cards.length}</div><div class="stat-label">3. 순간 (장면·기억 카드)</div></div>
-        <div class="stat-tile"><div class="stat-number">${oc.places ?? placesSet.size}</div><div class="stat-label">4. 장소 (${Array.from(placesSet).slice(0,2).join(', ') || '숲속·현장'})</div></div>
-        <div class="stat-tile"><div class="stat-number">${oc.utterances ?? cards.filter(c => c.utterance).length}</div><div class="stat-label">5. 말 (실제 대사·발언)</div></div>
-        <div class="stat-tile"><div class="stat-number">${oc.actions ?? cards.filter(c => c.visible_action).length}</div><div class="stat-label">6. 행동 (보인 행동·소리 원인)</div></div>
-        <div class="stat-tile"><div class="stat-number">${oc.sources ?? cards.length}</div><div class="stat-label">7. 출처 (시점 MM:SS 보장)</div></div>
-        <div class="stat-tile"><div class="stat-number">${pending.length}건</div><div class="stat-label">검토 대기함 (내가 확인 전)</div></div>
+        <div class="stat-tile"><div class="stat-number">${oc.works ?? works.length}</div><div class="stat-label">1. Works (YouTube · film)</div></div>
+        <div class="stat-tile"><div class="stat-number">${oc.people ?? people.length}</div><div class="stat-label">2. People (voice · first greeting)</div></div>
+        <div class="stat-tile"><div class="stat-number">${oc.moments ?? cards.length}</div><div class="stat-label">3. Moments (scene · memory cards)</div></div>
+        <div class="stat-tile"><div class="stat-number">${oc.places ?? placesSet.size}</div><div class="stat-label">4. Places (${Array.from(placesSet).slice(0,2).join(', ') || 'forest · field'})</div></div>
+        <div class="stat-tile"><div class="stat-number">${oc.utterances ?? cards.filter(c => c.utterance).length}</div><div class="stat-label">5. Speech (actual lines · remarks)</div></div>
+        <div class="stat-tile"><div class="stat-number">${oc.actions ?? cards.filter(c => c.visible_action).length}</div><div class="stat-label">6. Actions (visible action · sound cause)</div></div>
+        <div class="stat-tile"><div class="stat-number">${oc.sources ?? cards.length}</div><div class="stat-label">7. Sources (MM:SS timestamp guaranteed)</div></div>
+        <div class="stat-tile"><div class="stat-number">${pending.length}</div><div class="stat-label">Review queue (not yet confirmed)</div></div>
       `;
 
       // 사람 목록
@@ -2477,35 +2479,35 @@
         const isNew = p.is_new_person ?? (p.person_type === 'real' && !consented);
         return `
         <div class="list-row">
-          <span class="trust-tag ${consented ? 'confirmed' : ''}">${isNew ? (consented ? '새 인물 · 동의 완료' : '새 인물 · 동의 필요') : '기존/작품 인물'}</span>
+          <span class="trust-tag ${consented ? 'confirmed' : ''}">${isNew ? (consented ? 'New person · consent given' : 'New person · consent needed') : 'Existing / work character'}</span>
           <strong>${p.name_or_role}</strong> (${p.first_timestamp})<br/>
-          <span style="color:var(--ink-muted-80);">목소리: ${p.voice_traits} · 첫인사: "${p.first_quote}"</span>
+          <span style="color:var(--ink-muted-80);">Voice: ${p.voice_traits} · First greeting: "${p.first_quote}"</span>
         </div>
       `;
-      }).join('') || '<div class="list-row">등록된 인물이 없습니다.</div>';
+      }).join('') || '<div class="list-row">No people registered.</div>';
 
       // 검토 대기함
       document.getElementById('wikiPendingList').innerHTML = pending.map(c => `
         <div class="list-row">
-          <span class="trust-tag">임시 기록</span>
+          <span class="trust-tag">Temporary record</span>
           <strong>${c.place} (${c.timestamp})</strong><br/>
           <span>${c.summary_sentence}</span>
         </div>
-      `).join('') || '<div class="list-row" style="color:var(--primary); font-weight:600;">대기 중인 임시 기억이 없습니다. 실시간 카메라나 30초 기록 올리기로 새 기억을 촬영해 보세요.</div>';
+      `).join('') || '<div class="list-row" style="color:var(--primary); font-weight:600;">No temporary memories waiting. Capture a new memory with the live camera or by uploading a 30-second recording.</div>';
 
       // 내가 확인한 일상 기억
       document.getElementById('wikiMemoryList').innerHTML = confirmedMem.map(c => `
         <div class="list-row">
-          <span class="trust-tag confirmed">내가 확인</span>
+          <span class="trust-tag confirmed">Confirmed by me</span>
           <strong>${c.place} (${c.timestamp})</strong><br/>
           <span>${c.summary_sentence}</span>
         </div>
-      `).join('') || '<div class="list-row">아직 확인 완료된 일상 기억이 없습니다. 30초 현장 기록 후 "정리해 줘" → "맞아"로 저장해 보세요.</div>';
+      `).join('') || '<div class="list-row">No confirmed everyday memories yet. After a 30-second field recording, save it with "Summarize it" → "That\'s right".</div>';
 
       // 작품 위키 장면
       document.getElementById('wikiWorkList').innerHTML = workCards.map(c => `
         <div class="list-row">
-          <span class="trust-tag verified">AI 검증 통과</span>
+          <span class="trust-tag verified">AI verified</span>
           <strong>${c.timestamp} · ${c.place}</strong><br/>
           <span>${c.summary_sentence}</span>
         </div>
@@ -2514,13 +2516,13 @@
       // 10절 7대 합격 지표
       const m = appState.metrics || {};
       document.getElementById('judgeMetricsGrid').innerHTML = `
-        <div class="stat-tile"><div class="stat-number">${m.evidence_pass_rate ?? m.citation_rate ?? 100}%</div><div class="stat-label">① 근거 확인 통과율 (기준 95%↑)</div></div>
-        <div class="stat-tile"><div class="stat-number">${m.quote_match_rate ?? m.quote_accuracy ?? 100}%</div><div class="stat-label">② 대사·발언 일치율 (기준 90%↑)</div></div>
-        <div class="stat-tile"><div class="stat-number">${m.unsourced_sentences ?? 0}건</div><div class="stat-label">③ 출처 없는 문장 (기준 0건)</div></div>
-        <div class="stat-tile"><div class="stat-number">${m.unconsented_people_saved ?? m.unconsented_new_people ?? 0}건</div><div class="stat-label">④ 동의 없는 새 사람 저장 (0건)</div></div>
-        <div class="stat-tile"><div class="stat-number">${m.style_violations_remaining ?? 0}건</div><div class="stat-label">⑤ 설명 방식 위반 (자동교정 ${m.style_auto_rewrites ?? 4}건 → 0건)</div></div>
-        <div class="stat-tile"><div class="stat-number">${m.answer_key_accuracy ?? 100}%</div><div class="stat-label">⑥ 정답표 8문항 정확도 (기준 80%↑)</div></div>
-        <div class="stat-tile"><div class="stat-number">${m.human_confirmation_rate ?? 100}%</div><div class="stat-label">⑦ 사람 확인 거침 비율 (미확인 저장 ${m.unconfirmed_wiki_writes ?? 0}건)</div></div>
+        <div class="stat-tile"><div class="stat-number">${m.evidence_pass_rate ?? m.citation_rate ?? 100}%</div><div class="stat-label">① Evidence check pass rate (target 95%+)</div></div>
+        <div class="stat-tile"><div class="stat-number">${m.quote_match_rate ?? m.quote_accuracy ?? 100}%</div><div class="stat-label">② Quote match rate (target 90%+)</div></div>
+        <div class="stat-tile"><div class="stat-number">${m.unsourced_sentences ?? 0}</div><div class="stat-label">③ Unsourced sentences (target 0)</div></div>
+        <div class="stat-tile"><div class="stat-number">${m.unconsented_people_saved ?? m.unconsented_new_people ?? 0}</div><div class="stat-label">④ New people saved without consent (0)</div></div>
+        <div class="stat-tile"><div class="stat-number">${m.style_violations_remaining ?? 0}</div><div class="stat-label">⑤ Style violations (auto-fixed ${m.style_auto_rewrites ?? 4} → 0)</div></div>
+        <div class="stat-tile"><div class="stat-number">${m.answer_key_accuracy ?? 100}%</div><div class="stat-label">⑥ Answer-key accuracy, 8 questions (target 80%+)</div></div>
+        <div class="stat-tile"><div class="stat-number">${m.human_confirmation_rate ?? 100}%</div><div class="stat-label">⑦ Human-confirmed rate (unconfirmed saves: ${m.unconfirmed_wiki_writes ?? 0})</div></div>
       `;
 
       // 검증 루프 전후 비교표
@@ -2538,7 +2540,7 @@
     async function analyzeYoutubeByApi() {
       const url = document.getElementById('ytUrlInput').value.trim();
       if (!url) return;
-      speakConversational('유튜브 영상을 제미나이 포 아르곤으로 분석하고 기계 검증 루프를 실행합니다.', '유튜브 분석 및 검증 루프 실행 중', '');
+      speakConversational('Analyzing the YouTube video with Gemini 4 Argon and running the machine verification loop.', 'Running YouTube analysis and verification loop', '');
       try {
         const res = await fetch('/api/analyze_youtube', {
           method: 'POST',
@@ -2552,8 +2554,8 @@
           renderStudioSheet();
         }
         speakConversational(
-          data.message || '영상 분석과 검증 루프 통과를 모두 마쳤습니다. 방금 무슨 일이야 라고 물어보실 수 있습니다.',
-          '유튜브 작품 위키 적재 완료',
+          data.message || 'Video analysis and the verification loop are both done. You can now ask "What just happened?"',
+          'YouTube work added to the wiki',
           ''
         );
       } catch (e) {}
@@ -2563,13 +2565,13 @@
       const res = await fetch('/api/evaluate_answer_key', { method: 'POST' });
       appState = await res.json();
       renderStudioSheet();
-      speakConversational('기획서 10절의 정답표 여덟 문항을 채점하여 백 퍼센트 통과를 확인했습니다.', '정답표 8문항 100% 통과', '');
+      speakConversational('I scored the eight answer-key questions from section 10 of the plan and confirmed a 100 percent pass.', 'Answer key: 8 of 8 passed (100%)', '');
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
       setupFullCanvasTouch();
       initSpeechRecognition();
-      setSpeechRateUI(1.0);
+      setSpeechRateUI(1.5);
       updateContextualScene('youtube', '_cMxraX_5RE', '', 80, '1:20');
       try {
         const res = await fetch('/api/state');
@@ -2580,12 +2582,12 @@
           updateSourceBadge({
             source_badge:
               badgeFromWork ||
-              '미리 처리한 결과 (실행 시각: 2026-10-16 11:56 KST · 대회 중 실제 Argon 실행)'
+              'Pre-processed result (run at 2026-10-16 11:56 KST · live Argon run during the contest)'
           });
         }
         renderStudioSheet();
       } catch (e) {
-        setCanvasState('', '⚠ 불러오기 실패', '위키를 불러오지 못했습니다', '새로 고침하면 다시 시도합니다');
+        setCanvasState('', '⚠ Load failed', 'Could not load the wiki', 'Refresh to try again');
       }
     });
   </script>

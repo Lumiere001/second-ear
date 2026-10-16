@@ -462,8 +462,9 @@ async def api_ask(req: AskReq):
 규칙:
 1. 인물은 절대 옷차림·외모로만 소개하지 말고, 이름 또는 '목소리 특징과 처음 한 말(시점 포함)'로 소개하세요.
 2. 감정을 함부로 추측하지 말고 들린 말과 눈에 보인 행동으로만 설명하세요.
-3. 답(answer_sentence)은 귀로 바로 듣기 편하게 한두 문장으로 명확히 쓰고, 문장 끝에 출처 시점 (MM:SS)을 꼭 붙이세요.
-4. 앞 장면과 이어지는 인과관계(예: 1:02에 구해준 새가 8:09에 새똥으로 구해줌, 2:04 소금 약점으로 7:18에 짠 과자를 던짐 등)나 일상 기억이 있으면 함께 짚어 주세요.
+3. 답(answer_sentence)은 핵심만 짧은 한 문장(한국어 40자 안팎, 영어 20단어 이하)으로 쓰고 문장 끝에 출처 시점 (MM:SS)을 붙이세요. 꾸밈말·목소리 묘사·앞뒤 사연은 넣지 마세요. 사람은 이름(없으면 처음 한 말 한 마디)으로만 부르세요.
+4. 사용자 질문에 한글이 없으면(영어 질문) answer_sentence·detailed_answer·who_label을 모두 자연스러운 영어로 쓰세요.
+5. 자세한 내용은 detailed_answer에만 쓰세요: 앞 장면과 이어지는 인과관계(예: 1:02에 구해준 새가 8:09에 새똥으로 구해줌, 2:04 소금 약점으로 7:18에 짠 과자를 던짐 등)나 일상 기억이 있으면 함께 짚어 주세요.
 
 위키 데이터:
 {wiki_context}
@@ -471,7 +472,7 @@ async def api_ask(req: AskReq):
 반드시 JSON 형식으로 답하세요:
 {{"answer_sentence": "한 문장 답 (MM:SS).", "detailed_answer": "자세한 근거 설명", "cite_timestamp": "MM:SS", "first_voice_timestamp": "MM:SS", "who_label": "인물 소개"}}"""
 
-        # 대화 답은 빠른 Flash로 (기다림 줄이기), 실패하면 Argon
+        # Conversational answers use fast Flash to cut waiting; Argon is the fallback
         model_used = "gemini-3.8-flash"
         inter = None
         try:
@@ -1430,7 +1431,7 @@ class ConversationSession:
         self.last_card_id: str = "card_sf_1"
         self.last_person_id: str = "char_1"
         self.review_card_id: str = ""
-        self.speech_rate: float = 1.0
+        self.speech_rate: float = 1.5
         self.voice: str = "Kore"
 
 
@@ -1462,11 +1463,34 @@ def _card_play_fields(card: Optional[FactCard]) -> Dict[str, object]:
 
 @app.post("/api/converse")
 async def api_converse(req: ConverseReq):
-    u = req.utterance.strip()
+    res = await _converse_impl(req)
+    if re.search("[가-힣]", req.utterance) or not isinstance(res, dict):
+        return res
+    keys = [k for k in ("spoken_text", "answer_sentence", "follow_up_voice") if re.search("[가-힣]", str(res.get(k) or ""))]
+    client = get_genai_client() if keys else None
+    if client is None:
+        return res
+    try:
+        inter = client.interactions.create(
+            model="gemini-3.8-flash",
+            input="Translate each value of this JSON into short, natural spoken English for a blind user. Keep times like 3:16. Return the same keys as JSON.\n"
+            + json.dumps({k: res[k] for k in keys}, ensure_ascii=False),
+            generation_config={"thinking_level": "low"},
+            response_format={"type": "text", "mime_type": "application/json"},
+        )
+        res.update({k: v for k, v in json.loads(inter.output_text or "{}").items() if k in keys and isinstance(v, str)})
+    except Exception:
+        pass
+    return res
+
+
+async def _converse_impl(req: ConverseReq):
+    u = req.utterance.strip().lower()
+    is_en = not re.search("[가-힣]", u)
     cur_sec = max(0, int(req.current_time_sec))
 
     # 1. Stop / Rest intent
-    if any(w in u for w in ["그만", "멈춰", "조용히", "고마워", "됐어", "쉬어"]):
+    if any(w in u for w in ["그만", "멈춰", "조용히", "고마워", "됐어", "쉬어", "stop", "be quiet", "thanks", "thank you"]):
         conv_session.mode = "idle"
         return {
             "mode": conv_session.mode,
@@ -1480,7 +1504,7 @@ async def api_converse(req: ConverseReq):
         }
 
     # 2. Onboarding / Help / How to use
-    if any(w in u for w in ["어떻게 써", "도움말", "설명해", "뭐 할 수 있어", "안녕", "시작", "누구야 너", "가이드"]):
+    if any(w in u for w in ["어떻게 써", "도움말", "설명해", "뭐 할 수 있어", "안녕", "시작", "누구야 너", "가이드", "help", "how do i use", "what can you do", "hello"]):
         conv_session.mode = "idle"
         pending_cnt = len(_get_pending_cards())
         spoken = (
@@ -1500,7 +1524,7 @@ async def api_converse(req: ConverseReq):
         }
 
     # 3. Voice & Speed Preference adjustments
-    if any(w in u for w in ["남자 목소리", "남성 목소리", "중저음 목소리", "카론"]):
+    if any(w in u for w in ["남자 목소리", "남성 목소리", "중저음 목소리", "카론", "male voice"]):
         conv_session.voice = "Charon" if "중저음" in u or "카론" in u else "Puck"
         v_label = "중저음 남성 목소리(카론)" if conv_session.voice == "Charon" else "밝은 남성 목소리(퍽)"
         return {
@@ -1513,7 +1537,7 @@ async def api_converse(req: ConverseReq):
             "speech_rate": conv_session.speech_rate,
             "state": store.to_dict(),
         }
-    if any(w in u for w in ["여자 목소리", "여성 목소리", "부드러운 목소리", "코레", "아오이데"]):
+    if any(w in u for w in ["여자 목소리", "여성 목소리", "부드러운 목소리", "코레", "아오이데", "female voice"]):
         conv_session.voice = "Aoede" if "부드러운" in u or "아오이데" in u else "Kore"
         v_label = "부드러운 여성 목소리(아오이데)" if conv_session.voice == "Aoede" else "따뜻한 여성 목소리(코레)"
         return {
@@ -1526,7 +1550,7 @@ async def api_converse(req: ConverseReq):
             "speech_rate": conv_session.speech_rate,
             "state": store.to_dict(),
         }
-    if any(w in u for w in ["천천히 말해", "말 좀 천천히", "느리게 말해", "속도 느리게", "천천히"]):
+    if any(w in u for w in ["천천히 말해", "말 좀 천천히", "느리게 말해", "속도 느리게", "천천히", "slower", "slow down"]):
         conv_session.speech_rate = max(0.75, round(conv_session.speech_rate - 0.15, 2))
         return {
             "mode": conv_session.mode,
@@ -1538,7 +1562,7 @@ async def api_converse(req: ConverseReq):
             "voice": conv_session.voice,
             "state": store.to_dict(),
         }
-    if any(w in u for w in ["빠르게 말해", "말 좀 빨리", "빨리 말해", "속도 빠르게", "더 빨리"]):
+    if any(w in u for w in ["빠르게 말해", "말 좀 빨리", "빨리 말해", "속도 빠르게", "더 빨리", "faster", "speed up"]):
         conv_session.speech_rate = min(1.5, round(conv_session.speech_rate + 0.15, 2))
         return {
             "mode": conv_session.mode,
@@ -1550,7 +1574,7 @@ async def api_converse(req: ConverseReq):
             "voice": conv_session.voice,
             "state": store.to_dict(),
         }
-    if "색깔 빼" in u or "색 빼" in u or "색깔 말하지" in u:
+    if "색깔 빼" in u or "색 빼" in u or "색깔 말하지" in u or "skip colors" in u or "no colors" in u:
         store.preference.color_mode = "exclude"
         store.apply_preference_to_all_cards()
         store.save_async()
@@ -1563,7 +1587,7 @@ async def api_converse(req: ConverseReq):
             "speech_rate": conv_session.speech_rate,
             "state": store.to_dict(),
         }
-    if "색깔 넣" in u or "색깔 포함" in u or "색깔도 말해" in u:
+    if "색깔 넣" in u or "색깔 포함" in u or "색깔도 말해" in u or "include colors" in u:
         store.preference.color_mode = "include"
         store.apply_preference_to_all_cards()
         store.save_async()
@@ -1578,7 +1602,7 @@ async def api_converse(req: ConverseReq):
         }
 
     # 4. Recording surroundings by voice command
-    if any(w in u for w in ["지금 기록", "기록 시작", "지금부터 기억", "녹음 시작", "내 주변 기록"]):
+    if any(w in u for w in ["지금 기록", "기록 시작", "지금부터 기억", "녹음 시작", "내 주변 기록", "start recording", "record now"]):
         conv_session.mode = "idle"
         return {
             "mode": conv_session.mode,
@@ -1591,7 +1615,7 @@ async def api_converse(req: ConverseReq):
         }
 
     # 4b. Daily Story ("오늘의 한 마당 들려줘", "오늘 이야기 들려줘", "오늘 들려줘", "한 마당")
-    if any(w in u for w in ["한 마당", "한마당", "오늘 이야기", "오늘의 이야기", "오늘 들려줘", "오늘 하루 정리"]):
+    if any(w in u for w in ["한 마당", "한마당", "오늘 이야기", "오늘의 이야기", "오늘 들려줘", "오늘 하루 정리", "today's story", "my day"]):
         story_res = await api_daily_story()
         story_text = story_res["story_text"]
         conv_session.mode = "idle"
@@ -1639,7 +1663,7 @@ async def api_converse(req: ConverseReq):
         pending = _get_pending_cards()
         target = next((c for c in pending if c.id == conv_session.review_card_id), pending[0] if pending else None)
 
-        if target and any(w in u for w in ["맞아", "응", "그래", "네", "저장", "동의", "좋아", "오케이"]):
+        if target and any(w in u for w in ["맞아", "응", "그래", "네", "저장", "동의", "좋아", "오케이", "that's right", "yes", "save", "agree", "correct"]):
             p = store.people.get(target.who_id)
             needs_consent = bool(target.is_new_person or (p and p.is_new_person and not p.consent_granted))
             said_consent_explicitly = any(w in u for w in ["동의", "함께 저장", "응 동의", "네 동의"])
@@ -1698,7 +1722,7 @@ async def api_converse(req: ConverseReq):
                     "state": store.to_dict(),
                 }
 
-        if target and any(w in u for w in ["아니", "지워", "버려", "삭제", "넘어가", "패스"]):
+        if target and any(w in u for w in ["아니", "지워", "버려", "삭제", "넘어가", "패스", "not right", "discard", "delete", "skip"]):
             await api_review_card(ReviewActionReq(card_id=target.id, action="discard", consent_granted=False))
             remaining = _get_pending_cards()
             if remaining:
@@ -1734,7 +1758,7 @@ async def api_converse(req: ConverseReq):
                 }
 
     # 6. Start Review Inbox workflow ("정리해 줘", "기억 정리", "대기함")
-    if any(w in u for w in ["정리해", "기억 정리", "대기함", "확인할 기억"]):
+    if any(w in u for w in ["정리해", "기억 정리", "대기함", "확인할 기억", "summarize", "review"]):
         pending = _get_pending_cards()
         if not pending:
             conv_session.mode = "idle"
@@ -1772,7 +1796,7 @@ async def api_converse(req: ConverseReq):
         }
 
     # 7. Follow-up intent: Replay original sound ("응 들려줘", "원래 소리", "틀어줘", "응")
-    if any(w in u for w in ["들려줘", "원래 소리", "틀어줘", "다시 들려", "그 소리"]) or u in ("응", "그래", "네", "어", "좋아"):
+    if any(w in u for w in ["들려줘", "원래 소리", "틀어줘", "다시 들려", "그 소리", "original sound", "play it"]) or u in ("응", "그래", "네", "어", "좋아", "yes", "play"):
         last_c = _get_card_by_id(conv_session.last_card_id)
         if last_c:
             ts = last_c.timestamp
@@ -1789,7 +1813,7 @@ async def api_converse(req: ConverseReq):
             }
 
     # 8. Follow-up intent: "더 자세히 말해줘" / "무슨 상황이야?"
-    if any(w in u for w in ["자세히", "더 알려줘", "무슨 상황", "자세한 설명", "왜 그런 소리"]):
+    if any(w in u for w in ["자세히", "더 알려줘", "무슨 상황", "자세한 설명", "왜 그런 소리", "more detail", "tell me more", "details"]):
         last_c = _get_card_by_id(conv_session.last_card_id)
         if last_c:
             detail_spoken = (
@@ -1810,7 +1834,7 @@ async def api_converse(req: ConverseReq):
             }
 
     # 9. Follow-up intent: "다음 장면" / "그 다음엔?" / "이전 장면"
-    if any(w in u for w in ["다음 장면", "그 다음", "다음 거", "다음 기억", "이전 장면", "그 전에는", "앞 장면"]) or u in ("다음", "이전"):
+    if any(w in u for w in ["다음 장면", "그 다음", "다음 거", "다음 기억", "이전 장면", "그 전에는", "앞 장면", "next scene", "previous scene"]) or u in ("다음", "이전", "next", "previous"):
         last_c = _get_card_by_id(conv_session.last_card_id)
         same_type_cards = [
             c
@@ -1867,11 +1891,17 @@ async def api_converse(req: ConverseReq):
 
     cite_ts = qa_data["cite_timestamp"]
     ans_sent = qa_data["answer_sentence"]
-    is_who = any(w in u for w in ["누구", "누가", "누군지"]) and "뭐라고" not in u
-    if is_who:
-        follow_up = f"그분이 말한 {cite_ts} 시점의 원래 목소리를 바로 들어볼까요, 아니면 무슨 행동을 했는지 더 알려드릴까요?"
+    is_who = any(w in u for w in ["누구", "누가", "누군지", "who"]) and "뭐라고" not in u
+    if is_en:
+        follow_up = (
+            f"Hear the original voice at {cite_ts}?"
+            if is_who
+            else f"Hear the original sound at {cite_ts}?"
+        )
+    elif is_who:
+        follow_up = f"{cite_ts} 원래 목소리 들어볼까요?"
     else:
-        follow_up = f"{cite_ts} 시점의 원래 소리를 바로 들어볼까요, 아니면 그 목소리가 누구인지 알려드릴까요?"
+        follow_up = f"{cite_ts} 원래 소리 들어볼까요?"
 
     return {
         "mode": conv_session.mode,

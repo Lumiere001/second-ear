@@ -384,6 +384,7 @@ def verify_answer_with_flash(
 2. 감정을 추측하지 않고 들린 말과 보인 행동에 근거했는가?
 3. 위키 근거와 모순되지 않는가?
 
+rewritten_sentence는 답변 초안과 같은 언어(영어 초안이면 영어)로 쓰세요.
 JSON으로 답하세요: {{"passed": true, "reason": "검증 판단 이유", "rewritten_sentence": ""}}"""
                 v_inter = client.interactions.create(
                     model="gemini-3.8-flash",
