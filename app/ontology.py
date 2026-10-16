@@ -96,6 +96,8 @@ class FactCard(BaseModel):
     confirmed_by: str = "AI"
     confirmed_at: str = Field(default_factory=now_iso)
     discard_reason: str = ""
+    is_example_data: bool = False
+    source_badge: str = ""
     verification: VerificationRecord = Field(default_factory=VerificationRecord)
 
 
@@ -232,6 +234,10 @@ class QAHistoryItem(BaseModel):
     first_voice_timestamp: str = ""
     first_voice_timestamp_sec: int = 0
     who_label: str = ""
+    source_badge: str = ""
+    answer_source_mode: str = "live_gemini"
+    model_used: str = ""
+    elapsed_sec: float = 0.0
     verification: VerificationRecord = Field(default_factory=VerificationRecord)
     created_at: str = Field(default_factory=now_iso)
 

@@ -1,0 +1,328 @@
+{
+  "characters": [
+    {
+      "id": "char_1",
+      "name_or_role": "엘리 (자연 관찰 학생)",
+      "voice_traits": "높고 또렷하며 빠른 여자아이 목소리",
+      "first_quote": "안녕, 달팽이 아저씨! (Hello, Mr. Snail!)",
+      "first_timestamp": "00:18"
+    },
+    {
+      "id": "char_2",
+      "name_or_role": "렉스 (배트를 든 남학생)",
+      "voice_traits": "굵고 거친 남성 목소리",
+      "first_quote": "하, 저 자연보호 광팬이랑 엮이다니 믿기지가 않네. (Ugh, can't believe we got stuck with tree hugger.)",
+      "first_timestamp": "00:28"
+    },
+    {
+      "id": "char_3",
+      "name_or_role": "빅토리아 (스프레이를 든 여학생)",
+      "voice_traits": "비음이 섞이고 말끝을 길게 끄는 여성 목소리",
+      "first_quote": "진정해, 자기야. (Relax, sugar buns.)",
+      "first_timestamp": "00:35"
+    },
+    {
+      "id": "char_4",
+      "name_or_role": "제이 (카세트를 멘 남학생)",
+      "voice_traits": "가볍고 약간 쉰 듯한 남성 목소리",
+      "first_quote": "그래, 정신 줄 놓을 때까지 취해보자고! (Yeah, and get wasted out of our minds!)",
+      "first_timestamp": "00:39"
+    },
+    {
+      "id": "char_5",
+      "name_or_role": "필 (배낭을 멘 남학생)",
+      "voice_traits": "낮고 느릿하며 뭉개지는 남성 목소리",
+      "first_quote": "내가 한발 앞섰지, 친구. (Way ahead of you, man.)",
+      "first_timestamp": "00:43"
+    },
+    {
+      "id": "char_6",
+      "name_or_role": "장로 스프라이트 (수염 난 버섯 요정)",
+      "voice_traits": "할아버지처럼 걸걸하고 억양이 강한 목소리",
+      "first_quote": "반갑네! (Greetings!)",
+      "first_timestamp": "03:16"
+    },
+    {
+      "id": "char_7",
+      "name_or_role": "스프라이트들 (작은 버섯 요정 무리)",
+      "voice_traits": "아주 높고 얇은 아기 같은 합창 목소리",
+      "first_quote": "해가 뜨면 우린 잠에서 깨어나네, 스마일리 디, 스마일리 덤 (We wake up with the sun, Smiley-dee, smiley-dum)",
+      "first_timestamp": "02:23"
+    }
+  ],
+  "moments": [
+    {
+      "timestamp": "00:18",
+      "who_id": "char_1",
+      "utterance": "안녕, 달팽이 아저씨! 귀여운 코르누 아스페르숨이네. 학명 적으면 보너스 점수지! (Hello, Mr. Snail! Oh, you cute little Cornu aspersum. Latin name, bonus points!)",
+      "visible_action": "풀숲에 엎드려 바위 위 달팽이를 보며 수첩에 연필로 글씨를 적는다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "00:28",
+      "who_id": "char_3",
+      "utterance": "(질퍽하게 짓이겨지는 소리)",
+      "visible_action": "푸른색 하이힐 부츠가 바위 위 달팽이를 밟아 뭉개고 지나간다.",
+      "sound_cause": "부츠 굽에 달팽이가 밟혀 터지면서 난 소리"
+    },
+    {
+      "timestamp": "00:28",
+      "who_id": "char_2",
+      "utterance": "하, 저 자연보호 광팬이랑 엮이다니 믿기지가 않네. 동물 라틴어 이름을 한 번만 더 들으면 진짜 죽여버릴 거야. (Ugh, can't believe we got stuck with tree hugger. If I have to hear the Latin name for one more animal, I swear I'm gonna kill her.)",
+      "visible_action": "한 손에 나무 배트를 들고 눈을 부라리며 숲길을 걷는다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "00:35",
+      "who_id": "char_3",
+      "utterance": "진정해, 자기야. 쟤가 일 다 하는 동안 우린 신나게 놀면 되잖아. (Relax, sugar buns. While she does all the work, we'll have all the fun.)",
+      "visible_action": "한 손으로 머리에 스프레이를 뿌리다가 char_2의 팔에 매달려 어깨에 머리를 기댄다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "00:39",
+      "who_id": "char_4",
+      "utterance": "그래, 정신 줄 놓을 때까지 취해보자고! (Yeah, and get wasted out of our minds!)",
+      "visible_action": "어깨에 큰 라디오 카세트를 메고 걸으며 말한다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "00:43",
+      "who_id": "char_5",
+      "utterance": "내가 한발 앞섰지, 친구. (Way ahead of you, man.)",
+      "visible_action": "커다란 캠핑 배낭을 메고 걸으면서 손에 든 캔 음료를 마신다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "01:02",
+      "who_id": "char_1",
+      "utterance": "자, 괜찮아, 나의 작은 모타실라 플라바. (There, there, my little Motacilla flava.)",
+      "visible_action": "풀숲에서 플라스틱 캔 고리에 몸이 끼어 파닥거리는 노란 새를 발견하고 고리를 빼내어 손바닥에 올려놓는다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "01:20",
+      "who_id": "char_4",
+      "utterance": "(나뭇가지 부러지는 소리와 달걀 깨지는 소리)",
+      "visible_action": "새 둥지가 있는 나뭇가지에 매달려 턱걸이를 하다가 가지가 부러져 둥지 속 알들이 땅에 떨어져 깨진다.",
+      "sound_cause": "매달린 무게 때문에 나뭇가지가 부러지고 둥지가 추락함"
+    },
+    {
+      "timestamp": "01:28",
+      "who_id": "char_3",
+      "utterance": "으, 징그러워! (Ugh, gross!)",
+      "visible_action": "나무기둥에 붙은 딱정벌레에게 헤어스프레이를 뿌려 떨어뜨린 뒤 부츠 굽으로 밟아 으깬다.",
+      "sound_cause": "나무에 붙은 벌레를 보고 내뱉은 소리"
+    },
+    {
+      "timestamp": "01:30",
+      "who_id": "char_5",
+      "utterance": "오, 하하하! (Oh, hahaha!)",
+      "visible_action": "그릴 위를 날아다니는 나비들을 향해 착화제 통을 눌러 초록색 불길을 뿜어 나비들을 태운다.",
+      "sound_cause": "불길에 나비들이 타서 떨어지는 것을 보고 웃음"
+    },
+    {
+      "timestamp": "01:41",
+      "who_id": "char_2",
+      "utterance": "어이, 버섯 괴짜! 쓸모 있게 굴어서 텐트나 좀 고쳐봐. (Oi, fungus freak! Make yourself useful and fix the tent.)",
+      "visible_action": "쓰러진 텐트 앞에서 배트로 땅을 치다가 char_1을 손가락으로 가리키며 말한다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "02:04",
+      "who_id": "char_7",
+      "utterance": "(구토하며 켁켁거리는 소리)",
+      "visible_action": "char_5가 소시지에 뿌린 소금이 바닥의 빨간 버섯 위에 떨어지자, 버섯 갓의 흰 반점 부분이 부풀어 오르며 노란 거품을 토해낸다.",
+      "sound_cause": "버섯 요정(스프라이트)의 머리에 소금이 닿아 거품을 토해냄"
+    },
+    {
+      "timestamp": "02:37",
+      "who_id": "char_1",
+      "utterance": "믿을 수 없어, 새로운 종이야! (Incredible, it's a new species!)",
+      "visible_action": "수풀을 기어 통과해 들어가 공터에서 노래하며 돌아다니는 작은 버섯 생명체(char_7)들을 보고 수첩에 그림을 그린다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "03:03",
+      "who_id": "char_2",
+      "utterance": "그리고 저것들 중 하나만 잡으면 떼돈을 벌 걸. (And I bet we'll make a fortune if we catch one of those things.)",
+      "visible_action": "char_5가 들고 있던 피클 병을 뺏어 바닥에 내용물을 쏟아부은 뒤 빈 병을 흔들어 보인다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "03:16",
+      "who_id": "char_6",
+      "utterance": "반갑네! 환영하네, 친구들. 곧 내려가겠네! (Greetings! Welcome, friends. I'll be right down!)",
+      "visible_action": "나무 위 구멍에서 얼굴을 내밀고 인사하더니 밖으로 뛰어내려 나뭇가지들에 부딪히며 바닥으로 굴러떨어진다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "03:38",
+      "who_id": "char_7",
+      "utterance": "(낑낑대는 소리)",
+      "visible_action": "세 마리의 버섯 요정이 붉은 얼룩이 묻은 흰 양말에 싸인 기다란 물체를 들고 나무뿌리 밑 구멍으로 끌고 들어간다.",
+      "sound_cause": "무거운 물체를 옮기며 내는 소리"
+    },
+    {
+      "timestamp": "03:47",
+      "who_id": "char_2",
+      "utterance": "이봐요, 꼬마 버섯 영감님. 우리 오늘 밤 여기서 캠핑해도 괜찮죠? (Hey, uh, little mushroom geezer, you cool with us camping here for the night?)",
+      "visible_action": "빈 유리병을 등 뒤에 숨긴 채 한쪽 무릎을 꿇고 앉아 char_6에게 말한다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "04:00",
+      "who_id": "char_1",
+      "utterance": "아마 그냥 케첩이나... 빨간 물감 같은 거였을 거야? (Maybe it was just ketchup or something, like red paint?)",
+      "visible_action": "밤에 모닥불 옆 침낭에 누워 아까 본 붉은 얼룩 묻은 보따리 그림 위에 물음표를 그리다가 잠이 든다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "04:13",
+      "who_id": "char_1",
+      "utterance": "(비명과 나뭇가지 부러지는 소리에 놀라 헉 하는 숨소리) 얘들아? (Guys?)",
+      "visible_action": "비명 소리에 잠에서 깨어 일어나 손전등을 켜고 텅 빈 주변 침낭들과 부서진 텐트를 비춘다.",
+      "sound_cause": "숲속에서 들려온 비명과 날카로운 소리에 놀람"
+    },
+    {
+      "timestamp": "04:35",
+      "who_id": "char_5",
+      "utterance": "(입이 막혀 읍읍거리는 신음 소리)",
+      "visible_action": "흙더미 위에 밧줄로 묶인 채 입에 솔방울이 물려 있고, 주변을 횃불 든 char_7 무리가 둘러싸고 있다.",
+      "sound_cause": "입에 솔방울이 재갈처럼 물려 있어 소리를 내지 못함"
+    },
+    {
+      "timestamp": "04:40",
+      "who_id": "char_7",
+      "utterance": "(초록색 불길이 솟구치며 폭발하는 소리)",
+      "visible_action": "char_7 한 마리가 착화제를 char_5에게 뿌리고 다 같이 횃불을 던져 거대한 초록색 화염을 일으킨다.",
+      "sound_cause": "착화제에 횃불이 닿아 불길이 치솟음"
+    },
+    {
+      "timestamp": "04:48",
+      "who_id": "char_2",
+      "utterance": "우린 그냥 한 마리 잡으려고 했을 뿐인데, 저놈들 사이코야! 빨리 이거 풀어줘, 저놈들이 우릴 죽일 거야! (We were just gonna catch one, but they're psycho! You gotta get me out of these, hurry! They're gonna kill us!)",
+      "visible_action": "손발이 묶이고 입에 솔방울이 물린 채 바닥에 누워 있다가, 솔방울을 뱉어내고 다가온 char_1에게 묶인 손목을 내민다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "05:00",
+      "who_id": "char_6",
+      "utterance": "캠핑 장소를 잘못 골랐어, 이 잡것들아! 해치워라! (You picked the wrong camping spot, bitches. Sprite 'em!)",
+      "visible_action": "가시 돋친 나뭇가지를 들고 나무 위에서 눈을 노랗게 빛내며 소리친다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "05:13",
+      "who_id": "char_1",
+      "utterance": "아악! (Aah!)",
+      "visible_action": "꺼진 손전등을 두드리자 바로 앞 손전등 위에 올라타 있던 char_7이 불빛에 드러나고, 놀라서 손전등을 떨어뜨리고 도망친다.",
+      "sound_cause": "손전등이 켜지자마자 바로 눈앞에 나타난 스프라이트를 보고 놀람"
+    },
+    {
+      "timestamp": "05:21",
+      "who_id": "char_2",
+      "utterance": "스프라이트 날려버리기! (A Sprite-)",
+      "visible_action": "덤벼드는 char_7 한 마리를 배트로 쳐서 하늘 높이 날려 보낸다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "05:30",
+      "who_id": "char_3",
+      "utterance": "안 돼! 아아악! (No! Aaaah!)",
+      "visible_action": "양손에 든 스프레이가 다 떨어져 바닥에 넘어지자, char_7 세 마리가 다른 스프레이 통을 들고 그녀의 얼굴에 분사한다.",
+      "sound_cause": "스프라이트들이 쏜 헤어스프레이를 얼굴과 눈에 맞음"
+    },
+    {
+      "timestamp": "05:41",
+      "who_id": "char_1",
+      "utterance": "아악! (Aah!)",
+      "visible_action": "나무 위에서 char_7 세 마리가 던진 끈끈한 파란 꽃 줄기에 머리카락이 휘감겨 공중으로 들어 올려진다.",
+      "sound_cause": "머리카락이 줄기에 붙잡혀 공중에 매달림"
+    },
+    {
+      "timestamp": "05:45",
+      "who_id": "char_1",
+      "utterance": "(칼로 머리카락을 자르는 소리와 바닥에 떨어지며 내는 신음)",
+      "visible_action": "주머니칼을 꺼내 자기 묶인 머리카락(포니테일)을 직접 잘라내고 바닥으로 떨어진다.",
+      "sound_cause": "줄기에 매달린 상태에서 탈출하기 위해 머리카락을 자르고 추락함"
+    },
+    {
+      "timestamp": "06:04",
+      "who_id": "char_3",
+      "utterance": "안 돼, 싫어, 저리 치워! 아아악! (No, no, get 'em off! Aaaah!)",
+      "visible_action": "거미줄에 갇힌 상태에서 거미를 탄 char_7들이 그녀의 머리카락을 뜯어먹고, 거미들이 달려들어 몸 전체를 거미줄로 감싼다.",
+      "sound_cause": "스프라이트들이 머리카락을 뜯어먹고 거미들이 몸을 거미줄로 칭칭 감음"
+    },
+    {
+      "timestamp": "06:22",
+      "who_id": "char_2",
+      "utterance": "으아아악! (Aaaah!)",
+      "visible_action": "나무 위 char_7들이 새총으로 쏜 달팽이들이 얼굴과 귀, 콧구멍에 달라붙어 쓰러지고, 이어서 거대한 민달팽이가 몸 위에 떨어져 덮친다.",
+      "sound_cause": "수많은 달팽이와 거대 민달팽이가 얼굴과 온몸을 뒤덮음"
+    },
+    {
+      "timestamp": "06:34",
+      "who_id": "char_4",
+      "utterance": "뭐야? 이게 뭐야?! 안 돼! 나 수영 못 해, 나 오줌 싸고 있다고! (What? What is that?! No! I can't swim, I'm squirting!)",
+      "visible_action": "속이 빈 거대한 나무 구멍 안에서 위를 올려다보자, 가장자리에 둘러선 char_7들이 일제히 노란 액체(오줌)를 쏟아부어 구멍 안이 차오르자 물속으로 가라앉는다.",
+      "sound_cause": "스프라이트들이 쏟아부은 액체가 나무 구멍에 가득 차올라 익사함"
+    },
+    {
+      "timestamp": "07:05",
+      "who_id": "char_7",
+      "utterance": "(비명과 함께 몸이 부글거리며 녹는 소리)",
+      "visible_action": "달려들던 char_7 위로 바비큐 그릴에서 떨어진 소금통의 소금이 쏟아지자, 거품을 뿜으며 바닥에 쓰러진다.",
+      "sound_cause": "소금에 닿아 몸이 거품을 내며 쓰러짐"
+    },
+    {
+      "timestamp": "07:18",
+      "who_id": "char_1",
+      "utterance": "좋아, 그렇다면 소금이나 먹어라, 이 초록색 괴물 녀석들아! (All right then, eat salt, you little green bastards!)",
+      "visible_action": "배낭에서 짠 과자(땅콩, 프레첼, 나초)들을 꺼내 들고 몰려오는 char_7들을 향해 던져 맞춘다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "07:31",
+      "who_id": "char_1",
+      "utterance": "(기합 소리와 함께 휘두르는 소리)",
+      "visible_action": "'짭짤한 소시지 스틱(Salty Meat Stick)' 포장을 뜯어 칼처럼 휘두르며 덤벼드는 char_7들을 쳐서 쓰러뜨린다.",
+      "sound_cause": "소시지 스틱에 맞은 스프라이트들이 거품을 물고 쓰러짐"
+    },
+    {
+      "timestamp": "07:59",
+      "who_id": "char_6",
+      "utterance": "저 양아치 녀석들은 세상을 자기들 개인 쓰레기통처럼 여겼지. 그런데 네가 그놈들을 풀어줬어! 이제 너도 저놈들을 따라가게 될 거다. (Those punks treat the world as their own personal rubbish bin. And you set them free! Now you'll join them.)",
+      "visible_action": "쓰러진 통나무 위에서 주머니칼을 들고 발목이 묶여 넘어진 char_1을 내려다보며 말한다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "08:09",
+      "who_id": "char_6",
+      "utterance": "이야아아- 컥! (Yaaah- Ugh!)",
+      "visible_action": "칼을 들고 char_1에게 뛰어내리던 중 위에서 떨어진 하얀 새똥에 정통으로 맞아 땅바닥에 처박힌다.",
+      "sound_cause": "공중에서 날아온 새똥에 맞아 추락함"
+    },
+    {
+      "timestamp": "08:15",
+      "who_id": "char_1",
+      "utterance": "(지저귀는 소리에 뒤돌아보며) 하! 하하! (Huh? Hah! Haha!)",
+      "visible_action": "나뭇가지 위에 앉아 있는 노란 새(초반에 구해준 새)를 보고 웃은 뒤, 가방 끈을 풀고 일어나 통나무 다리 쪽으로 뛴다.",
+      "sound_cause": "자신이 구해줬던 노란 새가 새똥을 싸서 위기에서 구해준 것을 확인함"
+    },
+    {
+      "timestamp": "08:28",
+      "who_id": "char_1",
+      "utterance": "(줄을 잡고 날아가며 기합 소리)",
+      "visible_action": "통나무 다리가 무너져 내리자 가방 끈을 위쪽 나뭇가지에 걸고 매달려 반대편 절벽으로 건너간다.",
+      "sound_cause": null
+    },
+    {
+      "timestamp": "08:46",
+      "who_id": "char_6",
+      "utterance": "이번 한 번은 봐주마, 형제 새여. 좋아, 스프라이트들, 시체들을 태우고 페퍼민트 차나 마시러 가자꾸나! (I'll give you that one, brother bird. All right, Sprites, let's burn the bodies and have some peppermint tea!)",
+      "visible_action": "얼굴에 묻은 하얀 새똥을 닦아내며 주먹을 흔들더니, 다시 온화한 표정으로 돌아와 다른 스프라이트들과 함께 노래를 부르며 숲속으로 걸어간다.",
+      "sound_cause": null
+    }
+  ]
+}

@@ -125,7 +125,6 @@
     /* =====================================================================
        BLIND USER FULL-SCREEN CONVERSATIONAL CANVAS
        - Generous Apple white space (#f5f5f7 / #ffffff)
-       - Zero unnecessary screen text: explanations are spoken by voice
        - Touch anywhere to talk, double-tap for original sound, long-press to record
        ===================================================================== */
     #voiceCanvas {
@@ -133,15 +132,16 @@
       top: 44px;
       left: 0;
       right: 0;
-      bottom: 64px;
+      bottom: 68px;
       background: var(--canvas);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 32px 24px;
+      padding: 18px 20px;
       cursor: pointer;
       user-select: none;
+      overflow-y: auto;
       transition: background-color 0.3s ease;
     }
     #voiceCanvas.state-listening,
@@ -154,15 +154,135 @@
       color: var(--body-on-dark);
     }
 
+    /* =====================================================================
+       Live Camera Stage (#cameraStage) — Apple rounded-lg 18px + Product Shadow
+       ===================================================================== */
+    #cameraStage {
+      position: relative;
+      width: min(480px, 92vw);
+      height: 240px;
+      display: none;
+      border-radius: var(--rounded-lg);
+      overflow: hidden;
+      background: var(--surface-black);
+      box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+      cursor: default;
+    }
+    #cameraStage.visible {
+      display: block;
+    }
+    #liveCameraVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .camera-badge-top {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 5px 12px;
+      border-radius: var(--rounded-pill);
+      background: rgba(0, 0, 0, 0.72);
+      color: var(--body-on-dark);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -0.12px;
+      backdrop-filter: saturate(180%) blur(12px);
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .camera-dot-live {
+      width: 7px;
+      height: 7px;
+      border-radius: var(--rounded-pill);
+      background: var(--primary-on-dark);
+    }
+    .camera-actions-bottom {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .camera-action-pill {
+      height: 32px;
+      padding: 0 12px;
+      border-radius: var(--rounded-pill);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(29, 29, 31, 0.84);
+      color: var(--body-on-dark);
+      font-family: var(--font-text);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -0.12px;
+      cursor: pointer;
+      backdrop-filter: saturate(180%) blur(12px);
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    .camera-action-pill:active {
+      transform: scale(0.95);
+    }
+    .camera-action-pill.primary {
+      background: var(--primary-focus);
+      border-color: var(--primary-focus);
+    }
+
+    /* Embedded Media Frame (Product-shadow only on media player per Apple DESIGN.md) */
+    #mediaStage {
+      width: min(460px, 90vw);
+      height: 0;
+      opacity: 0;
+      overflow: hidden;
+      border-radius: var(--rounded-lg);
+      background: var(--surface-black);
+      box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px;
+      transition: height 0.28s ease, opacity 0.28s ease, margin-bottom 0.28s ease;
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+    #mediaStage.visible {
+      height: 200px;
+      opacity: 1;
+      margin-bottom: 16px;
+      pointer-events: auto;
+    }
+    #ytPlayer, #localVideoPlayer {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    #localVideoPlayer {
+      display: none;
+      object-fit: cover;
+    }
+
     /* Minimal Monochrome + Action Blue Acoustic Circle */
     .acoustic-stage {
       position: relative;
-      width: 188px;
-      height: 188px;
+      width: 136px;
+      height: 136px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 36px;
+      margin-bottom: 18px;
+      flex-shrink: 0;
+      transition: width 0.25s ease, height 0.25s ease, margin-bottom 0.25s ease;
+    }
+    #voiceCanvas.compact-stage .acoustic-stage {
+      width: 88px;
+      height: 88px;
+      margin-bottom: 10px;
     }
     .acoustic-ring-outer {
       position: absolute;
@@ -173,21 +293,25 @@
     }
     .acoustic-ring-inner {
       position: absolute;
-      inset: 20px;
+      inset: 14px;
       border-radius: var(--rounded-pill);
       border: 1px solid var(--divider-soft);
       transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
     }
     .acoustic-core {
-      width: 112px;
-      height: 112px;
+      width: 86px;
+      height: 86px;
       border-radius: var(--rounded-pill);
       background: var(--ink);
       color: var(--body-on-dark);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.25s ease;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.25s ease, width 0.25s ease, height 0.25s ease;
+    }
+    #voiceCanvas.compact-stage .acoustic-core {
+      width: 60px;
+      height: 60px;
     }
     #voiceCanvas:active .acoustic-core {
       transform: scale(0.95);
@@ -231,23 +355,58 @@
       font-weight: 600;
       letter-spacing: -0.12px;
       color: var(--primary);
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
     #voiceCanvas.state-playing .state-badge,
     #voiceCanvas.state-recording .state-badge {
       color: var(--primary-on-dark);
     }
 
-    /* Single clean spoken line (SF Pro Display 34px/28px, 600 weight, tight negative tracking) */
+    /* Source & Execution Mode Pill Badge (#sourceModeBadge) right above #liveCaption */
+    #sourceModeBadge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--rounded-pill);
+      background: var(--canvas-parchment);
+      border: 1px solid var(--hairline);
+      color: var(--ink-muted-80);
+      font-family: var(--font-text);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -0.12px;
+      margin-bottom: 10px;
+      max-width: 92vw;
+      text-align: center;
+    }
+    #sourceModeBadge.wiki-fallback {
+      background: var(--ink);
+      color: var(--body-on-dark);
+      border-color: var(--ink);
+    }
+    #sourceModeBadge.live-argon {
+      background: var(--canvas);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    #voiceCanvas.state-playing #sourceModeBadge,
+    #voiceCanvas.state-recording #sourceModeBadge {
+      background: var(--surface-tile-2);
+      color: var(--body-on-dark);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Single clean spoken line (SF Pro Display 30px/24px, 600 weight, tight negative tracking) */
     #liveCaption {
       font-family: var(--font-display);
-      font-size: clamp(24px, 3.6vw, 34px);
+      font-size: clamp(20px, 3vw, 30px);
       font-weight: 600;
       line-height: 1.24;
       letter-spacing: -0.374px;
       color: var(--ink);
       text-align: center;
-      max-width: 680px;
+      max-width: 720px;
       pointer-events: none;
     }
     #voiceCanvas.state-playing #liveCaption,
@@ -256,15 +415,15 @@
     }
 
     #liveSubCaption {
-      margin-top: 12px;
+      margin-top: 8px;
       font-family: var(--font-text);
-      font-size: 17px;
+      font-size: 15px;
       font-weight: 400;
-      line-height: 1.47;
-      letter-spacing: -0.374px;
+      line-height: 1.45;
+      letter-spacing: -0.24px;
       color: var(--ink-muted-48);
       text-align: center;
-      max-width: 560px;
+      max-width: 600px;
       pointer-events: none;
     }
     #voiceCanvas.state-playing #liveSubCaption,
@@ -272,73 +431,185 @@
       color: var(--body-muted);
     }
 
-    /* Embedded Media Frame (Product-shadow only on media player per Apple DESIGN.md) */
-    #mediaStage {
-      width: min(440px, 88vw);
-      height: 0;
-      opacity: 0;
-      overflow: hidden;
-      border-radius: var(--rounded-lg);
-      background: var(--surface-black);
-      box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px;
-      transition: height 0.3s ease, opacity 0.3s ease, margin-bottom 0.3s ease;
-      pointer-events: none;
-    }
-    #mediaStage.visible {
-      height: 210px;
-      opacity: 1;
-      margin-bottom: 24px;
-      pointer-events: auto;
-    }
-    #ytPlayer, #localVideoPlayer {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-    #localVideoPlayer {
+    /* Contextual Original Sound Pill inside #voiceCanvas (only appears when timestamp is active) */
+    #contextualOriginalBtn {
+      margin-top: 12px;
+      height: 36px;
+      padding: 0 16px;
+      border-radius: var(--rounded-pill);
+      border: 1px solid var(--primary);
+      background: var(--canvas);
+      color: var(--primary);
+      font-family: var(--font-text);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.16px;
+      cursor: pointer;
       display: none;
-      object-fit: cover;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    #contextualOriginalBtn.visible {
+      display: inline-flex;
+    }
+    #contextualOriginalBtn:active {
+      transform: scale(0.95);
     }
 
     /* =====================================================================
-       Apple Frosted Sticky Bar (Bottom 64px height, saturate(180%) blur(20px))
-       Contains ONLY the single Action Blue Pill CTA & Original Sound Pill
+       Quiet Hackathon Venue Text Command & Scene Navigation Bar (#silentCommandBar)
+       ===================================================================== */
+    #silentCommandBar {
+      margin-top: 16px;
+      width: min(760px, 94vw);
+      background: var(--canvas-parchment);
+      border: 1px solid var(--hairline);
+      border-radius: var(--rounded-lg);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      cursor: default;
+      flex-shrink: 0;
+    }
+    #voiceCanvas.state-playing #silentCommandBar,
+    #voiceCanvas.state-recording #silentCommandBar {
+      background: var(--surface-tile-2);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+    .silent-top-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .scene-nav-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .silent-pill-btn {
+      height: 30px;
+      padding: 0 11px;
+      border-radius: var(--rounded-pill);
+      border: 1px solid var(--hairline);
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: var(--font-text);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: -0.12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .silent-pill-btn:active {
+      transform: scale(0.95);
+    }
+    .silent-pill-btn.scene-btn {
+      font-weight: 600;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .scene-indicator-pill {
+      height: 30px;
+      padding: 0 11px;
+      border-radius: var(--rounded-pill);
+      background: var(--ink);
+      color: var(--body-on-dark);
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .quick-cmd-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .silent-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #silentCommandInput {
+      flex: 1;
+      height: 38px;
+      padding: 0 14px;
+      border-radius: var(--rounded-pill);
+      border: 1px solid var(--hairline);
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: var(--font-text);
+      font-size: 14px;
+      outline: none;
+    }
+    #silentCommandInput:focus {
+      border-color: var(--primary-focus);
+    }
+    .silent-send-btn {
+      height: 38px;
+      padding: 0 18px;
+      border-radius: var(--rounded-pill);
+      border: none;
+      background: var(--primary-focus);
+      color: var(--body-on-dark);
+      font-family: var(--font-text);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .silent-send-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* =====================================================================
+       Apple Frosted Sticky Bar (Bottom 68px height, saturate(180%) blur(20px))
+       Contains: 말하기 | 📷 실시간 카메라 | 🎥 30초 기록 올리기 | 목소리 선택 | 속도 조절
        ===================================================================== */
     .floating-sticky-bar {
       position: fixed;
       left: 0;
       right: 0;
       bottom: 0;
-      height: 64px;
-      background: rgba(245, 245, 247, 0.82);
+      min-height: 68px;
+      background: rgba(245, 245, 247, 0.88);
       backdrop-filter: saturate(180%) blur(20px);
       -webkit-backdrop-filter: saturate(180%) blur(20px);
       border-top: 1px solid var(--hairline);
-      padding: 10px 24px;
+      padding: 8px 16px;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
       z-index: 110;
     }
 
     .apple-btn-primary {
-      height: 44px;
-      padding: 0 24px;
+      height: 40px;
+      padding: 0 20px;
       border-radius: var(--rounded-pill);
       background: var(--primary-focus);
       color: var(--body-on-dark);
       border: none;
       font-family: var(--font-text);
-      font-size: 17px;
-      font-weight: 400;
-      letter-spacing: -0.374px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.24px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       transition: transform 0.15s ease, background-color 0.15s ease;
     }
     .apple-btn-primary:active {
@@ -347,43 +618,97 @@
     }
 
     .apple-btn-secondary {
-      height: 44px;
-      padding: 0 22px;
+      height: 40px;
+      padding: 0 16px;
       border-radius: var(--rounded-pill);
       background: var(--surface-chip-translucent);
       color: var(--ink);
       border: none;
       font-family: var(--font-text);
-      font-size: 17px;
-      font-weight: 400;
-      letter-spacing: -0.374px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: -0.22px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       transition: transform 0.15s ease;
     }
     .apple-btn-secondary:active {
       transform: scale(0.95);
     }
+    .apple-btn-secondary.active-cam {
+      background: var(--ink);
+      color: var(--body-on-dark);
+    }
+
+    .voice-select-pill {
+      height: 40px;
+      padding: 0 12px;
+      border-radius: var(--rounded-pill);
+      border: 1px solid var(--hairline);
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: var(--font-text);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .speed-control-pill {
+      height: 40px;
+      padding: 0 8px;
+      border-radius: var(--rounded-pill);
+      border: 1px solid var(--hairline);
+      background: var(--canvas);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .speed-step-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: var(--rounded-pill);
+      border: none;
+      background: var(--canvas-parchment);
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease;
+    }
+    .speed-step-btn:active {
+      transform: scale(0.92);
+    }
+    #speedLabel {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      min-width: 36px;
+      text-align: center;
+    }
 
     /* =====================================================================
        Collapsible Apple Studio Sheet (Presenter Simulator + Wiki + Verification)
-       Hidden by default so the blind user's canvas remains 100% pure & minimal
+       Hidden by default so the blind user's canvas remains clean
        ===================================================================== */
     #studioSheet {
       position: fixed;
       top: 44px;
       left: 0;
       right: 0;
-      bottom: 64px;
+      bottom: 68px;
       background: var(--canvas-parchment);
       z-index: 105;
       overflow-y: auto;
       transform: translateY(102%);
       transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-      padding: 32px 24px 48px;
+      padding: 28px 24px 48px;
     }
     #studioSheet.open {
       transform: translateY(0);
@@ -599,8 +924,8 @@
     </div>
     <div class="nav-actions">
       <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#cccccc; cursor:pointer;">
-        <input type="checkbox" id="autoListenToggle" checked />
-        <span>연속 대화</span>
+        <input type="checkbox" id="autoListenToggle" />
+        <span>연속 마이크 대기</span>
       </label>
       <button class="nav-link-btn" id="sheetToggleBtn" onclick="toggleStudioSheet(event)">
         시연 및 위키 검증 열기
@@ -608,15 +933,36 @@
     </div>
   </header>
 
-  <!-- 2. Blind User's Ultra-Minimal Conversational Canvas (Apple White/Parchment Gallery) -->
+  <!-- 2. Blind User's Conversational Canvas + Live Camera + Quiet Venue Command Bar -->
   <main
     id="voiceCanvas"
     role="button"
     tabindex="0"
-    aria-label="세컨드 이어 음성 대화 공간. 화면 아무 곳이나 터치하고 말씀하세요. 설명은 음성으로 안내됩니다."
+    aria-label="세컨드 이어 음성 대화 공간. 화면 아무 곳이나 터치하고 말씀하시거나 하단 텍스트 명령어 입력창을 사용하세요."
   >
-    <!-- 원래 소리 재생 시에만 나타나는 미니 플레이어 -->
-    <div id="mediaStage" aria-hidden="true" onclick="event.stopPropagation()">
+    <!-- 실시간 카메라 연결 및 AI 선제 시각 분석 스테이지 (#cameraStage) -->
+    <div id="cameraStage" onclick="event.stopPropagation()" onpointerdown="event.stopPropagation()">
+      <video id="liveCameraVideo" autoplay playsinline muted></video>
+      <canvas id="cameraSnapCanvas" style="display:none;"></canvas>
+      <div class="camera-badge-top">
+        <span class="camera-dot-live"></span>
+        <span id="cameraTopBadgeText">실시간 카메라 연결됨 · AI 시각 분석</span>
+      </div>
+      <div class="camera-actions-bottom">
+        <button class="camera-action-pill primary" onclick="captureAndAnalyzeCameraFrame()">
+          🔍 지금 화면 다시 분석해 말 걸기
+        </button>
+        <button class="camera-action-pill" id="liveCamRecordBtn" onclick="handleLiveCamRecordBtnClick()">
+          🔴 이 카메라로 30초 현장 기록 (/api/record)
+        </button>
+        <button class="camera-action-pill" onclick="stopLiveCamera()">
+          카메라 끄기
+        </button>
+      </div>
+    </div>
+
+    <!-- 원래 소리 및 현재 장면 재생 미니 플레이어 (#mediaStage) -->
+    <div id="mediaStage" aria-hidden="true" onclick="event.stopPropagation()" onpointerdown="event.stopPropagation()">
       <div id="ytPlayer"></div>
       <video id="localVideoPlayer" playsinline controls></video>
     </div>
@@ -626,7 +972,7 @@
       <div class="acoustic-ring-outer"></div>
       <div class="acoustic-ring-inner"></div>
       <div class="acoustic-core" id="orbGlyph">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
           <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
           <line x1="12" x2="12" y1="19" y2="22"></line>
@@ -634,13 +980,72 @@
       </div>
     </div>
 
-    <div class="state-badge" id="stateBadge">대기 중 · 화면 아무 곳이나 터치</div>
+    <div class="state-badge" id="stateBadge">대기 중 · 화면 터치 또는 아래 텍스트 입력으로 대화</div>
+
+    <!-- 실제 Argon / 캐시 실행 시각 / 위키 폴백 출처 배지 (#sourceModeBadge) -->
+    <div id="sourceModeBadge" onclick="event.stopPropagation()">
+      미리 처리한 결과 (실행 시각: 2026-10-16 11:56 KST · 대회 중 실제 Argon 실행)
+    </div>
+
     <h1 id="liveCaption" aria-live="assertive">터치 한 번으로 대화를 시작하세요</h1>
-    <p id="liveSubCaption">화면의 글자를 읽을 필요 없이 모든 사용법과 기억을 목소리로 안내해 드립니다</p>
+    <p id="liveSubCaption">실시간 카메라를 켜면 AI가 먼저 눈앞 상황을 보고 말을 걸어 줍니다</p>
+
+    <!-- 장면/기억 시점이 활성화되었을 때만 나타나는 문맥형 원본 소리 재생 알약 버튼 -->
+    <button
+      id="contextualOriginalBtn"
+      onclick="handleReplayOriginalBtn(event)"
+      onpointerdown="event.stopPropagation()"
+    >
+      <span id="contextualOriginalLabel">🎬 방금 설명한 장면(1:20)의 실제 원본 영상 소리 들어보기</span>
+    </button>
+
+    <!-- 해커톤 행사장 조용한 테스트용 텍스트 명령어 입력창 & 장면 이동 바 -->
+    <div
+      id="silentCommandBar"
+      onclick="event.stopPropagation()"
+      onpointerdown="event.stopPropagation()"
+      aria-label="조용한 테스트용 텍스트 명령어 입력창 및 장면 이동 도구"
+    >
+      <div class="silent-top-row">
+        <div class="scene-nav-group">
+          <button type="button" class="silent-pill-btn scene-btn" onclick="stepSceneAndPreview('이전 장면')">
+            ◀ 이전 장면
+          </button>
+          <span
+            id="currentSceneBadge"
+            class="scene-indicator-pill"
+            onclick="handleReplayOriginalBtn(event)"
+            title="클릭하면 현재 장면의 원본 영상을 재생합니다"
+          >
+            현재 장면: 1:20
+          </span>
+          <button type="button" class="silent-pill-btn scene-btn" onclick="stepSceneAndPreview('다음 장면')">
+            다음 장면 ▶
+          </button>
+        </div>
+        <div class="quick-cmd-row">
+          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('방금 무슨 일이야?')">"방금 무슨 일이야?"</button>
+          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('그 목소리 누구야?')">"그 목소리 누구야?"</button>
+          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('원래 소리 들려줘')">"원래 소리 들려줘"</button>
+          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('앞에 뭐 있어?')">"앞에 뭐 있어?"</button>
+          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('정리해 줘')">"정리해 줘"</button>
+          <button type="button" class="silent-pill-btn" onclick="runSilentQuickCmd('맞아')">"맞아"</button>
+        </div>
+      </div>
+      <form class="silent-input-row" onsubmit="submitSilentCommand(event)">
+        <input
+          id="silentCommandInput"
+          type="text"
+          placeholder="조용한 테스트: 명령어 입력 후 Enter (예: 방금 무슨 일이야?, 그 목소리 누구야?, 다음 장면, 정리해 줘, 맞아)"
+          aria-label="텍스트 명령어 입력"
+        />
+        <button type="submit" class="silent-send-btn">전송</button>
+      </form>
+    </div>
   </main>
 
-  <!-- 3. Apple Frosted Bottom Bar (딱 2개의 큰 알약 버튼: 말하기 / 원래 소리) -->
-  <footer class="floating-sticky-bar">
+  <!-- 3. Apple Frosted Bottom Bar (말하기 | 📷 실시간 카메라 | 🎥 30초 기록 올리기 | 제미나이 목소리 | 속도 조절) -->
+  <footer class="floating-sticky-bar" onclick="event.stopPropagation()">
     <button
       class="apple-btn-primary"
       onclick="handlePrimaryTalkBtn(event)"
@@ -648,13 +1053,42 @@
     >
       <span>말하기</span>
     </button>
+
     <button
       class="apple-btn-secondary"
-      onclick="handleReplayOriginalBtn(event)"
-      aria-label="방금 대화한 시점의 원래 소리 들어보기"
+      id="liveCameraToggleBtn"
+      onclick="toggleLiveCamera(event)"
+      aria-label="실시간 카메라 연결 및 AI 선제 시각 분석"
     >
-      <span>원래 소리 듣기</span>
+      <span>📷 실시간 카메라</span>
     </button>
+
+    <button
+      class="apple-btn-secondary"
+      onclick="triggerSurroundingsRecording(event)"
+      aria-label="30초 현장 기록 올리기"
+    >
+      <span>🎥 30초 기록 올리기</span>
+    </button>
+
+    <select
+      id="voiceSelect"
+      class="voice-select-pill"
+      aria-label="제미나이 3.8 TTS 목소리 선택"
+      onchange="handleVoiceSelectChange(this.value)"
+    >
+      <option value="Kore" selected>Kore (코레 · 따뜻한 여성)</option>
+      <option value="Aoede">Aoede (아오이데 · 부드러운 여성)</option>
+      <option value="Puck">Puck (퍽 · 밝은 남성)</option>
+      <option value="Charon">Charon (카론 · 중저음 남성)</option>
+      <option value="Zephyr">Zephyr (제피르 · 또렷한 안내)</option>
+    </select>
+
+    <div class="speed-control-pill" aria-label="말하기 속도 조절">
+      <button type="button" class="speed-step-btn" onclick="adjustSpeechRate(-0.1)" aria-label="말 속도 느리게">-</button>
+      <span id="speedLabel">1.0x</span>
+      <button type="button" class="speed-step-btn" onclick="adjustSpeechRate(0.1)" aria-label="말 속도 빠르게">+</button>
+    </div>
   </footer>
 
   <!-- 4. Collapsible Presenter & Judge Verification Sheet (Apple Parchment #f5f5f7) -->
@@ -664,64 +1098,67 @@
         <div>
           <h2 class="sheet-title">대화형 시연 및 온톨로지·검증 대시보드</h2>
           <p style="font-size:14px; color:var(--ink-muted-48); margin-top:4px;">
-            시각장애인용 메인 화면은 글자 없이 단촐하게 유지하고, 발표 시연과 심사위원 점검 도구는 이곳에 모았습니다.
+            현재 응답 출처 상태:
+            <strong id="sheetSourceBadge" style="color:var(--primary);">
+              미리 처리한 결과 (실행 시각: 2026-10-16 11:56 KST · 대회 중 실제 Argon 실행)
+            </strong>
           </p>
         </div>
         <div class="sheet-tabs">
-          <button class="sheet-tab active" onclick="switchSheetTab('converse', this)">1. 대화 시나리오 (그 이후 경험)</button>
+          <button class="sheet-tab active" onclick="switchSheetTab('converse', this)">1. 실시간 시연 액션</button>
           <button class="sheet-tab" onclick="switchSheetTab('wiki', this)">2. 온톨로지 위키 (7가지 틀)</button>
           <button class="sheet-tab" onclick="switchSheetTab('verify', this)">3. 기계 검증 루프 & 7대 지표</button>
         </div>
       </div>
 
-      <!-- 패널 1: 대화 중심 사용자 경험 (Multi-turn Voice Flows) -->
+      <!-- 패널 1: 실제 입력 기반 실시간 시연 액션 (가짜 샘플 제거 완료) -->
       <div id="sheet-converse" class="sheet-panel active">
         <div class="apple-card">
-          <div class="apple-card-title">흐름 1 · 처음 켰을 때 음성 안내 & 오늘의 한 마당 (글자 대신 목소리로 설명)</div>
-          <div class="apple-card-sub">시각장애인이 화면 설명을 읽지 않아도 AI가 먼저 사용법과 저장된 기억을 음성으로 브리핑합니다.</div>
+          <div class="apple-card-title">흐름 1 · 실시간 카메라 연결 & AI가 화면 보고 먼저 말 걸기 (/api/vision_proactive)</div>
+          <div class="apple-card-sub">카메라가 켜지면 0.9초 뒤 첫 프레임을 캡처해 AI가 눈앞의 사물·글자·사람 행동을 먼저 음성으로 알려 줍니다.</div>
           <div class="pill-row">
-            <button class="voice-pill primary-pill" onclick="runVoiceFromSheet('안녕, 어떻게 써?')">"안녕, 어떻게 써?"</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('내 기억 읽어줘')">"내 기억 읽어줘"</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('오늘 누구 만났지?')">"오늘 누구 만났지?"</button>
+            <button class="voice-pill primary-pill" onclick="openCameraFromSheet()">📷 실시간 카메라 켜고 AI가 먼저 말 걸기</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('앞에 뭐 있어?')">"앞에 뭐 있어?" (현재 카메라 프레임 즉시 분석)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('안녕, 어떻게 써?')">"안녕, 어떻게 써?"</button>
             <button class="voice-pill" onclick="runStoryFromSheet()">"오늘의 한 마당 들려줘"</button>
           </div>
         </div>
 
         <div class="apple-card">
-          <div class="apple-card-title">흐름 2 · 첫 번째 길: 유튜브 작품 듣기 → 꼬리 질문으로 이어 말하기 (Sprite Fright)</div>
-          <div class="apple-card-sub">AI가 한 문장으로 답한 뒤 "원래 소리를 들어볼까요, 그분이 누군지 알려드릴까요?"라고 물어 대화가 자연스럽게 이어집니다.</div>
+          <div class="apple-card-title">흐름 2 · 유튜브 작품 듣기 & 꼬리 질문으로 이어 말하기 (Sprite Fright — 대회 중 실제 Argon 실행)</div>
+          <div class="apple-card-sub">AI가 한 문장(시점 포함)으로 답한 뒤 "원래 소리를 들어볼까요, 그 목소리가 누구인지 알려드릴까요?"라고 물어 대화가 이어집니다.</div>
           <div class="pill-row">
-            <button class="voice-pill primary-pill" onclick="seekAndRunFromSheet(74, '방금 무슨 일이야?')">① (1:14) "방금 무슨 일이야?"</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('응 들려줘')">② "응 들려줘" (그 시점 원래 소리 재생)</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('그 사람 누구야?')">③ "그 사람 누구야?" (직전 맥락 기억)</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('더 자세히 말해줘')">④ "더 자세히 말해줘"</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('다음 장면')">⑤ "다음 장면" (시간순 이동)</button>
-            <button class="voice-pill" onclick="seekAndRunFromSheet(489, '방금 왜 새들이 날아왔어?')">(8:09) "방금 왜 새들이 날아왔어?"</button>
+            <button class="voice-pill primary-pill" onclick="seekAndRunFromSheet(80, '1분 20초에 무슨 일이야?')">🎬 Sprite Fright 질문 1 (1:20 나뭇가지·둥지)</button>
+            <button class="voice-pill primary-pill" onclick="seekAndRunFromSheet(489, '8분 09초에 왜 새들이 날아왔어?')">🎬 Sprite Fright 질문 2 (8:09 새똥·장로 스프라이트)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('그 목소리 누구야?')">"그 목소리 누구야?" (직전 맥락 기억)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('응 들려줘')">"응 들려줘" (그 시점 원래 소리 재생)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('더 자세히 말해줘')">"더 자세히 말해줘"</button>
+            <button class="voice-pill" onclick="stepSceneAndPreviewFromSheet('다음 장면')">"다음 장면" (시간순 이동 + 영상 프리뷰)</button>
           </div>
         </div>
 
         <div class="apple-card">
-          <div class="apple-card-title">흐름 3 · 두 번째 길: 내 주변 30~60초 기록 → "정리해 줘" → "맞아" → 새 사람 동의</div>
-          <div class="apple-card-sub">내가 직접 확인하기 전에는 절대 위키에 섞이지 않으며, 새로 만난 사람은 음성 동의를 거쳐야 저장됩니다.</div>
+          <div class="apple-card-title">흐름 3 · 내 주변 30초 실제 촬영·업로드 (/api/record) → "정리해 줘" → "맞아" → 새 인물 음성 동의</div>
+          <div class="apple-card-sub">실시간 카메라 또는 휴대폰 카메라로 촬영한 실제 영상이 2차 검증을 거쳐 검토 대기함에 담기며, 내가 "맞아"라고 확인해야 위키에 저장됩니다.</div>
           <div class="pill-row">
-            <button class="voice-pill primary-pill" onclick="runVoiceFromSheet('지금 기록해 줘')">① "지금 기록해 줘" (주변 30초 기록)</button>
-            <button class="voice-pill primary-pill" onclick="runVoiceFromSheet('기억 정리해 줘')">② "기억 정리해 줘" (대기함 하나씩 듣기)</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('맞아')">③ "맞아" (위키에 저장)</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('응 동의해')">④ "응 동의해" (새 인물 박수민 님 음성 동의)</button>
+            <button class="voice-pill primary-pill" onclick="triggerRealRecordFromSheet()">🎥 휴대폰 카메라 촬영 / 30초 영상 올리기 (/api/record)</button>
+            <button class="voice-pill primary-pill" onclick="runVoiceFromSheet('기억 정리해 줘')">"기억 정리해 줘" (대기함 하나씩 듣기)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('맞아')">"맞아" (위키에 저장)</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('응 동의해')">"응 동의해" (새 인물 음성 동의 후 저장)</button>
             <button class="voice-pill" onclick="runVoiceFromSheet('지워')">"지워" (저장 안 하고 버리기)</button>
           </div>
         </div>
 
         <div class="apple-card">
-          <div class="apple-card-title">흐름 4 · 일상 기억 연상 검색 & 대화로 내 설명 방식 바꾸기</div>
-          <div class="apple-card-sub">정확한 이름을 몰라도 물건·장소·목소리 특징만으로 찾아오고, 말투나 속도도 대화로 즉시 바꿉니다.</div>
+          <div class="apple-card-title">흐름 4 · 저장된 내 기억 조회 & 대화로 목소리·말투·속도 바꾸기</div>
+          <div class="apple-card-sub">내가 직접 찍어 확인한 기억을 다시 꺼내 듣고, 제미나이 3.8 TTS 목소리와 설명 방식을 음성 명령으로 즉시 바꿉니다.</div>
           <div class="pill-row">
-            <button class="voice-pill primary-pill" onclick="runVoiceFromSheet('아까 보조배터리 어디 뒀지?')">"아까 보조배터리 어디 뒀지?"</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('목소리 낮은 분이 뭐라고 했어?')">"목소리 낮은 분이 뭐라고 했어?"</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('콘센트 어디 있다고 했지?')">"콘센트 어디 있다고 했지?"</button>
-            <button class="voice-pill" onclick="runVoiceFromSheet('배터리 얘기한 분이랑 같은 사람이야?')">"배터리 얘기한 분이랑 같은 사람이야?"</button>
+            <button class="voice-pill primary-pill" onclick="runVoiceFromSheet('내 기억 읽어줘')">"내 기억 읽어줘"</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('오늘 누구 만났지?')">"오늘 누구 만났지?"</button>
             <button class="voice-pill" onclick="runVoiceFromSheet('색깔 빼고 말해줘')">"색깔 빼고 말해줘"</button>
             <button class="voice-pill" onclick="runVoiceFromSheet('말 좀 천천히 해줘')">"말 좀 천천히 해줘"</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('남자 목소리로 바꿔줘')">"남자 목소리로 바꿔줘"</button>
+            <button class="voice-pill" onclick="runVoiceFromSheet('여자 목소리로 바꿔줘')">"여자 목소리로 바꿔줘"</button>
           </div>
         </div>
       </div>
@@ -744,8 +1181,8 @@
           </div>
 
           <div class="apple-card">
-            <div class="apple-card-title">내 기억 & 장소·물건 (내가 확인 완료)</div>
-            <div class="apple-card-sub">보조배터리, 커피, 콘센트 위치 등 일상에서 확인된 기억입니다.</div>
+            <div class="apple-card-title">내 기억 & 장소·물건 (내가 직접 촬영·확인 완료)</div>
+            <div class="apple-card-sub">카메라와 마이크로 직접 기록하고 내가 확인한 일상 기억입니다.</div>
             <div id="wikiMemoryList"></div>
           </div>
 
@@ -780,7 +1217,7 @@
               onchange="uploadPersonalFile(this)"
               aria-label="내 주변 영상 또는 소리 파일 업로드 (32MB 이하)"
             />
-            <button class="apple-btn-secondary" onclick="document.getElementById('recordFileInput').click()">내 영상·소리 파일 올리기 (32MB 이하)</button>
+            <button class="apple-btn-secondary" onclick="document.getElementById('recordFileInput').click()">🎥 휴대폰 카메라 촬영 / 30초 영상 올리기 (/api/record)</button>
             <button class="apple-btn-secondary" onclick="evaluateAnswerKey()">8문항 정답표 채점</button>
           </div>
         </div>
@@ -812,7 +1249,9 @@
     let ytPlayer = null;
     let ytReady = false;
     let currentSourceType = 'youtube';
-    let currentSpeechRate = 1.04;
+    let currentSpeechRate = 1.0;
+    let selectedVoice = 'Kore';
+    let activeAudio = null;
     let isListening = false;
     let isSpeaking = false;
     let isRecording = false;
@@ -823,6 +1262,23 @@
     let lastTapTime = 0;
     let touchStartX = 0;
     let touchStartY = 0;
+
+    // Live Camera & MediaRecorder state
+    let liveCameraStream = null;
+    let liveMediaRecorder = null;
+    let liveRecordedChunks = [];
+    let liveRecordTimer = null;
+    let liveRecordCountdownInterval = null;
+    let liveRecordSecondsLeft = 30;
+
+    // Active contextual scene state for "원래 소리 듣기" & scene stepping
+    let activeSceneContext = {
+      sourceType: 'youtube',
+      youtubeId: '_cMxraX_5RE',
+      recordingFile: '',
+      timestampSec: 80,
+      timestampMmss: '1:20'
+    };
 
     // =====================================================================
     // 1. 0.01s Subtle Acoustic Earcons (Apple-style clean sine tones)
@@ -882,65 +1338,571 @@
     }
 
     // =====================================================================
-    // 2. Canvas Visual & Voice State Management
+    // 2. Canvas Visual, Source Badge & Contextual Original Button Management
     // =====================================================================
+    function syncCanvasCompactClass() {
+      const canvas = document.getElementById('voiceCanvas');
+      const camVisible = document.getElementById('cameraStage')?.classList.contains('visible');
+      const mediaVisible = document.getElementById('mediaStage')?.classList.contains('visible');
+      if (camVisible || mediaVisible) {
+        canvas.classList.add('compact-stage');
+      } else {
+        canvas.classList.remove('compact-stage');
+      }
+    }
+
     function setCanvasState(state, badgeText, caption, subCaption) {
       const canvas = document.getElementById('voiceCanvas');
+      const keepCompact = canvas.classList.contains('compact-stage');
       canvas.className = state ? `state-${state}` : '';
+      if (keepCompact) canvas.classList.add('compact-stage');
+      syncCanvasCompactClass();
+
       if (badgeText !== undefined) document.getElementById('stateBadge').textContent = badgeText;
       if (caption !== undefined) document.getElementById('liveCaption').textContent = caption;
       if (subCaption !== undefined) document.getElementById('liveSubCaption').textContent = subCaption;
     }
 
-    function speakConversational(spokenText, displayCaption, followUpSub, onDoneAction) {
+    function updateSourceBadge(data) {
+      if (!data) return;
+      const badgeEl = document.getElementById('sourceModeBadge');
+      const sheetBadgeEl = document.getElementById('sheetSourceBadge');
+      if (!badgeEl) return;
+
+      const rawBadge =
+        data.source_badge ||
+        data.processing_badge ||
+        (data.qa && (data.qa.source_badge || data.qa.processing_badge)) ||
+        (data.status === 'loaded_cached'
+          ? '미리 처리한 결과 (실행 시각: 2026-10-16 11:56 KST · 대회 중 실제 Argon 실행)'
+          : '');
+
+      const mode =
+        data.answer_source_mode ||
+        (data.qa && data.qa.answer_source_mode) ||
+        '';
+
+      let displayText = rawBadge;
+      if (mode === 'wiki_fallback' || (rawBadge && rawBadge.includes('저장된 위키에서 찾은 답'))) {
+        displayText = rawBadge || '저장된 위키에서 찾은 답';
+        badgeEl.className = 'wiki-fallback';
+      } else if (rawBadge) {
+        badgeEl.className = rawBadge.includes('실제') ? 'live-argon' : '';
+      } else {
+        return;
+      }
+
+      badgeEl.textContent = displayText;
+      if (sheetBadgeEl) sheetBadgeEl.textContent = displayText;
+    }
+
+    function mmssToSecondsLocal(mmss) {
+      if (!mmss || typeof mmss !== 'string') return 0;
+      const parts = mmss.trim().split(':').map(Number);
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        return parts[0] * 60 + parts[1];
+      }
+      return 0;
+    }
+
+    function updateContextualScene(sourceType, youtubeId, recordingFile, sec, mmss) {
+      if (!mmss) return;
+      activeSceneContext = {
+        sourceType: sourceType || 'youtube',
+        youtubeId: youtubeId || '_cMxraX_5RE',
+        recordingFile: recordingFile || '',
+        timestampSec: typeof sec === 'number' ? sec : mmssToSecondsLocal(mmss),
+        timestampMmss: mmss
+      };
+
+      const btn = document.getElementById('contextualOriginalBtn');
+      const lbl = document.getElementById('contextualOriginalLabel');
+      const sceneBadge = document.getElementById('currentSceneBadge');
+
+      if (lbl) {
+        lbl.textContent = `🎬 방금 설명한 장면(${mmss})의 실제 원본 영상 소리 들어보기`;
+      }
+      if (btn) {
+        btn.classList.add('visible');
+      }
+      if (sceneBadge) {
+        sceneBadge.textContent = `현재 장면: ${mmss}`;
+      }
+    }
+
+    function extractAndSyncSceneFromResponse(data, autoPreviewVideo = false) {
+      if (!data) return;
+      let mmss =
+        data.play_timestamp ||
+        (data.qa && data.qa.cite_timestamp) ||
+        (data.card && data.card.timestamp) ||
+        '';
+      let sec =
+        data.play_timestamp_sec ??
+        (data.qa && data.qa.cite_timestamp_sec) ??
+        (data.card && data.card.timestamp_sec);
+      let sourceType =
+        data.play_source_type ||
+        (data.qa && data.qa.source_type) ||
+        (data.card && data.card.source_type) ||
+        'youtube';
+      let youtubeId =
+        data.play_youtube_id ||
+        (data.qa && data.qa.youtube_video_id) ||
+        (data.card && data.card.youtube_video_id) ||
+        '_cMxraX_5RE';
+      let recordingFile =
+        data.play_recording_filename ||
+        (data.qa && data.qa.recording_filename) ||
+        (data.card && data.card.recording_filename) ||
+        '';
+
+      if (!mmss && data.answer_sentence) {
+        const m = data.answer_sentence.match(/\((\d{1,2}:\d{2})\)/);
+        if (m) {
+          mmss = m[1];
+          sec = mmssToSecondsLocal(mmss);
+        }
+      }
+
+      if (mmss) {
+        updateContextualScene(sourceType, youtubeId, recordingFile, sec, mmss);
+        if (autoPreviewVideo) {
+          previewSceneVisual(sourceType, youtubeId, recordingFile, sec ?? mmssToSecondsLocal(mmss));
+        }
+      }
+    }
+
+    // =====================================================================
+    // 3. Gemini 3.8 Flash TTS (/api/tts) + Speed Control (0.75x ~ 1.50x)
+    // =====================================================================
+    function stopAllSpeech() {
+      if (activeAudio) {
+        try {
+          activeAudio.pause();
+          activeAudio.src = '';
+        } catch (e) {}
+        activeAudio = null;
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      isSpeaking = false;
+    }
+
+    function handleVoiceSelectChange(newVoice) {
+      selectedVoice = newVoice || 'Kore';
+    }
+
+    function adjustSpeechRate(delta) {
+      const next = Math.max(0.75, Math.min(1.5, Math.round((currentSpeechRate + delta) * 100) / 100));
+      setSpeechRateUI(next);
+    }
+
+    function setSpeechRateUI(rate) {
+      currentSpeechRate = Math.max(0.75, Math.min(1.5, Number(rate) || 1.0));
+      const label = document.getElementById('speedLabel');
+      if (label) {
+        label.textContent = `${currentSpeechRate.toFixed(2).replace(/\.00$/, '.0').replace(/(\.\d)0$/, '$1')}x`;
+      }
+      if (activeAudio) {
+        activeAudio.preservesPitch = true;
+        activeAudio.mozPreservesPitch = true;
+        activeAudio.webkitPreservesPitch = true;
+        activeAudio.playbackRate = currentSpeechRate;
+      }
+    }
+
+    function finishSpeakingTurn(displayCaption, followUpSub, onDoneAction) {
+      isSpeaking = false;
+      if (onDoneAction) {
+        onDoneAction();
+        return;
+      }
+      const autoListen = document.getElementById('autoListenToggle')?.checked;
+      if (autoListen && recognition) {
+        setTimeout(() => startVoiceRecognition(true), 240);
+      } else {
+        setCanvasState(
+          '',
+          '대기 중 · 화면 터치 또는 아래 텍스트 명령어로 이어서 대화하세요',
+          displayCaption,
+          followUpSub || ''
+        );
+      }
+    }
+
+    function speakFallbackBrowserTTS(spokenText, displayCaption, followUpSub, onDoneAction) {
       if (!('speechSynthesis' in window)) {
-        if (onDoneAction) onDoneAction();
+        finishSpeakingTurn(displayCaption || spokenText, followUpSub, onDoneAction);
         return;
       }
       window.speechSynthesis.cancel();
-      pauseAllMedia();
+      const u = new SpeechSynthesisUtterance(spokenText);
+      u.lang = 'ko-KR';
+      u.rate = currentSpeechRate || 1.0;
+      u.onend = () => finishSpeakingTurn(displayCaption || spokenText, followUpSub, onDoneAction);
+      u.onerror = () => finishSpeakingTurn(displayCaption || spokenText, followUpSub, onDoneAction);
+      window.speechSynthesis.speak(u);
+    }
+
+    async function speakConversational(spokenText, displayCaption, followUpSub, onDoneAction) {
+      stopAllSpeech();
 
       isSpeaking = true;
       setCanvasState(
         'speaking',
-        '음성 안내 중 · 화면을 터치하면 언제든 내 말을 듣습니다',
+        `제미나이 음성(${selectedVoice}) 안내 중 · 화면을 터치하면 언제든 내 말을 듣습니다`,
         displayCaption || spokenText,
-        followUpSub || '안내가 끝나면 바로 이어서 말씀하실 수 있습니다'
+        followUpSub || '안내가 끝나면 바로 이어서 말씀하시거나 텍스트로 입력하실 수 있습니다'
       );
 
-      const u = new SpeechSynthesisUtterance(spokenText);
-      u.lang = 'ko-KR';
-      u.rate = currentSpeechRate || 1.04;
+      if (!spokenText || !spokenText.trim()) {
+        finishSpeakingTurn(displayCaption || '', followUpSub, onDoneAction);
+        return;
+      }
 
-      u.onend = () => {
-        isSpeaking = false;
-        if (onDoneAction) {
-          onDoneAction();
-        } else {
-          const autoListen = document.getElementById('autoListenToggle')?.checked;
-          if (autoListen && recognition) {
-            setTimeout(() => startVoiceRecognition(true), 240);
-          } else {
-            setCanvasState(
-              '',
-              '대기 중 · 화면 아무 곳이나 터치해 이어서 대화하세요',
-              displayCaption || spokenText,
-              followUpSub || ''
-            );
-          }
-        }
-      };
+      try {
+        const res = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: spokenText.trim(),
+            voice: selectedVoice || 'Kore'
+          })
+        });
+        if (!res.ok) throw new Error('TTS request failed');
+        const data = await res.json();
+        if (!data || !data.audio_base64) throw new Error('Empty audio_base64');
 
-      u.onerror = () => {
-        isSpeaking = false;
-        setCanvasState('', '대기 중', displayCaption || spokenText, followUpSub || '');
-      };
+        const audio = new Audio('data:audio/wav;base64,' + data.audio_base64);
+        audio.preservesPitch = true;
+        audio.mozPreservesPitch = true;
+        audio.webkitPreservesPitch = true;
+        audio.playbackRate = currentSpeechRate || 1.0;
+        activeAudio = audio;
 
-      window.speechSynthesis.speak(u);
+        audio.onended = () => {
+          if (activeAudio === audio) activeAudio = null;
+          finishSpeakingTurn(displayCaption || spokenText, followUpSub, onDoneAction);
+        };
+        audio.onerror = () => {
+          if (activeAudio === audio) activeAudio = null;
+          speakFallbackBrowserTTS(spokenText, displayCaption, followUpSub, onDoneAction);
+        };
+
+        await audio.play();
+      } catch (e) {
+        speakFallbackBrowserTTS(spokenText, displayCaption, followUpSub, onDoneAction);
+      }
     }
 
     // =====================================================================
-    // 3. Multi-Turn Conversational Engine (/api/converse)
+    // 4. Real-Time Live Camera + Proactive AI Greeting (/api/vision_proactive)
+    // =====================================================================
+    async function toggleLiveCamera(e) {
+      if (e) e.stopPropagation();
+      if (liveCameraStream) {
+        stopLiveCamera();
+      } else {
+        await startLiveCamera(true);
+      }
+    }
+
+    async function startLiveCamera(runProactiveGreeting = true) {
+      const stage = document.getElementById('cameraStage');
+      const video = document.getElementById('liveCameraVideo');
+      const toggleBtn = document.getElementById('liveCameraToggleBtn');
+
+      try {
+        let stream = null;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+            audio: true
+          });
+        } catch (errWithAudio) {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+          });
+        }
+
+        liveCameraStream = stream;
+        video.srcObject = stream;
+        await video.play().catch(() => {});
+
+        stage.classList.add('visible');
+        if (toggleBtn) {
+          toggleBtn.classList.add('active-cam');
+          toggleBtn.innerHTML = '<span>📷 카메라 켜짐</span>';
+        }
+        syncCanvasCompactClass();
+
+        setCanvasState(
+          'speaking',
+          '실시간 카메라 연결됨 · AI가 먼저 화면을 살펴보고 있습니다',
+          '실시간 카메라가 켜졌습니다',
+          '눈앞의 장면을 분석해 먼저 말을 걸어 드립니다'
+        );
+
+        if (runProactiveGreeting) {
+          setTimeout(() => {
+            if (liveCameraStream) {
+              captureAndAnalyzeCameraFrame();
+            }
+          }, 900);
+        }
+      } catch (err) {
+        setCanvasState(
+          '',
+          '카메라 권한 필요 · 브라우저 카메라 허용 또는 파일 업로드를 이용해 주세요',
+          '카메라를 열 수 없습니다',
+          '하단 「🎥 30초 기록 올리기」 버튼으로 촬영 파일을 바로 올리실 수 있습니다'
+        );
+      }
+    }
+
+    function stopLiveCamera() {
+      if (liveRecordTimer) {
+        clearTimeout(liveRecordTimer);
+        liveRecordTimer = null;
+      }
+      if (liveRecordCountdownInterval) {
+        clearInterval(liveRecordCountdownInterval);
+        liveRecordCountdownInterval = null;
+      }
+      if (liveMediaRecorder && liveMediaRecorder.state !== 'inactive') {
+        try { liveMediaRecorder.stop(); } catch (e) {}
+      }
+      if (liveCameraStream) {
+        liveCameraStream.getTracks().forEach(t => t.stop());
+        liveCameraStream = null;
+      }
+      const video = document.getElementById('liveCameraVideo');
+      if (video) video.srcObject = null;
+
+      const stage = document.getElementById('cameraStage');
+      if (stage) stage.classList.remove('visible');
+
+      const toggleBtn = document.getElementById('liveCameraToggleBtn');
+      if (toggleBtn) {
+        toggleBtn.classList.remove('active-cam');
+        toggleBtn.innerHTML = '<span>📷 실시간 카메라</span>';
+      }
+      syncCanvasCompactClass();
+    }
+
+    async function captureAndAnalyzeCameraFrame(userQuestion = '') {
+      if (!liveCameraStream) {
+        await startLiveCamera(true);
+        return;
+      }
+      const video = document.getElementById('liveCameraVideo');
+      const snapCanvas = document.getElementById('cameraSnapCanvas');
+      if (!video || !snapCanvas) return;
+
+      const w = video.videoWidth || 640;
+      const h = video.videoHeight || 360;
+      snapCanvas.width = w;
+      snapCanvas.height = h;
+      const ctx = snapCanvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, w, h);
+
+      const dataUrl = snapCanvas.toDataURL('image/jpeg', 0.82);
+      const rawBase64 = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+
+      const topBadge = document.getElementById('cameraTopBadgeText');
+      if (topBadge) topBadge.textContent = '실시간 카메라 · AI 시각 분석 중...';
+
+      setCanvasState(
+        'speaking',
+        'AI 시각 분석 중 · 카메라 화면을 보고 먼저 말을 건넵니다',
+        '눈앞의 화면을 살펴보고 있습니다',
+        '잠시만 기다려 주세요'
+      );
+
+      try {
+        const res = await fetch('/api/vision_proactive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image_base64: dataUrl,
+            image_data: rawBase64,
+            mime_type: 'image/jpeg',
+            question: userQuestion || '지금 눈앞에 무엇이 보이는지 먼저 친근하게 말을 걸어 설명해 주세요.'
+          })
+        });
+        const data = await res.json();
+        if (topBadge) topBadge.textContent = '실시간 카메라 연결됨 · AI 시각 분석 완료';
+
+        updateSourceBadge(
+          data.source_badge || data.processing_badge
+            ? data
+            : { source_badge: '실제 Argon/Flash 실시간 카메라 시각 응답' }
+        );
+
+        if (data.state) {
+          appState = data.state;
+          renderStudioSheet();
+        }
+
+        const spoken =
+          data.spoken_text ||
+          data.answer_sentence ||
+          data.message ||
+          '카메라 화면을 확인했습니다. 궁금한 점을 물어보시거나 30초 현장 기록을 시작해 보세요.';
+        const caption = data.answer_sentence || spoken;
+        const followUp =
+          data.follow_up_voice ||
+          '이 장면을 30초 현장 기록으로 남기시려면 "지금 기록해 줘"라고 말씀해 보세요.';
+
+        speakConversational(spoken, caption, followUp);
+      } catch (e) {
+        if (topBadge) topBadge.textContent = '실시간 카메라 연결됨 · AI 시각 분석';
+        speakConversational(
+          '카메라 화면을 확인했습니다. 궁금한 점을 말씀하시거나 30초 기록을 시작해 보세요.',
+          '카메라 화면 연결됨',
+          '"지금 기록해 줘"라고 말씀하시면 현장 기록을 시작합니다'
+        );
+      }
+    }
+
+    function handleLiveCamRecordBtnClick() {
+      if (isRecording && liveMediaRecorder && liveMediaRecorder.state === 'recording') {
+        stopLiveCameraRecordingNow();
+      } else {
+        recordFromLiveCamera30s();
+      }
+    }
+
+    function stopLiveCameraRecordingNow() {
+      if (liveRecordTimer) {
+        clearTimeout(liveRecordTimer);
+        liveRecordTimer = null;
+      }
+      if (liveRecordCountdownInterval) {
+        clearInterval(liveRecordCountdownInterval);
+        liveRecordCountdownInterval = null;
+      }
+      if (liveMediaRecorder && liveMediaRecorder.state === 'recording') {
+        try {
+          liveMediaRecorder.stop();
+        } catch (e) {}
+      }
+    }
+
+    async function recordFromLiveCamera30s() {
+      if (isRecording) {
+        stopLiveCameraRecordingNow();
+        return;
+      }
+      if (!liveCameraStream) {
+        await startLiveCamera(false);
+      }
+      if (!liveCameraStream) {
+        document.getElementById('recordFileInput')?.click();
+        return;
+      }
+
+      // Ensure audio track is available if possible
+      if (liveCameraStream.getAudioTracks().length === 0) {
+        try {
+          const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+          audioStream.getAudioTracks().forEach(t => liveCameraStream.addTrack(t));
+        } catch (e) {}
+      }
+
+      stopAllSpeech();
+      isRecording = true;
+      liveRecordedChunks = [];
+      playEarcon('record_start');
+
+      const recBtn = document.getElementById('liveCamRecordBtn');
+      const topBadge = document.getElementById('cameraTopBadgeText');
+      liveRecordSecondsLeft = 30;
+
+      if (recBtn) {
+        recBtn.textContent = `⏹ 지금 기록 마치고 분석하기 (${liveRecordSecondsLeft}초)`;
+      }
+      if (topBadge) {
+        topBadge.textContent = `🔴 30초 현장 기록 중 (${liveRecordSecondsLeft}초 남음)`;
+      }
+
+      setCanvasState(
+        'recording',
+        '실시간 카메라 30초 현장 기록 중 · 언제든 버튼을 눌러 바로 분석할 수 있습니다',
+        '카메라와 마이크로 주변 소리와 행동을 기록하고 있습니다',
+        '10~30초 기록 후 「지금 기록 마치고 분석하기」를 누르시면 검토 대기함에 추가됩니다'
+      );
+
+      let mimeType = '';
+      if (window.MediaRecorder) {
+        if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4';
+        else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) mimeType = 'video/webm;codecs=vp8,opus';
+        else if (MediaRecorder.isTypeSupported('video/webm')) mimeType = 'video/webm';
+      }
+
+      try {
+        liveMediaRecorder = mimeType
+          ? new MediaRecorder(liveCameraStream, { mimeType })
+          : new MediaRecorder(liveCameraStream);
+      } catch (e) {
+        isRecording = false;
+        document.getElementById('recordFileInput')?.click();
+        return;
+      }
+
+      liveMediaRecorder.ondataavailable = (ev) => {
+        if (ev.data && ev.data.size > 0) {
+          liveRecordedChunks.push(ev.data);
+        }
+      };
+
+      liveMediaRecorder.onstop = async () => {
+        isRecording = false;
+        if (liveRecordCountdownInterval) {
+          clearInterval(liveRecordCountdownInterval);
+          liveRecordCountdownInterval = null;
+        }
+        if (recBtn) {
+          recBtn.textContent = '🔴 이 카메라로 30초 현장 기록 (/api/record)';
+        }
+        if (topBadge) {
+          topBadge.textContent = '실시간 카메라 · 기록 파일 분석 중...';
+        }
+
+        const ext = (mimeType && mimeType.includes('mp4')) ? 'mp4' : 'webm';
+        const blob = new Blob(liveRecordedChunks, { type: mimeType || 'video/webm' });
+        const fileObj = new File([blob], `live_camera_${Date.now()}.${ext}`, {
+          type: mimeType || 'video/webm'
+        });
+
+        await uploadRecordedBlobToApi(fileObj);
+        if (topBadge) {
+          topBadge.textContent = '실시간 카메라 연결됨 · AI 시각 분석';
+        }
+      };
+
+      liveMediaRecorder.start(500);
+
+      liveRecordCountdownInterval = setInterval(() => {
+        liveRecordSecondsLeft = Math.max(0, liveRecordSecondsLeft - 1);
+        if (recBtn) {
+          recBtn.textContent = `⏹ 지금 기록 마치고 분석하기 (${liveRecordSecondsLeft}초)`;
+        }
+        if (topBadge) {
+          topBadge.textContent = `🔴 30초 현장 기록 중 (${liveRecordSecondsLeft}초 남음)`;
+        }
+      }, 1000);
+
+      liveRecordTimer = setTimeout(() => {
+        stopLiveCameraRecordingNow();
+      }, 30000);
+    }
+
+    // =====================================================================
+    // 5. Multi-Turn Conversational Engine (/api/converse) — Live Argon On
     // =====================================================================
     function getCurrentMediaSeconds() {
       const lv = document.getElementById('localVideoPlayer');
@@ -948,32 +1910,69 @@
         return Math.floor(lv.currentTime || 0);
       }
       if (ytReady && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
-        return Math.floor(ytPlayer.getCurrentTime() || 0);
+        const t = Math.floor(ytPlayer.getCurrentTime() || 0);
+        if (t > 0) return t;
       }
-      return 74;
+      return activeSceneContext.timestampSec || 80;
     }
 
-    async function sendVoiceTurn(utterance) {
+    async function sendVoiceTurn(utterance, options = {}) {
       if (!utterance || !utterance.trim()) return;
+      const cleanText = utterance.trim();
       hasGreetedOnce = true;
-      setCanvasState('speaking', '대화 맥락 확인 중', `"${utterance}"`, '잠시만 기다려 주세요');
+
+      // Direct camera / proactive vision voice triggers
+      if (
+        cleanText.includes('카메라 켜') ||
+        cleanText.includes('앞에 뭐 있') ||
+        cleanText.includes('앞에 뭐가 보') ||
+        cleanText.includes('지금 화면 분석')
+      ) {
+        if (!liveCameraStream) {
+          await startLiveCamera(true);
+        } else {
+          await captureAndAnalyzeCameraFrame(cleanText);
+        }
+        return;
+      }
+
+      setCanvasState('speaking', '실제 Argon/위키 맥락 확인 중', `"${cleanText}"`, '잠시만 기다려 주세요');
 
       try {
         const res = await fetch('/api/converse', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            utterance: utterance.trim(),
+            utterance: cleanText,
             current_time_sec: getCurrentMediaSeconds(),
-            use_live_argon: false
+            use_live_argon: true
           })
         });
         const data = await res.json();
-        if (data.speech_rate) currentSpeechRate = data.speech_rate;
+
+        updateSourceBadge(data);
+
+        if (data.voice) {
+          selectedVoice = data.voice;
+          const vs = document.getElementById('voiceSelect');
+          if (vs) vs.value = selectedVoice;
+        }
+        if (data.speech_rate) {
+          setSpeechRateUI(data.speech_rate);
+        }
         if (data.state) {
           appState = data.state;
           renderStudioSheet();
         }
+
+        const isSceneStep =
+          options.forceScenePreview ||
+          cleanText.includes('다음 장면') ||
+          cleanText.includes('이전 장면') ||
+          cleanText === '다음' ||
+          cleanText === '이전';
+
+        extractAndSyncSceneFromResponse(data, isSceneStep);
 
         if (data.action === 'play_original') {
           speakConversational(
@@ -982,11 +1981,11 @@
             data.follow_up_voice,
             () => {
               playOriginalAt(
-                data.play_source_type || 'youtube',
-                data.play_youtube_id || '_cMxraX_5RE',
-                data.play_recording_filename || 'sample_korean_memory.mp4',
-                data.play_timestamp_sec || 0,
-                data.play_timestamp || '0:00'
+                data.play_source_type || activeSceneContext.sourceType || 'youtube',
+                data.play_youtube_id || activeSceneContext.youtubeId || '_cMxraX_5RE',
+                data.play_recording_filename || activeSceneContext.recordingFile || '',
+                data.play_timestamp_sec ?? activeSceneContext.timestampSec ?? 0,
+                data.play_timestamp || activeSceneContext.timestampMmss || '0:00'
               );
             }
           );
@@ -1015,8 +2014,88 @@
 
         speakConversational(data.spoken_text, data.answer_sentence, data.follow_up_voice);
       } catch (e) {
-        speakConversational('일시적인 연결 오류가 발생했습니다. 화면을 한 번 더 터치해 주세요.', '연결 오류', '');
+        speakConversational('일시적인 연결 오류가 발생했습니다. 다시 한 번 시도해 주세요.', '연결 오류', '');
       }
+    }
+
+    // =====================================================================
+    // 6. Quiet Hackathon Venue Text Command & Scene Stepper Helpers
+    // =====================================================================
+    function submitSilentCommand(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const input = document.getElementById('silentCommandInput');
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      sendVoiceTurn(text, {
+        forceScenePreview: text.includes('다음 장면') || text.includes('이전 장면')
+      });
+    }
+
+    function runSilentQuickCmd(text) {
+      sendVoiceTurn(text, {
+        forceScenePreview: text.includes('다음 장면') || text.includes('이전 장면')
+      });
+    }
+
+    function stepSceneAndPreview(commandText) {
+      sendVoiceTurn(commandText, { forceScenePreview: true });
+    }
+
+    function stepSceneAndPreviewFromSheet(commandText) {
+      document.getElementById('studioSheet').classList.remove('open');
+      document.getElementById('sheetToggleBtn').classList.remove('active');
+      sendVoiceTurn(commandText, { forceScenePreview: true });
+    }
+
+    function previewSceneVisual(sourceType, youtubeId, recordingFile, sec) {
+      const stage = document.getElementById('mediaStage');
+      stage.classList.add('visible');
+      syncCanvasCompactClass();
+
+      const ytDiv = document.getElementById('ytPlayer');
+      const lv = document.getElementById('localVideoPlayer');
+
+      if (sourceType === 'recording' && recordingFile) {
+        currentSourceType = 'recording';
+        ytDiv.style.display = 'none';
+        lv.style.display = 'block';
+        const targetSrc = `/media/${recordingFile}`;
+        if (!lv.src.endsWith(targetSrc)) lv.src = targetSrc;
+        lv.currentTime = sec || 0;
+      } else {
+        currentSourceType = 'youtube';
+        lv.pause();
+        lv.style.display = 'none';
+        ytDiv.style.display = 'block';
+        if (ytReady && ytPlayer && typeof ytPlayer.seekTo === 'function') {
+          ytPlayer.seekTo(sec || 0, true);
+          // Pause so visual frame is shown without drowning out the AI voice explanation
+          setTimeout(() => {
+            try {
+              if (isSpeaking && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+                ytPlayer.pauseVideo();
+              }
+            } catch (e) {}
+          }, 350);
+        }
+      }
+    }
+
+    function openCameraFromSheet() {
+      document.getElementById('studioSheet').classList.remove('open');
+      document.getElementById('sheetToggleBtn').classList.remove('active');
+      startLiveCamera(true);
+    }
+
+    function triggerRealRecordFromSheet() {
+      document.getElementById('studioSheet').classList.remove('open');
+      document.getElementById('sheetToggleBtn').classList.remove('active');
+      triggerSurroundingsRecording();
     }
 
     function runVoiceFromSheet(text) {
@@ -1028,10 +2107,10 @@
     function seekAndRunFromSheet(sec, text) {
       document.getElementById('studioSheet').classList.remove('open');
       document.getElementById('sheetToggleBtn').classList.remove('active');
-      if (ytReady && ytPlayer && typeof ytPlayer.seekTo === 'function') {
-        ytPlayer.seekTo(sec, true);
-      }
-      sendVoiceTurn(text);
+      const mmss = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+      updateContextualScene('youtube', '_cMxraX_5RE', '', sec, mmss);
+      previewSceneVisual('youtube', '_cMxraX_5RE', '', sec);
+      sendVoiceTurn(text, { forceScenePreview: true });
     }
 
     async function runStoryFromSheet() {
@@ -1040,12 +2119,13 @@
       try {
         const res = await fetch('/api/story', { method: 'POST' });
         const data = await res.json();
+        updateSourceBadge(data);
         speakConversational(data.story_text, data.story_text, '오늘의 한 마당 요약이 끝났습니다.');
       } catch (e) {}
     }
 
     // =====================================================================
-    // 4. Web Speech API Recognition
+    // 7. Web Speech API Recognition
     // =====================================================================
     function initSpeechRecognition() {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1062,7 +2142,7 @@
           'listening',
           '듣는 중 · 편하게 말씀해 주세요',
           '말씀을 듣고 있습니다',
-          '"방금 무슨 일이야?", "아까 보조배터리 어디 뒀지?", "응 들려줘", "정리해 줘"'
+          '"방금 무슨 일이야?", "그 목소리 누구야?", "앞에 뭐 있어?", "정리해 줘"'
         );
       };
 
@@ -1074,20 +2154,24 @@
 
       recognition.onerror = () => {
         isListening = false;
-        setCanvasState('', '대기 중 · 화면을 터치해 다시 말씀해 주세요', '말씀을 또렷이 듣지 못했습니다', '화면을 한 번 터치하거나 상단 시연 도구에서 대화를 선택해 보세요');
+        setCanvasState(
+          '',
+          '대기 중 · 화면 터치 또는 아래 텍스트 명령어를 입력해 주세요',
+          '마이크 입력 대기 중입니다',
+          '행사장 주변이 시끄러우면 바로 아래 텍스트 명령어 입력창으로 똑같이 대화할 수 있습니다'
+        );
       };
 
       recognition.onend = () => {
         if (isListening) {
           isListening = false;
-          setCanvasState('', '대기 중', '화면 아무 곳이나 터치해 말씀해 주세요', '');
+          setCanvasState('', '대기 중', '화면 터치 또는 아래 텍스트 입력창으로 대화해 주세요', '');
         }
       };
     }
 
     function startVoiceRecognition(isAutoFollowUp = false) {
-      window.speechSynthesis.cancel();
-      pauseAllMedia();
+      stopAllSpeech();
       if (!recognition) initSpeechRecognition();
       if (recognition) {
         try {
@@ -1101,11 +2185,11 @@
     }
 
     // =====================================================================
-    // 5. Original Sound Playback & 30-60s Surroundings Recording
+    // 8. Original Sound Playback & Real /api/record Upload
     // =====================================================================
     function onYouTubeIframeAPIReady() {
       ytPlayer = new YT.Player('ytPlayer', {
-        height: '210',
+        height: '200',
         width: '100%',
         videoId: '_cMxraX_5RE',
         playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
@@ -1121,32 +2205,34 @@
       } catch (e) {}
       const lv = document.getElementById('localVideoPlayer');
       if (lv) lv.pause();
-      document.getElementById('mediaStage').classList.remove('visible');
     }
 
     function playOriginalAt(sourceType, youtubeId, recordingFile, sec, mmss) {
       playEarcon('double_tap');
-      window.speechSynthesis.cancel();
+      stopAllSpeech();
       const stage = document.getElementById('mediaStage');
       stage.classList.add('visible');
+      syncCanvasCompactClass();
+
+      updateContextualScene(sourceType, youtubeId, recordingFile, sec, mmss);
 
       setCanvasState(
         'playing',
         `원래 소리 재생 중 (${mmss}) · 화면을 터치하면 멈추고 대화를 이어갑니다`,
-        `${mmss} 시점의 원래 소리를 들려드리고 있습니다`,
-        '다 들으신 뒤 화면을 톡 치고 "그 사람 누구야?" 또는 "다음 장면"이라고 말씀해 보세요'
+        `${mmss} 시점의 실제 원본 영상 소리를 들려드리고 있습니다`,
+        '다 들으신 뒤 "그 목소리 누구야?" 또는 "다음 장면"을 눌러 보세요'
       );
 
       const ytDiv = document.getElementById('ytPlayer');
       const lv = document.getElementById('localVideoPlayer');
 
-      if (sourceType === 'recording') {
+      if (sourceType === 'recording' && recordingFile) {
         currentSourceType = 'recording';
         ytDiv.style.display = 'none';
         lv.style.display = 'block';
-        const targetSrc = `/media/${recordingFile || 'sample_korean_memory.mp4'}`;
+        const targetSrc = `/media/${recordingFile}`;
         if (!lv.src.endsWith(targetSrc)) lv.src = targetSrc;
-        lv.currentTime = sec;
+        lv.currentTime = sec || 0;
         lv.play().catch(() => {});
       } else {
         currentSourceType = 'youtube';
@@ -1154,49 +2240,77 @@
         lv.style.display = 'none';
         ytDiv.style.display = 'block';
         if (ytReady && ytPlayer) {
-          ytPlayer.seekTo(sec, true);
+          ytPlayer.seekTo(sec || 0, true);
           ytPlayer.playVideo();
         }
       }
     }
 
-    async function triggerSurroundingsRecording() {
-      if (isRecording) return;
-      isRecording = true;
-      playEarcon('record_start');
+    async function triggerSurroundingsRecording(e) {
+      if (e) e.stopPropagation();
+      // If live camera stream is active, record directly from the live camera stream via MediaRecorder
+      if (liveCameraStream) {
+        await recordFromLiveCamera30s();
+        return;
+      }
+      // Otherwise, open the mobile camera capture / file input connected to POST /api/record
+      const fileInput = document.getElementById('recordFileInput');
+      if (fileInput) {
+        fileInput.click();
+      }
+    }
+
+    async function uploadRecordedBlobToApi(file) {
+      if (!file) return;
+      if (file.size > 32 * 1024 * 1024) {
+        speakConversational(
+          '파일 크기가 32메가바이트를 넘습니다. 30초에서 60초 길이로 짧게 올려 주세요.',
+          '32MB 한도 초과',
+          ''
+        );
+        return;
+      }
       setCanvasState(
         'recording',
-        '내 주변 기록 중 (30~60초) · 들린 말과 보인 행동을 검토 대기함에 담습니다',
-        '주변 소리와 행동을 기록하고 있습니다',
-        '기록된 기억은 내가 "정리해 줘"라고 말한 뒤 "맞아"라고 한 것만 위키에 저장됩니다'
+        '실제 현장 기록 분석 중 (/api/record) · Gemini 검증 루프 실행 중',
+        '촬영한 현장 영상·소리를 분석하고 있습니다',
+        '들린 말과 눈에 보인 행동을 추출해 검토 대기함에 담습니다'
       );
-
-      setTimeout(async () => {
-        try {
-          const res = await fetch('/api/record_sample', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ scenario: 'lunch_and_outlet' })
-          });
-          const data = await res.json();
-          if (data.state) {
-            appState = data.state;
-            renderStudioSheet();
-          }
-          isRecording = false;
-          speakConversational(
-            '기록이 끝났어요. 점심 식탁 오른쪽에 보조배터리와 커피를 놓아 준 기억과 발표대 앞 콘센트 위치 기억 2건을 검토 대기함에 담아 두었습니다. 지금 바로 정리해 볼까요? 정리해 줘라고 말씀해 주세요.',
-            '새 기억 2건을 검토 대기함에 담았습니다',
-            '"정리해 줘"라고 말씀하시면 하나씩 읽어 드립니다'
-          );
-        } catch (e) {
-          isRecording = false;
+      try {
+        const fd = new FormData();
+        fd.append('use_korean_sample', 'false');
+        fd.append('file', file);
+        const res = await fetch('/api/record', { method: 'POST', body: fd });
+        const data = await res.json();
+        updateSourceBadge(
+          data.source_badge || data.processing_badge
+            ? data
+            : { source_badge: '실제 Argon/Flash 현장 기록 분석 완료 (/api/record)' }
+        );
+        if (data.state) {
+          appState = data.state;
+          renderStudioSheet();
         }
-      }, 2500);
+        extractAndSyncSceneFromResponse(data, false);
+        speakConversational(
+          data.spoken_text || data.message || '내 현장 기록 카드를 검토 대기함에 넣었습니다. 정리해 줘라고 말씀해 주세요.',
+          data.card?.summary_sentence || '검토 대기함에 새 현장 기록 추가 완료',
+          '"정리해 줘"를 누르시면 방금 기록한 기억을 확인해 위키에 저장합니다'
+        );
+      } catch (e) {
+        speakConversational('현장 기록 업로드 중 오류가 발생했습니다.', '업로드 오류', '');
+      }
+    }
+
+    async function uploadPersonalFile(inputEl) {
+      const file = inputEl.files && inputEl.files[0];
+      if (!file) return;
+      await uploadRecordedBlobToApi(file);
+      inputEl.value = '';
     }
 
     // =====================================================================
-    // 6. Full-Screen Eyes-Free Touch & Motion Gestures + Sticky Bar Buttons
+    // 9. Full-Screen Eyes-Free Touch & Motion Gestures + Sticky Bar Buttons
     // =====================================================================
     function handlePrimaryTalkBtn(e) {
       if (e) e.stopPropagation();
@@ -1210,14 +2324,32 @@
 
     function handleReplayOriginalBtn(e) {
       if (e) e.stopPropagation();
-      sendVoiceTurn('응 들려줘');
+      if (activeSceneContext && activeSceneContext.timestampMmss) {
+        playOriginalAt(
+          activeSceneContext.sourceType,
+          activeSceneContext.youtubeId,
+          activeSceneContext.recordingFile,
+          activeSceneContext.timestampSec,
+          activeSceneContext.timestampMmss
+        );
+      } else {
+        sendVoiceTurn('응 들려줘');
+      }
     }
 
     function setupFullCanvasTouch() {
       const canvas = document.getElementById('voiceCanvas');
 
       canvas.addEventListener('pointerdown', (e) => {
-        if (e.target.closest('#mediaStage')) return;
+        if (
+          e.target.closest('#mediaStage') ||
+          e.target.closest('#cameraStage') ||
+          e.target.closest('#silentCommandBar') ||
+          e.target.closest('#contextualOriginalBtn') ||
+          e.target.closest('#sourceModeBadge')
+        ) {
+          return;
+        }
         touchStartX = e.clientX;
         touchStartY = e.clientY;
         longPressTriggered = false;
@@ -1229,7 +2361,15 @@
       });
 
       canvas.addEventListener('pointerup', (e) => {
-        if (e.target.closest('#mediaStage')) return;
+        if (
+          e.target.closest('#mediaStage') ||
+          e.target.closest('#cameraStage') ||
+          e.target.closest('#silentCommandBar') ||
+          e.target.closest('#contextualOriginalBtn') ||
+          e.target.closest('#sourceModeBadge')
+        ) {
+          return;
+        }
         if (pressTimer) clearTimeout(pressTimer);
         if (longPressTriggered) return;
 
@@ -1241,14 +2381,14 @@
         if (Math.max(absX, absY) > 48) {
           if (absX > absY) {
             if (dx > 0) sendVoiceTurn('맞아');
-            else sendVoiceTurn('이전 장면');
+            else stepSceneAndPreview('이전 장면');
           } else {
             if (dy < 0) sendVoiceTurn('더 자세히 말해줘');
             else {
               playEarcon('stop');
-              window.speechSynthesis.cancel();
+              stopAllSpeech();
               pauseAllMedia();
-              setCanvasState('', '대기 중 · 소리를 멈추었습니다', '소리를 멈추었습니다', '화면을 다시 터치하면 대화를 이어갑니다');
+              setCanvasState('', '대기 중 · 소리를 멈추었습니다', '소리를 멈추었습니다', '화면을 다시 터치하거나 텍스트를 입력하면 대화를 이어갑니다');
             }
           }
           return;
@@ -1257,7 +2397,7 @@
         const now = Date.now();
         if (now - lastTapTime < 320) {
           lastTapTime = 0;
-          sendVoiceTurn('응 들려줘');
+          handleReplayOriginalBtn(e);
           return;
         }
         lastTapTime = now;
@@ -1277,7 +2417,7 @@
     }
 
     // =====================================================================
-    // 7. Studio Sheet Rendering (Ontology 7 Entities + Verification Loop)
+    // 10. Studio Sheet Rendering (Ontology 7 Entities + Verification Loop)
     // =====================================================================
     function toggleStudioSheet(e) {
       if (e) e.stopPropagation();
@@ -1311,7 +2451,7 @@
         <div class="stat-tile"><div class="stat-number">${oc.works ?? works.length}</div><div class="stat-label">1. 작품 (유튜브·영화)</div></div>
         <div class="stat-tile"><div class="stat-number">${oc.people ?? people.length}</div><div class="stat-label">2. 사람 (목소리·첫인사)</div></div>
         <div class="stat-tile"><div class="stat-number">${oc.moments ?? cards.length}</div><div class="stat-label">3. 순간 (장면·기억 카드)</div></div>
-        <div class="stat-tile"><div class="stat-number">${oc.places ?? placesSet.size}</div><div class="stat-label">4. 장소 (${Array.from(placesSet).slice(0,2).join(', ')})</div></div>
+        <div class="stat-tile"><div class="stat-number">${oc.places ?? placesSet.size}</div><div class="stat-label">4. 장소 (${Array.from(placesSet).slice(0,2).join(', ') || '숲속·현장'})</div></div>
         <div class="stat-tile"><div class="stat-number">${oc.utterances ?? cards.filter(c => c.utterance).length}</div><div class="stat-label">5. 말 (실제 대사·발언)</div></div>
         <div class="stat-tile"><div class="stat-number">${oc.actions ?? cards.filter(c => c.visible_action).length}</div><div class="stat-label">6. 행동 (보인 행동·소리 원인)</div></div>
         <div class="stat-tile"><div class="stat-number">${oc.sources ?? cards.length}</div><div class="stat-label">7. 출처 (시점 MM:SS 보장)</div></div>
@@ -1329,7 +2469,7 @@
           <span style="color:var(--ink-muted-80);">목소리: ${p.voice_traits} · 첫인사: "${p.first_quote}"</span>
         </div>
       `;
-      }).join('');
+      }).join('') || '<div class="list-row">등록된 인물이 없습니다.</div>';
 
       // 검토 대기함
       document.getElementById('wikiPendingList').innerHTML = pending.map(c => `
@@ -1338,7 +2478,7 @@
           <strong>${c.place} (${c.timestamp})</strong><br/>
           <span>${c.summary_sentence}</span>
         </div>
-      `).join('') || '<div class="list-row" style="color:var(--primary); font-weight:600;">모든 대기 기억을 음성으로 확인 완료했습니다.</div>';
+      `).join('') || '<div class="list-row" style="color:var(--primary); font-weight:600;">대기 중인 임시 기억이 없습니다. 실시간 카메라나 30초 기록 올리기로 새 기억을 촬영해 보세요.</div>';
 
       // 내가 확인한 일상 기억
       document.getElementById('wikiMemoryList').innerHTML = confirmedMem.map(c => `
@@ -1347,7 +2487,7 @@
           <strong>${c.place} (${c.timestamp})</strong><br/>
           <span>${c.summary_sentence}</span>
         </div>
-      `).join('') || '<div class="list-row">확인된 기억이 없습니다.</div>';
+      `).join('') || '<div class="list-row">아직 확인 완료된 일상 기억이 없습니다. 30초 현장 기록 후 "정리해 줘" → "맞아"로 저장해 보세요.</div>';
 
       // 작품 위키 장면
       document.getElementById('wikiWorkList').innerHTML = workCards.map(c => `
@@ -1382,32 +2522,6 @@
       `).join('');
     }
 
-    async function uploadPersonalFile(inputEl) {
-      const file = inputEl.files && inputEl.files[0];
-      if (!file) return;
-      if (file.size > 32 * 1024 * 1024) {
-        speakConversational('파일 크기가 32메가바이트를 넘습니다. 30초에서 60초 길이로 짧게 올려 주세요.', '32MB 한도 초과', '');
-        inputEl.value = '';
-        return;
-      }
-      speakConversational('내 영상 또는 소리 파일을 비공개 버킷에 저장하고 검토 대기함 카드로 정리하고 있습니다.', '내 기록 파일 분석 중 (32MB 이하)', '');
-      try {
-        const fd = new FormData();
-        fd.append('use_korean_sample', 'false');
-        fd.append('file', file);
-        const res = await fetch('/api/record', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (data.state) {
-          appState = data.state;
-          renderStudioSheet();
-        }
-        speakConversational(data.message || '내 기록 카드를 검토 대기함에 넣었습니다. 정리해 줘라고 말씀해 주세요.', '검토 대기함 추가 완료', '');
-      } catch (e) {
-        speakConversational('파일 업로드 중 오류가 발생했습니다.', '업로드 오류', '');
-      }
-      inputEl.value = '';
-    }
-
     async function analyzeYoutubeByApi() {
       const url = document.getElementById('ytUrlInput').value.trim();
       if (!url) return;
@@ -1419,11 +2533,16 @@
           body: JSON.stringify({ url })
         });
         const data = await res.json();
+        updateSourceBadge(data);
         if (data.state) {
           appState = data.state;
           renderStudioSheet();
         }
-        speakConversational('영상 분석과 검증 루프 통과를 모두 마쳤습니다. 방금 무슨 일이야 라고 물어보실 수 있습니다.', '유튜브 작품 위키 적재 완료', '');
+        speakConversational(
+          data.message || '영상 분석과 검증 루프 통과를 모두 마쳤습니다. 방금 무슨 일이야 라고 물어보실 수 있습니다.',
+          '유튜브 작품 위키 적재 완료',
+          ''
+        );
       } catch (e) {}
     }
 
@@ -1437,9 +2556,20 @@
     window.addEventListener('DOMContentLoaded', async () => {
       setupFullCanvasTouch();
       initSpeechRecognition();
+      setSpeechRateUI(1.0);
+      updateContextualScene('youtube', '_cMxraX_5RE', '', 80, '1:20');
       try {
         const res = await fetch('/api/state');
         appState = await res.json();
+        if (appState && appState.works && appState.works['sprite-fright']) {
+          const sf = appState.works['sprite-fright'];
+          const badgeFromWork = sf.processing_stats && sf.processing_stats.badge;
+          updateSourceBadge({
+            source_badge:
+              badgeFromWork ||
+              '미리 처리한 결과 (실행 시각: 2026-10-16 11:56 KST · 대회 중 실제 Argon 실행)'
+          });
+        }
         renderStudioSheet();
       } catch (e) {}
     });
