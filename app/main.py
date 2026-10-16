@@ -1889,8 +1889,10 @@ async def _converse_impl(req: ConverseReq):
     conv_session.last_person_id = matched_card.who_id
     conv_session.mode = "discussing_card"
 
-    cite_ts = qa_data["cite_timestamp"]
     ans_sent = qa_data["answer_sentence"]
+    # Use the time the spoken answer actually cites so the follow-up never names a different moment
+    m_ts = re.search(r"\((\d{1,2}):(\d{2})\)", ans_sent)
+    cite_ts = f"{int(m_ts.group(1))}:{m_ts.group(2)}" if m_ts else qa_data["cite_timestamp"]
     is_who = any(w in u for w in ["누구", "누가", "누군지", "who"]) and "뭐라고" not in u
     if is_en:
         follow_up = (
