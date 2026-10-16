@@ -136,17 +136,32 @@ def _find_best_card_for_question(question: str, current_sec: int) -> FactCard:
     memory_cards = [c for c in active_cards if c.card_type == "memory_card"]
     work_cards = [c for c in active_cards if c.card_type == "work_card"]
 
-    # 1. Check if question asks about real-life memories (배터리, 커피, 점심, 콘센트, 지훈, 수민)
-    for kw in ["배터리", "보조배터리", "충전", "커피", "점심", "지훈", "콘센트", "멀티탭", "수민"]:
-        if kw in q:
-            for mc in memory_cards:
-                if kw in mc.summary_sentence or kw in mc.utterance or kw in mc.who_label:
-                    return mc
-            for pc in store.cards:
-                if pc.card_type == "memory_card" and (
-                    kw in pc.summary_sentence or kw in pc.utterance
-                ):
-                    return pc
+    # 1. Associative search for real-life memories (물건, 장소, 시간대, 목소리 특징, 인물 이름)
+    memory_triggers = [
+        "배터리", "보조배터리", "충전", "커피", "점심", "지훈", "콘센트", "멀티탭",
+        "수민", "식탁", "발표대", "오른쪽", "왼쪽", "중저음", "남자", "남성", "낮은 목소리",
+        "목소리 낮은", "낮은 분", "밝은 목소리", "내가 어디", "어디 뒀", "어디 있", "누가 챙겨",
+    ]
+    if any(kw in q for kw in memory_triggers):
+        best_mc = None
+        best_mc_score = -1
+        for mc in memory_cards + [c for c in store.cards if c.card_type == "memory_card"]:
+            score = 0
+            searchable = f"{mc.summary_sentence} {mc.utterance} {mc.visible_action} {mc.who_label} {mc.voice_traits} {mc.place}"
+            for kw in memory_triggers:
+                if kw in q and kw in searchable:
+                    score += 30
+            if ("중저음" in q or "남자" in q or "남성" in q or "낮은" in q) and ("중저음" in searchable or "남성" in searchable):
+                score += 50
+            if ("밝은" in q or "여성" in q or "콘센트" in q) and ("박수민" in searchable or "콘센트" in searchable):
+                score += 50
+            if mc.status == "confirmed":
+                score += 10
+            if score > best_mc_score:
+                best_mc_score = score
+                best_mc = mc
+        if best_mc is not None and best_mc_score > 0:
+            return best_mc
 
     # 2. Check if question contains an explicit timestamp like "1분 20초" or "1:20" or "8:09"
     m_mmss = re.search(r"(\d{1,2})\s*[:분]\s*(\d{1,2})", q)
@@ -154,19 +169,19 @@ def _find_best_card_for_question(question: str, current_sec: int) -> FactCard:
     if m_mmss:
         target_sec = int(m_mmss.group(1)) * 60 + int(m_mmss.group(2))
 
-    # 3. Check keyword match on work cards
+    # 3. Check keyword & voice trait match on work cards
     best_card = work_cards[0] if work_cards else active_cards[0]
     best_score = -999999.0
     for c in work_cards:
         dist = abs(c.timestamp_sec - target_sec)
         score = -float(dist)
-        for token in ["달팽이", "새", "둥지", "나비", "소금", "버섯", "장로", "스프레이", "새똥", "비명", "웃음"]:
-            if token in q and (
-                token in c.summary_sentence
-                or token in c.visible_action
-                or token in c.sound_event_and_cause
-            ):
-                score += 120.0
+        searchable = f"{c.summary_sentence} {c.visible_action} {c.utterance} {c.sound_event_and_cause} {c.who_label} {c.voice_traits}"
+        for token in [
+            "달팽이", "새", "둥지", "나비", "소금", "버섯", "장로", "스프레이",
+            "새똥", "비명", "웃음", "엘리", "제이", "필", "빅토리아", "다리", "그물",
+        ]:
+            if token in q and token in searchable:
+                score += 150.0
         if score > best_score:
             best_score = score
             best_card = c
@@ -211,7 +226,7 @@ async def api_ask(req: AskReq):
 
     # Fast, zero-delay response path for blind users (default)
     if not req.use_live_argon:
-        is_who_q = any(w in q for w in ["누구", "목소리", "누가"])
+        is_who_q = (any(w in q for w in ["누구", "누가", "누군지"]) or "그 목소리" in q) and "뭐라고" not in q
         if is_who_q and person:
             short_quote = person.first_quote.split("(")[0].strip()
             raw_ans = (
@@ -221,15 +236,18 @@ async def api_ask(req: AskReq):
             cite_ts = person.first_timestamp
             cite_sec = person.first_timestamp_sec
         else:
-            cause_part = (
-                f" ({matched_card.sound_event_and_cause})"
-                if matched_card.sound_event_and_cause
-                else ""
-            )
-            raw_ans = (
-                f"{matched_card.who_label}가 '{matched_card.utterance}'라고 하며 "
-                f"{matched_card.visible_action}{cause_part} ({matched_card.timestamp})."
-            )
+            if matched_card.card_type == "memory_card" and matched_card.summary_sentence:
+                raw_ans = matched_card.summary_sentence
+            else:
+                cause_part = (
+                    f" ({matched_card.sound_event_and_cause})"
+                    if matched_card.sound_event_and_cause
+                    else ""
+                )
+                raw_ans = (
+                    f"{matched_card.who_label}가 '{matched_card.utterance}'라고 하며 "
+                    f"{matched_card.visible_action}{cause_part} ({matched_card.timestamp})."
+                )
             cite_ts = matched_card.timestamp
             cite_sec = matched_card.timestamp_sec
 

@@ -74,9 +74,9 @@ def check_and_sanitize_style(
                 cleaned = re.sub(pat, fallback_who_intro, cleaned)
                 fixed += 1
 
-    # 4. If length_mode == 'one_line', keep concise single sentence (max ~140 chars)
-    if pref.length_mode == "one_line" and len(cleaned) > 155:
-        parts = re.split(r"(?<=[.?!요다])\s+", cleaned)
+    # 4. If length_mode == 'one_line', keep concise single sentence (max ~220 chars)
+    if pref.length_mode == "one_line" and len(cleaned) > 220:
+        parts = re.split(r"(?<=[.?!])\s+", cleaned)
         if parts:
             cleaned = parts[0].strip()
             fixed += 1
