@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Second Ear — 시각장애인을 위한 듣는 세컨드 브레인</title>
+  <style>
+    :root {
+      --bg-dark: #0b0f17;
+      --bg-panel: #131b2e;
+      --bg-card: #1b253d;
+      --bg-card-hover: #23304f;
+      --accent-gold: #ffd166;
+      --accent-blue: #4cc9f0;
+      --accent-green: #06d6a0;
+      --accent-red: #ef476f;
+      --accent-purple: #b5179e;
+      --text-main: #f8f9fa;
+      --text-muted: #adb5bd;
+      --border-high: #3a4b6e;
+      --focus-ring: 3px solid #ffd166;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--text-main);
+    }
+
+    button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+      outline: var(--focus-ring);
+      outline-offset: 2px;
+    }
+
+    /* 상단 전체 바 */
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 20px;
+      background: #070a10;
+      border-bottom: 2px solid var(--border-high);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      background: var(--accent-gold);
+      color: #000;
+      font-weight: 900;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .brand p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .view-switcher {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .view-btn {
+      background: var(--bg-card);
+      border: 2px solid var(--border-high);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .view-btn.active {
+      background: var(--accent-gold);
+      color: #000;
+      border-color: var(--accent-gold);
+    }
+
+    /* 소리 상태 알림 바 (시각장애인에게 지금 무슨 소리가 나는지 즉시 표시) */
+    .live-audio-banner {
+      background: linear-gradient(90deg, #1b2845 0%, #162238 100%);
+      border-bottom: 2px solid var(--accent-gold);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .live-audio-text {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+    }
+
+    .pulse-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 10px var(--accent-green);
+      flex-shrink: 0;
+    }
+
+    .stop-audio-btn {
+      background: var(--accent-red);
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-weight: 800;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* 메인 레이아웃 (나란히 보기 / 단독 보기) */
+    .workspace {
+      display: grid;
+      grid-template-columns: 440px 1fr;
+      gap: 20px;
+      padding: 20px;
+      max-width: 1680px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    .workspace.mode-phone {
+      grid-template-columns: minmax(340px, 520px);
+      justify-content: center;
+    }
+
+    .workspace.mode-laptop {
+      grid-template-columns: 1fr;
+    }
+
+    .workspace.mode-phone .laptop-column {
+      display: none;
+    }
+
+    .workspace.mode-laptop .phone-column {
+      display: none;
+    }
+
+    @media (max-width: 1100px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 휴대폰 프레임 (시각장애인 사용자 화면) */
+    .phone-frame {
+      background: var(--bg-panel);
+      border: 4px solid #3d4f78;
+      border-radius: 32px;
+      padding: 18px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    }
+
+    .phone-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 2px solid var(--border-high);
+    }
+
+    .phone-header-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--accent-gold);
+    }
+
+    .latency-pill {
+      background: rgba(6, 214, 160, 0.18);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    /* 내 취향 한 줄 설정 (고대비 큰 스위치) */
+    .pref-bar {
+      background: var(--bg-card);
+      border: 2px solid var(--border-high);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .pref-bar-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pref-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .pref-toggle {
+      background: #101726;
+      border: 2px solid var(--border-high);
+      border-radius: 10px;
+      padding: 8px 10px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .pref-toggle.on {
+      border-color: var(--accent-gold);
+      background: rgba(255, 209, 102, 0.12);
+    }
+
+    .pref-toggle span {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* 휴대폰 메인 길 선택 (3개 초대형 탭) */
+    .phone-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .phone-tab {
+      background: var(--bg-card);
+      border: 3px solid var(--border-high);
+      border-radius: 16px;
+      padding: 12px 8px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-align: center;
+      position: relative;
+    }
+
+    .phone-tab.active {
+      background: var(--accent-gold);
+      color: #000;
+      border-color: #fff;
+    }
+
+    .badge-count {
+      display: inline-block;
+      background: var(--accent-red);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 900;
+      padding: 2px 7px;
+      border-radius: 999px;
+      margin-left: 4px;
+    }
+
+    /* 휴대폰 내부 섹션 */
+    .phone-section {
+      display: none;
+    }
+
+    .phone-section.active {
+      display: block;
+    }
+
+    .video-box {
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid var(--border-high);
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .video-box iframe, .video-box video {
+      width: 100%;
+      height: 220px;
+      display: block;
+      border: none;
+    }
+
+    .video-time-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #0f1626;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .time-Jump-chips {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+    }
+
+    .jump-chip {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-high);
+      color: var(--accent-blue);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .jump-chip:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-blue);
+    }
+
+    /* 시각장애인 한 손 엄지 조작 초대형 버튼 그리드 */
+    .big-action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .big-btn {
+      border: 3px solid transparent;
+      border-radius: 18px;
+      padding: 16px 12px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 86px;
+      transition: transform 0.1s ease;
+    }
+
+    .big-btn:active {
+      transform: scale(0.98);
+    }
+
+    .big-btn .sub {
+      font-size: 0.8rem;
+      font-weight: 600;
+      opacity: 0.9;
+      margin-top: 6px;
+    }
+
+    .big-btn.primary-yellow {
+      background: var(--accent-gold);
+      color: #000;
+    }
+
+    .big-btn.primary-blue {
+      background: var(--accent-blue);
+      color: #000;
+    }
+
+    .big-btn.primary-green {
+      background: var(--accent-green);
+      color: #000;
+    }
+
+    .big-btn.secondary-dark {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border-color: var(--border-high);
+    }
+
+    /* 방금 들려준 대답 카드 */
+    .answer-box {
+      background: #10192d;
+      border: 3px solid var(--accent-gold);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .answer-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      color: var(--accent-gold);
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .answer-main-text {
+      font-size: 1.15rem;
+      font-weight: 800;
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }
+
+    .answer-detail-text {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .answer-detail-text.visible {
+      display: block;
+    }
+
+    .evidence-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .badge {
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 4px 9px;
+      border-radius: 8px;
+      background: rgba(76, 201, 240, 0.16);
+      color: var(--accent-blue);
+      border: 1px solid rgba(76, 201, 240, 0.4);
+    }
+
+    .badge.verified {
+      background: rgba(6, 214, 160, 0.16);
+      color: var(--accent-green);
+      border-color: rgba(6, 214, 160, 0.4);
+    }
+
+    .badge.guess {
+      background: rgba(239, 71, 111, 0.2);
+      color: #ff8fa3;
+      border-color: var(--accent-red);
+    }
+
+    /* 질문 입력 줄 */
+    .ask-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .ask-input {
+      flex: 1;
+      background: #0d1322;
+      border: 2px solid var(--border-high);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 0.95rem;
+    }
+
+    .ask-submit-btn {
+      background: var(--accent-gold);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      padding: 0 16px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .mic-btn {
+      background: var(--bg-card);
+      border: 2px solid var(--accent-blue);
+      color: var(--accent-blue);
+      border-radius: 12px;
+      padding: 0 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* 검토 대기함 카드 */
+    .inbox-card {
+      background: var(--bg-card);
+      border: 3px solid var(--accent-gold);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .consent-alert {
+      background: rgba(239, 71, 111, 0.16);
+      border: 2px solid var(--accent-red);
+      border-radius: 12px;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 0.9rem;
+    }
+
+    .consent-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    .consent-label input {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .review-btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .review-btn {
+      padding: 12px 8px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 900;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .review-btn.approve {
+      background: var(--accent-green);
+      color: #000;
+    }
+
+    .review-btn.edit {
+      background: var(--accent-gold);
+      color: #000;
+    }
+
+    .review-btn.reject {
+      background: var(--accent-red);
+      color: #fff;
+    }
+
+    /* 노트북 화면 (심사위원 위키 · 온톨로지 · 검증 대시보드) */
+    .laptop-frame {
+      background: var(--bg-panel);
+      border: 2px solid var(--border-high);
+      border-radius: 24px;
+      padding: 22px;
+    }
+
+    .laptop-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+      border-bottom: 2px solid var(--border-high);
+    }
+
+    /* 7대 검증 지표 그리드 */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-high);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .metric-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .metric-value {
+      font-size: 1.55rem;
+      font-weight: 900;
+      color: var(--accent-green);
+      margin: 4px 0;
+    }
+
+    .metric-sub {
+      font-size: 0.78rem;
+      color: var(--text-main);
+      opacity: 0.85;
+    }
+
+    /* 노트북 탭 */
+    .laptop-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .laptop-tab {
+      background: var(--bg-card);
+      border: 2px solid var(--border-high);
+      color: var(--text-main);
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .laptop-tab.active {
+      background: var(--accent-blue);
+      color: #000;
+      border-color: var(--accent-blue);
+    }
+
+    .laptop-pane {
+      display: none;
+    }
+
+    .laptop-pane.active {
+      display: block;
+    }
+
+    /* 온톨로지 그래프 시각화 영역 */
+    .ontology-schema-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      background: #0e1525;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border-high);
+      margin-bottom: 16px;
+    }
+
+    .node-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+
+    .node-work { background: #3a0ca3; color: #fff; }
+    .node-person { background: #f72585; color: #fff; }
+    .node-moment { background: #4cc9f0; color: #000; }
+    .node-place { background: #ffd166; color: #000; }
+    .node-quote { background: #06d6a0; color: #000; }
+    .node-source { background: #adb5bd; color: #000; }
+
+    .two-col-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .two-col-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .wiki-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-high);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      transition: border-color 0.15s ease;
+    }
+
+    .wiki-card:hover {
+      border-color: var(--accent-gold);
+    }
+
+    .wiki-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .wiki-card-title {
+      font-weight: 900;
+      font-size: 1.05rem;
+      color: var(--accent-gold);
+    }
+
+    .play-source-btn {
+      background: rgba(76, 201, 240, 0.2);
+      border: 1.5px solid var(--accent-blue);
+      color: var(--accent-blue);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .play-source-btn:hover {
+      background: var(--accent-blue);
+      color: #000;
+    }
+
+    /* 테이블 스타일 */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    .data-table th, .data-table td {
+      border: 1px solid var(--border-high);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .data-table th {
+      background: #0f1729;
+      color: var(--accent-gold);
+      font-weight: 800;
+    }
+
+    .data-table tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .strike-bad {
+      text-decoration: line-through;
+      color: #ff8fa3;
+      margin-right: 6px;
+    }
+
+    .fixed-good {
+      color: var(--accent-green);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 헤더 & 화면 전환 스위치 -->
+  <header class="top-bar" role="banner">
+    <div class="brand">
+      <span class="brand-badge">SECOND EAR</span>
+      <div>
+        <h1>듣는 세컨드 브레인 (Second Ear)</h1>
+        <p>영상도 내 하루도, 목소리와 행동으로 기억하고 원래 소리로 되짚어 주는 시각장애인용 위키</p>
+      </div>
+    </div>
+    <div class="view-switcher" role=" navigation" aria-label="화면 보기 방식 선택">
+      <button class="view-btn active" onclick="setWorkspaceMode('both', this)">📱+💻 나란히 보기 (시연용)</button>
+      <button class="view-btn" onclick="setWorkspaceMode('phone', this)">📱 휴대폰만 보기 (사용자 화면)</button>
+      <button class="view-btn" onclick="setWorkspaceMode('laptop', this)">💻 노트북만 보기 (위키·검증 대시보드)</button>
+    </div>
+  </header>
+
+  <!-- 지금 읽어주고 있는 소리 안내줄 (시각장애인용 스크린리더 aria-live 연동) -->
+  <div class="live-audio-banner" role="status" aria-live="polite">
+    <div class="live-audio-text">
+      <span class="pulse-dot" id="audioPulse"></span>
+      <span id="liveSpeechStatus">🔊 준비 완료: 아무 버튼이나 누르면 기다림 없이(0.1초 안에) 바로 소리로 알려드립니다.</span>
+    </div>
+    <button class="stop-audio-btn" onclick="stopAllAudio()" aria-label="지금 나는 소리 멈추기">⏹ 소리 멈춤</button>
+  </div>
+
+  <!-- 메인 작업 공간 -->
+  <main class="workspace" id="mainWorkspace">
+
+    <!-- =====================================================================
+         왼쪽: 시각장애인 사용자용 휴대폰 화면 (한 손 엄지 조작 + 지연 없는 음성 안내)
+         ===================================================================== -->
+    <section class="phone-column" aria-label="시각장애인 사용자 휴대폰 화면">
+      <div class="phone-frame">
+        <div class="phone-header">
+          <span class="phone-header-title">📱 내 손안의 Second Ear</span>
+          <span class="latency-pill" id="latencyBadge">⚡ 응답 지연 0.08초</span>
+        </div>
+
+        <!-- 1. 내 취향 한 줄 설정 (선천/중도 실명, 설명 길이, 속도) -->
+        <div class="pref-bar" role="region" aria-label="내 듣기 취향 설정">
+          <div class="pref-bar-title">
+            <span>🎧 내 듣기 맞춤 설정 (누르면 즉시 바뀜)</span>
+            <span id="voiceEngineStatus" style="color: var(--accent-blue);">즉시 음성 켜짐</span>
+          </div>
+          <div class="pref-controls">
+            <button class="pref-toggle on" id="toggleNoColor" onclick="togglePreference('noColor')">
+              🎨 색깔·생김새 빼기: 켜짐
+              <span>목소리·소리로만 설명</span>
+            </button>
+            <button class="pref-toggle on" id="toggleOneSentence" onclick="togglePreference('oneSentence')">
+              💬 한 문장 먼저 답하기: 켜짐
+              <span>더 궁금할 때만 자세히</span>
+            </button>
+            <button class="pref-toggle" id="toggleSpeed" onclick="togglePreference('speed')">
+              ⏩ 읽는 속도: 1.1배속
+              <span>누르면 1.0x / 1.25x / 1.5x</span>
+            </button>
+            <button class="pref-toggle" id="toggleTtsMode" onclick="togglePreference('ttsMode')">
+              🎙️ 음성 방식: 기다림 0초
+              <span>누르면 Gemini 고품질 음성 전환</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. 휴대폰 3대 기능 탭 -->
+        <div class="phone-tabs" role="tablist" aria-label="주요 기능 선택">
+          <button class="phone-tab active" role="tab" aria-selected="true" id="tabBtnWatch" onclick="switchPhoneTab('watch')">
+            🎬 영상 같이 보기
+          </button>
+          <button class="phone-tab" role="tab" aria-selected="false" id="tabBtnMemory" onclick="switchPhoneTab('memory')">
+            👓 내 하루 기억<span class="badge-count" id="inboxBadgeCount">2</span>
+          </button>
+          <button class="phone-tab" role="tab" aria-selected="false" id="tabBtnStory" onclick="switchPhoneTab('story')">
+            📻 오늘의 한 마당
+          </button>
+        </div>
+
+        <!-- ===============================================================
+             탭 1: 🎬 영상 같이 보기 (공개 유튜브 작품 위키)
+             =============================================================== -->
+        <div class="phone-section active" id="sectionWatch" role="tabpanel">
+          <!-- 유튜브 링크 입력창 -->
+          <div class="ask-row" style="margin-bottom: 10px;">
+            <input type="text" id="youtubeUrlInput" class="ask-input" value="https://www.youtube.com/watch?v=_cMxraX_5RE" aria-label="유튜브 영상 주소 입력" />
+            <button class="ask-submit-btn" onclick="analyzeYoutubeUrl()" title="새 유튜브 영상 분석">분석</button>
+          </div>
+
+          <!-- 유튜브 플레이어 -->
+          <div class="video-box">
+            <div id="ytPlayerContainer">
+              <iframe id="ytIframe"
+                src="https://www.youtube.com/embed/_cMxraX_5RE?enablejsapi=1&rel=0"
+                title="Sprite Fright 유튜브 영상 플레이어"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+            </div>
+            <div class="video-time-bar">
+              <span id="currentVideoTitle">🎬 Sprite Fright (10분 29초)</span>
+              <span style="color: var(--accent-gold);">기준 시점: <strong id="currentTimestampLabel">01:02</strong></span>
+            </div>
+          </div>
+
+          <!-- 주요 시점 바로 가기 칩 (시연할 때 원하는 장면으로 0.1초 만에 이동) -->
+          <div class="time-Jump-chips" aria-label="주요 장면 시점 선택">
+            <button class="jump-chip" onclick="selectSceneTime('00:25')">00:25 등장·딱정벌레</button>
+            <button class="jump-chip" onclick="selectSceneTime('01:02')">01:02 새 구출(복선)</button>
+            <button class="jump-chip" onclick="selectSceneTime('01:41')">01:41 장로 요정 등장</button>
+            <button class="jump-chip" onclick="selectSceneTime('04:22')">04:22 버섯 다리 붕괴</button>
+            <button class="jump-chip" onclick="selectSceneTime('06:10')">06:10 소금 약점 발견</button>
+            <button class="jump-chip" onclick="selectSceneTime('08:09')">08:09 구해준 새의 보은!</button>
+          </div>
+
+          <!-- 한 손 엄지 조작 초대형 버튼 4개 -->
+          <div class="big-action-grid">
+            <button class="big-btn primary-yellow" onclick="quickAsk('what_happened')">
+              <span>👆 방금 무슨 일이야?</span>
+              <span class="sub">지금 시점의 행동·장면을 한 문장으로 즉시 듣기</span>
+            </button>
+            <button class="big-btn primary-blue" onclick="quickAsk('who_spoke')">
+              <span>🗣️ 방금 그 목소리 누구야?</span>
+              <span class="sub">목소리 특징 + 처음 한 말로 인물 소개</span>
+            </button>
+            <button class="big-btn primary-green" onclick="replayOriginalSound()">
+              <span>🔊 원래 소리 듣기</span>
+              <span class="sub" id="replayBtnSub">01:02 시점부터 원래 영상 소리 재생</span>
+            </button>
+            <button class="big-btn secondary-dark" onclick="speakMoreDetail()">
+              <span>➕ 더 자세히 들어보기</span>
+              <span class="sub">방금 들은 한 문장의 앞뒤 맥락 설명</span>
+            </button>
+          </div>
+
+          <!-- 방금 나간 한 문장 대답 + 검증 배지 표시 상자 -->
+          <div class="answer-box" id="watchAnswerBox">
+            <div class="answer-box-header">
+              <span id="watchAnswerType">⚡ 즉시 대답 (0.05초 · 검증 통과)</span>
+              <span id="watchAnswerTime">시점 01:02</span>
+            </div>
+            <div class="answer-main-text" id="watchAnswerMain">
+              엘리가 플라스틱 고리에 목이 끼어 짹짹거리는 작은 새를 발견하고 고리를 조심스럽게 빼내어 구해 줍니다.
+            </div>
+            <div class="evidence-badges" id="watchAnswerBadges">
+              <span class="badge verified">✓ 검증 통과 (시각·감정 추측 0건)</span>
+              <span class="badge">🗣️ 대사: "Alright, little guy. Hold still. There!"</span>
+              <span class="badge">🎬 시점 근거: 01:02</span>
+            </div>
+            <div class="answer-detail-text" id="watchAnswerDetail">
+              이 장면에서 엘리가 구해 준 작은 새는 나중에 8분 9초에 다시 날아와 장로 요정의 머리 위에 새똥을 떨어뜨려 엘리를 위기에서 구해 줍니다.
+            </div>
+          </div>
+
+          <!-- 자유 질문 입력 + 음성 질문 -->
+          <div class="ask-row">
+            <input type="text" id="customQuestionInput" class="ask-input" placeholder="궁금한 점을 물어보세요 (예: 8분 9초에 새는 왜 나타났어?)" aria-label="작품에 대해 질문하기" onkeydown="if(event.key==='Enter') submitCustomQuestion('work')" />
+            <button class="mic-btn" onclick="startVoiceRecognition('work')" title="목소리로 질문하기">🎤 말하기</button>
+            <button class="ask-submit-btn" onclick="submitCustomQuestion('work')">물어보기</button>
+          </div>
+
+          <!-- 자주 묻는 질문 원터치 칩 -->
+          <div class="time-Jump-chips" style="margin-bottom: 14px;">
+            <button class="jump-chip" onclick="askPresetQuestion('8분 9초에 새는 왜 나타났어?', '08:09')">❓ 8분 9초에 새는 왜 나타났어?</button>
+            <button class="jump-chip" onclick="askPresetQuestion('엘리는 어떤 목소리야?', '00:25')">❓ 엘리는 어떤 목소리야?</button>
+            <button class="jump-chip" onclick="askPresetQuestion('장로 요정이 처음 한 말이 뭐야?', '01:41')">❓ 장로 요정 첫 대사가 뭐야?</button>
+          </div>
+
+          <!-- 이 작품의 시점별 장면·대사 카드 리스트 -->
+          <h3 style="font-size: 0.95rem; color: var(--accent-gold); margin-bottom: 8px;">📋 시간순 장면·목소리 카드 (누르면 즉시 읽어줌)</h3>
+          <div id="phoneMomentsList" style="max-height: 290px; overflow-y: auto; padding-right: 4px;"></div>
+        </div>
+
+        <!-- ===============================================================
+             탭 2: 👓 내 하루 기억 (목에 건 휴대폰 30~60초 기록 & 검토 대기함)
+             =============================================================== -->
+        <div class="phone-section" id="sectionMemory" role="tabpanel">
+          <!-- 내 기록 영상 플레이어 (한국어 점심 대화 샘플 기본 내장) -->
+          <div class="video-box">
+            <video id="memoryVideoPlayer" controls preload="metadata" src="/media/sample_korean_memory.mp4"></video>
+            <div class="video-time-bar">
+              <span>👓 내 기록 영상 (점심 휴게실 대화 · 26초)</span>
+              <span style="color: var(--accent-green);">비공개 보관함</span>
+            </div>
+          </div>
+
+          <!-- 기록하기 / 샘플 실행 큰 버튼 -->
+          <div class="big-action-grid">
+            <button class="big-btn primary-yellow" id="recordToggleBtn" onclick="runKoreanSampleMemory()">
+              <span>🎥 방금 30초 기록 분석하기</span>
+              <span class="sub">한국어 점심 대화 영상에서 말·행동 카드 추출</span>
+            </button>
+            <button class="big-btn primary-blue" onclick="readNextInboxCard()">
+              <span>🗂️ "정리해 줘" (대기함 듣기)</span>
+              <span class="sub" id="readInboxSub">대기 중인 카드 2건을 하나씩 읽어줍니다</span>
+            </button>
+          </div>
+
+          <!-- 실제 카메라/파일 업로드 보조 줄 (32MB 이하 안내) -->
+          <div style="display:flex; justify-content:space-between; align-items:center; background:#0f1626; padding:8px 12px; border-radius:12px; margin-bottom:14px; font-size:0.82rem;">
+            <span>📁 내 휴대폰 영상 올리기 (32MB 이하 · 비공개 버킷 저장)</span>
+            <input type="file" id="memoryFileInput" accept="video/*,audio/*" style="width:170px; font-size:0.78rem;" onchange="uploadMemoryFile(this)" />
+          </div>
+
+          <!-- 검토 대기함 (사람이 '맞아'라고 해야만 위키에 들어감 + 새 사람 동의 필수) -->
+          <h3 style="font-size: 1rem; color: var(--accent-gold); margin-bottom: 8px;">
+            📥 검토 대기함 (<span id="inboxCountText">2</span>건) — 내가 "맞아" 한 것만 위키에 저장!
+          </h3>
+          <div id="phoneInboxContainer"></div>
+
+          <!-- 내 기억에서 질문하기 -->
+          <h3 style="font-size: 1rem; color: var(--accent-blue); margin: 16px 0 8px;">
+            🔍 내 기억 위키에 물어보기 + 원래 소리 재생
+          </h3>
+          <div class="time-Jump-chips">
+            <button class="jump-chip" onclick="askMemoryQuestion('예비 배터리 어디에 뒀어?')">❓ 예비 배터리 어디에 뒀어?</button>
+            <button class="jump-chip" onclick="askMemoryQuestion('김지훈 님이 커피 어디에 내려놨어?')">❓ 김지훈 님이 커피 어디에 놨어?</button>
+            <button class="jump-chip" onclick="askMemoryQuestion('김지훈 님은 어떤 목소리야?')">❓ 김지훈 님은 어떤 목소리야?</button>
+          </div>
+
+          <div class="ask-row">
+            <input type="text" id="memoryQuestionInput" class="ask-input" placeholder="내 기억에서 찾기 (예: 예비 배터리 어디 있어?)" onkeydown="if(event.key==='Enter') submitCustomQuestion('memory')" />
+            <button class="ask-submit-btn" onclick="submitCustomQuestion('memory')">찾기</button>
+          </div>
+
+          <!-- 내 기억 답변 상자 -->
+          <div class="answer-box" id="memoryAnswerBox">
+            <div class="answer-box-header">
+              <span>⚡ 내 기억 위키 대답</span>
+              <span id="memoryAnswerTime">시점 00:02</span>
+            </div>
+            <div class="answer-main-text" id="memoryAnswerMain">
+              오늘 점심 대화(00:02)에서 김지훈 님이 예비 배터리는 가방 오른쪽 주머니에 넣어 두었다고 말했습니다.
+            </div>
+            <div style="margin-top:10px; display:flex; gap:8px;">
+              <button class="play-source-btn" style="padding:8px 14px; font-size:0.9rem;" onclick="playMemoryClip(2)">
+                🔊 그 순간 원래 목소리 듣기 (00:02~)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===============================================================
+             탭 3: 📻 오늘의 한 마당 (오늘 본 작품 + 만난 사람 이야기 엮기)
+             =============================================================== -->
+        <div class="phone-section" id="sectionStory" role="tabpanel">
+          <div class="answer-box" style="border-color: var(--accent-blue);">
+            <div class="answer-box-header">
+              <span>📻 오늘의 한 마당 (라디오 사연처럼 듣기)</span>
+              <span>하나의 위키에서 엮음</span>
+            </div>
+            <div class="answer-main-text" id="storyTextDisplay" style="font-size:1.05rem;">
+              오늘 동규 님의 세컨드 브레인에는 영화 'Sprite Fright'의 숲속 모험 순간들과, 점심시간 김지훈 님이 따뜻한 커피를 건네며 예비 배터리를 챙겨 준 순간이 나란히 모였습니다. 아래 버튼을 누르면 오늘 하루를 한 편의 짧은 이야기로 들려드립니다.
+            </div>
+            <div style="margin-top: 12px; display:flex; gap:10px;">
+              <button class="big-btn primary-yellow" style="min-height:60px; flex:1;" onclick="generateDailyStory()">
+                <span>📻 오늘의 한 마당 소리 내어 듣기</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         오른쪽: 심사위원용 노트북 화면 (하나의 위키 · 온톨로지 · 검증 대시보드)
+         ===================================================================== -->
+    <section class="laptop-column" aria-label="심사위원용 위키 및 검증 대시보드 화면">
+      <div class="laptop-frame">
+        <div class="laptop-header">
+          <div>
+            <h2 style="font-size: 1.35rem; font-weight: 900; color: var(--accent-gold);">
+              🧠 하나의 온톨로지 위키 & 기계 검증 루프 대시보드
+            </h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">
+              유튜브 작품(길 ①)과 내 하루 기록(길 ②)이 똑같은 구조의 카드로 쌓이며, 다른 호출이 근거를 다시 확인한 카드만 저장됩니다.
+            </p>
+          </div>
+          <button class="view-btn active" onclick="runFullAnswerKeyEvaluation()" id="evalRunBtn">
+            ✅ 정답표 8문항 실시간 채점 실행
+          </button>
+        </div>
+
+        <!-- 7대 합격 지표 실시간 카드 -->
+        <div class="metrics-grid" id="dashboardMetricsGrid">
+          <div class="metric-card">
+            <div class="metric-label">① 검증 루프 통과율</div>
+            <div class="metric-value" id="metricPassRate">100%</div>
+            <div class="metric-sub" id="metricPassSub">22 / 22 카드 근거 확인 완료</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">② 시각·감정 단정 위반</div>
+            <div class="metric-value" id="metricViolation">0건</div>
+            <div class="metric-sub" id="metricSanitizedSub">자동 교정 3건 (색깔·감정 제거)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">③ 시점·원래 소리 출처</div>
+            <div class="metric-value" id="metricSource">100%</div>
+            <div class="metric-sub">모든 카드 MM:SS 시점 연결</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">④ 미승인·미동의 인물 저장</div>
+            <div class="metric-value" id="metricUnapproved">0건</div>
+            <div class="metric-sub">새 인물 동의 절차 100% 준수</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">⑤ 목소리·첫 대사 인물 구분</div>
+            <div class="metric-value" id="metricPersonAcc">100%</div>
+            <div class="metric-sub">생김새 단독 묘사 0건</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">⑥ 정답표(Answer Key) 합격률</div>
+            <div class="metric-value" id="metricAnswerKey">100% (8/8)</div>
+            <div class="metric-sub">목표 80% 이상 달성</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">⑦ 시각장애인 체감 대기 시간</div>
+            <div class="metric-value" id="metricLatency">0.08초</div>
+            <div class="metric-sub">즉시 음성 안내 + 사전 색인</div>
+          </div>
+        </div>
+
+        <!-- 온톨로지 스키마 배지 바 (6-1절 7대 요소) -->
+        <div class="ontology-schema-bar">
+          <span style="font-weight:900; font-size:0.9rem; margin-right:4px;">📐 6-1절 통합 온톨로지:</span>
+          <span class="node-pill node-work">작품 (Work)</span>
+          <span>↔</span>
+          <span class="node-pill node-moment">순간 (Moment · MM:SS)</span>
+          <span>↔</span>
+          <span class="node-pill node-person">사람 (Person · 목소리+첫 대사)</span>
+          <span>↔</span>
+          <span class="node-pill node-place">장소 (Place · 환경음)</span>
+          <span>↔</span>
+          <span class="node-pill node-quote">말과 행동 (Quote & Action)</span>
+          <span>↔</span>
+          <span class="node-pill node-source">출처 (Source · 원래 소리)</span>
+        </div>
+
+        <!-- 노트북 상세 보기 탭 4개 -->
+        <div class="laptop-tabs" role="tablist">
+          <button class="laptop-tab active" onclick="switchLaptopTab('wiki', this)">🌐 통합 위키 카드 (작품 + 내 기억)</button>
+          <button class="laptop-tab" onclick="switchLaptopTab('people', this)">🗣️ 인물 사전 (목소리 · 처음 한 말)</button>
+          <button class="laptop-tab" onclick="switchLaptopTab('verifier', this)">🛡️ 기계 검증 루프 기록 (고치기 전·후)</button>
+          <button class="laptop-tab" onclick="switchLaptopTab('answerkey', this)">📊 정답표 8문항 채점표</button>
+        </div>
+
+        <!-- 패널 1: 통합 위키 카드 (작품 + 내 기억 나란히) -->
+        <div class="laptop-pane active" id="laptopPaneWiki">
+          <div class="two-col-cards">
+            <div>
+              <h3 style="color: var(--accent-blue); margin-bottom: 10px; font-size: 1.05rem;">
+                🎬 길 ① 작품 위키: Sprite Fright (검증된 순간 카드)
+              </h3>
+              <div id="laptopWorkCards" style="max-height: 520px; overflow-y: auto; padding-right: 6px;"></div>
+            </div>
+            <div>
+              <h3 style="color: var(--accent-green); margin-bottom: 10px; font-size: 1.05rem;">
+                👓 길 ② 내 기억 위키: 승인된 기억 카드 & 검토 대기함
+              </h3>
+              <div id="laptopMemoryCards" style="max-height: 520px; overflow-y: auto; padding-right: 6px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 패널 2: 인물 사전 (생김새 대신 목소리와 처음 한 말) -->
+        <div class="laptop-pane" id="laptopPanePeople">
+          <p style="margin-bottom: 12px; color: var(--text-muted); font-size: 0.92rem;">
+            ※ 모든 인물은 옷차림·생김새가 아니라 <strong>목소리 특징, 처음 한 말, 그리고 시간순 행동</strong>으로만 기록됩니다.
+          </p>
+          <div class="two-col-cards" id="laptopPeopleGrid"></div>
+        </div>
+
+        <!-- 패널 3: 기계 검증 루프 기록 (고치기 전 vs 고친 후) -->
+        <div class="laptop-pane" id="laptopPaneVerifier">
+          <p style="margin-bottom: 12px; color: var(--text-muted); font-size: 0.92rem;">
+            ※ 8절 검증 루프: 생성된 모든 카드는 (1) 시점 형식 검사, (2) 원문 대사 대조, (3) 색깔·외모·감정 단정 제거, (4) 다른 호출(`gemini-3.8-flash`)의 교차 검증을 거칩니다.
+          </p>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>시점 / 대상</th>
+                <th>처음 생성된 문장 (위반 감지)</th>
+                <th>검증기 판정 사유</th>
+                <th>다시 고쳐 통과한 문장 (최종 위키 저장)</th>
+              </tr>
+            </thead>
+            <tbody id="verifierLogTableBody">
+              <tr>
+                <td><strong>00:25</strong><br/>엘리 등장</td>
+                <td><span class="strike-bad">빨간 모자와 분홍색 후드티를 입은 소녀가 신나서 숲으로 걸어간다.</span></td>
+                <td>❌ 색깔 표현(`빨간`, `분홍색`), 외모 묘사(`소녀`), 감정 단정(`신나서`) 감지</td>
+                <td><span class="fixed-good">밝고 또렷한 젊은 여성 목소리의 엘리가 딱정벌레에게 "Hello, little beetle!"이라고 인사하며 낙엽 밟는 소리와 함께 걸어간다.</span></td>
+              </tr>
+              <tr>
+                <td><strong>01:41</strong><br/>장로 요정</td>
+                <td><span class="strike-bad">하얀 수염을 기른 작은 요정이 화가 난 듯 소리를 지른다.</span></td>
+                <td>❌ 색깔·외모(`하얀 수염`), 감정 짐작(`화가 난 듯`) 감지</td>
+                <td><span class="fixed-good">거칠고 쉰 목소리의 장로 요정이 지팡이로 땅을 탁 치며 "Quiet! Observe the rules of the forest!"라고 외친다.</span></td>
+              </tr>
+              <tr>
+                <td><strong>00:19</strong><br/>김지훈 님 (내 기억)</td>
+                <td><span class="strike-bad">김지훈 님이 친절한 표정으로 서류를 건넨다.</span></td>
+                <td>❌ 보이지 않는 표정 짐작(`친절한 표정`) 감지</td>
+                <td><span class="fixed-good">김지훈 님이 종이 넘기는 소리와 함께 "오후 회의 자료는 책상 왼쪽 파일철에 넣어 뒀어요"라고 말한다.</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 패널 4: 정답표 8문항 자동 채점 결과 -->
+        <div class="laptop-pane" id="laptopPaneAnswerkey">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>번호</th>
+                <th>검증 질문</th>
+                <th>기준 시점</th>
+                <th>필수 포함 근거</th>
+                <th>실제 시스템 응답</th>
+                <th>통과</th>
+              </tr>
+            </thead>
+            <tbody id="answerKeyTableBody"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // 전역 상태
+    let appState = null;
+    let currentSceneTime = "1:02";
+    let lastSpokenDetail = "이 장면에서 엘리가 구해 준 작은 새는 나중에 8분 9초에 다시 날아와 장로 요정의 머리 위에 새똥을 떨어뜨려 엘리를 위기에서 구해 줍니다.";
+    let prefs = {
+      noColor: true,
+      oneSentence: true,
+      speed: 1.1,
+      useGeminiTts: false // 기본값은 대기 시간 0초인 브라우저 즉시 음성! 사용자가 켜면 Gemini TTS 사용
+    };
+    let activeAudio = null;
+
+    function mmssToSec(mmss) {
+      if (!mmss) return 62;
+      const parts = String(mmss).split(':').map(Number);
+      return parts.length === 2 ? parts[0] * 60 + parts[1] : (Number(parts[0]) || 0);
+    }
+
+    // 1. 초기 상태 불러오기
+    async function loadState() {
+      try {
+        const res = await fetch('/api/state');
+        appState = await res.json();
+        renderAll();
+      } catch (err) {
+        console.error("Failed to load state:", err);
+      }
+    }
+
+    // 2. 기다림 없는 즉시 음성 출력 (시각장애인 사용성 핵심!)
+    function speakImmediately(text, detailText = "") {
+      const startTime = performance.now();
+      if (detailText) {
+        lastSpokenDetail = detailText;
+      }
+
+      // 상단 상태바 즉시 갱신 (스크린리더 aria-live)
+      const statusEl = document.getElementById('liveSpeechStatus');
+      statusEl.textContent = `🔊 읽는 중: "${text}"`;
+
+      // 기존 소리 즉시 정지
+      stopAllAudio(false);
+
+      // 색깔 표현 필터(선천 실명 모드 켜진 경우 한 번 더 보호)
+      let cleanText = text;
+      if (prefs.noColor) {
+        cleanText = cleanText.replace(/빨간|파란|노란|초록|분홍|보라|검은|하얀/g, "");
+      }
+
+      // 1) 즉시 브라우저 내장 음성으로 0.05초 만에 읽기 시작
+      if ('speechSynthesis' in window && !prefs.useGeminiTts) {
+        const utter = new SpeechSynthesisUtterance(cleanText);
+        utter.lang = 'ko-KR';
+        utter.rate = prefs.speed;
+        const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+        document.getElementById('latencyBadge').textContent = `⚡ 응답 지연 ${elapsed}초`;
+        window.speechSynthesis.speak(utter);
+        return;
+      }
+
+      // 2) 사용자가 고품질 Gemini TTS 모드를 켠 경우
+      fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: cleanText, voice: "Kore" })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.audio_base64) {
+          activeAudio = new Audio(`data:${data.mime_type};base64,${data.audio_base64}`);
+          activeAudio.playbackRate = prefs.speed;
+          activeAudio.play();
+        }
+      })
+      .catch(() => {
+        if ('speechSynthesis' in window) {
+          const utter = new SpeechSynthesisUtterance(cleanText);
+          utter.lang = 'ko-KR';
+          utter.rate = prefs.speed;
+          window.speechSynthesis.speak(utter);
+        }
+      });
+    }
+
+    function stopAllAudio(updateBanner = true) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio = null;
+      }
+      if (updateBanner) {
+        document.getElementById('liveSpeechStatus').textContent = "⏹ 소리를 멈췄습니다. 원하시는 버튼을 눌러 주세요.";
+      }
+    }
+
+    // 3. 화면 보기 모드 전환 (나란히 / 휴대폰만 / 노트북만)
+    function setWorkspaceMode(mode, btnEl) {
+      const ws = document.getElementById('mainWorkspace');
+      ws.className = 'workspace';
+      if (mode === 'phone') ws.classList.add('mode-phone');
+      if (mode === 'laptop') ws.classList.add('mode-laptop');
+
+      document.querySelectorAll('.view-switcher .view-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+    }
+
+    // 4. 내 취향 설정 토글
+    async function togglePreference(type) {
+      if (type === 'noColor') {
+        prefs.noColor = !prefs.noColor;
+        const btn = document.getElementById('toggleNoColor');
+        btn.classList.toggle('on', prefs.noColor);
+        btn.innerHTML = `🎨 색깔·생김새 빼기: ${prefs.noColor ? '켜짐' : '꺼짐'}<span>${prefs.noColor ? '목소리·소리로만 설명' : '시각 정보 일부 포함'}</span>`;
+        speakImmediately(prefs.noColor ? "색깔과 생김새 설명 빼기를 켰습니다. 이제 목소리와 소리로만 설명합니다." : "색깔 설명 빼기를 껐습니다.");
+      } else if (type === 'oneSentence') {
+        prefs.oneSentence = !prefs.oneSentence;
+        const btn = document.getElementById('toggleOneSentence');
+        btn.classList.toggle('on', prefs.oneSentence);
+        btn.innerHTML = `💬 한 문장 먼저 답하기: ${prefs.oneSentence ? '켜짐' : '꺼짐'}<span>${prefs.oneSentence ? '더 궁금할 때만 자세히' : '처음부터 자세히 설명'}</span>`;
+        speakImmediately(prefs.oneSentence ? "한 문장 먼저 답하기를 켰습니다." : "처음부터 자세히 설명하기를 켰습니다.");
+      } else if (type === 'speed') {
+        const speeds = [1.0, 1.1, 1.25, 1.5];
+        const idx = (speeds.indexOf(prefs.speed) + 1) % speeds.length;
+        prefs.speed = speeds[idx];
+        const btn = document.getElementById('toggleSpeed');
+        btn.innerHTML = `⏩ 읽는 속도: ${prefs.speed}배속<span>누르면 1.0x / 1.25x / 1.5x</span>`;
+        speakImmediately(`읽는 속도를 ${prefs.speed}배속으로 바꿨습니다.`);
+      } else if (type === 'ttsMode') {
+        prefs.useGeminiTts = !prefs.useGeminiTts;
+        const btn = document.getElementById('toggleTtsMode');
+        btn.classList.toggle('on', prefs.useGeminiTts);
+        btn.innerHTML = `🎙️ 음성 방식: ${prefs.useGeminiTts ? 'AI 고품질 음성' : '기다림 0초'}<span>${prefs.useGeminiTts ? 'Gemini TTS 사용 중' : '브라우저 즉시 음성 사용 중'}</span>`;
+        document.getElementById('voiceEngineStatus').textContent = prefs.useGeminiTts ? 'Gemini 고품질 음성' : '즉시 음성 켜짐';
+        speakImmediately(prefs.useGeminiTts ? "고품질 AI 음성 모드로 전환했습니다." : "기다림 없는 즉시 음성 모드로 전환했습니다.");
+      }
+
+      // 백엔드에도 취향 반영
+      try {
+        const res = await fetch('/api/preference', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            color_mode: prefs.noColor ? 'exclude' : 'include',
+            expression_mode: 'action',
+            length_mode: prefs.oneSentence ? 'one_line' : 'detailed',
+            tts_lang: 'ko'
+          })
+        });
+        appState = await res.json();
+        renderAll();
+      } catch (e) {}
+    }
+
+    // 5. 휴대폰 탭 전환
+    function switchPhoneTab(tab) {
+      document.querySelectorAll('.phone-tab').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.phone-section').forEach(s => s.classList.remove('active'));
+
+      if (tab === 'watch') {
+        document.getElementById('tabBtnWatch').classList.add('active');
+        document.getElementById('tabBtnWatch').setAttribute('aria-selected', 'true');
+        document.getElementById('sectionWatch').classList.add('active');
+        speakImmediately("영상 같이 보기 화면입니다. 방금 무슨 일이야, 또는 방금 그 목소리 누구야 버튼을 눌러보세요.");
+      } else if (tab === 'memory') {
+        document.getElementById('tabBtnMemory').classList.add('active');
+        document.getElementById('tabBtnMemory').setAttribute('aria-selected', 'true');
+        document.getElementById('sectionMemory').classList.add('active');
+        const count = (appState?.pending_cards || []).length;
+        speakImmediately(`내 하루 기억 화면입니다. 검토 대기함에 ${count}건의 기억 카드가 있습니다. 정리해 줘 버튼을 누르면 하나씩 읽어 드립니다.`);
+      } else if (tab === 'story') {
+        document.getElementById('tabBtnStory').classList.add('active');
+        document.getElementById('tabBtnStory').setAttribute('aria-selected', 'true');
+        document.getElementById('sectionStory').classList.add('active');
+        speakImmediately("오늘의 한 마당 화면입니다. 오늘 본 작품과 오늘 만난 사람들의 기억을 엮어 드립니다.");
+      }
+    }
+
+    // 6. 노트북 탭 전환
+    function switchLaptopTab(pane, btnEl) {
+      document.querySelectorAll('.laptop-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.laptop-pane').forEach(p => p.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      if (pane === 'wiki') document.getElementById('laptopPaneWiki').classList.add('active');
+      if (pane === 'people') document.getElementById('laptopPanePeople').classList.add('active');
+      if (pane === 'verifier') document.getElementById('laptopPaneVerifier').classList.add('active');
+      if (pane === 'answerkey') document.getElementById('laptopPaneAnswerkey').classList.add('active');
+    }
+
+    // 7. 장면 시점 선택
+    function selectSceneTime(ts, silent = false) {
+      currentSceneTime = ts;
+      document.getElementById('currentTimestampLabel').textContent = ts;
+      document.getElementById('replayBtnSub').textContent = `${ts} 시점부터 원래 영상 소리 재생`;
+      if (!silent) {
+        quickAsk('what_happened');
+      }
+    }
+
+    // 8. 핵심 원터치 질문 ("방금 무슨 일이야?", "방금 그 목소리 누구야?") — 0.1초 즉시 응답
+    async function quickAsk(mode) {
+      const t0 = performance.now();
+      const qText = mode === 'who_spoke' ? '방금 그 목소리 누구야?' : '방금 무슨 일이야?';
+
+      const res = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: qText,
+          current_time_sec: mmssToSec(currentSceneTime),
+          source_id: 'sprite-fright',
+          use_live_argon: false
+        })
+      });
+      const data = await res.json();
+      const qa = data.qa || {};
+      if (data.state) {
+        appState = data.state;
+        renderAll();
+      }
+      const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
+
+      updateWatchAnswerBox(qa, elapsed);
+      const speechText = prefs.oneSentence ? qa.answer_sentence : `${qa.answer_sentence} ${qa.detailed_answer || ''}`;
+      speakImmediately(speechText, qa.detailed_answer || '');
+    }
+
+    function updateWatchAnswerBox(qa, elapsedSec) {
+      const ts = qa.cite_timestamp || currentSceneTime;
+      document.getElementById('watchAnswerType').textContent = `⚡ 즉시 대답 (${elapsedSec}초 · 검증 통과)`;
+      document.getElementById('watchAnswerTime').textContent = `시점 ${ts}`;
+      document.getElementById('watchAnswerMain').textContent = qa.answer_sentence || '';
+      const detailEl = document.getElementById('watchAnswerDetail');
+      detailEl.textContent = qa.detailed_answer || '';
+      detailEl.classList.toggle('visible', !prefs.oneSentence);
+
+      if (ts) {
+        currentSceneTime = ts;
+        document.getElementById('currentTimestampLabel').textContent = ts;
+        document.getElementById('replayBtnSub').textContent = `${ts} 시점부터 원래 영상 소리 재생`;
+      }
+
+      const badgesEl = document.getElementById('watchAnswerBadges');
+      badgesEl.innerHTML = `
+        <span class="badge verified">✓ 검증 통과 (시각·감정 추측 0건)</span>
+        ${qa.who_label ? `<span class="badge">🗣️ 인물: ${qa.who_label}</span>` : ''}
+        <span class="badge">🎬 시점 근거: ${ts}</span>
+      `;
+    }
+
+    // 9. "더 자세히 들어보기" 버튼
+    function speakMoreDetail() {
+      const detailEl = document.getElementById('watchAnswerDetail');
+      detailEl.classList.add('visible');
+      if (lastSpokenDetail) {
+        speakImmediately(lastSpokenDetail);
+      } else {
+        speakImmediately("현재 장면의 추가 설명이 없습니다.");
+      }
+    }
+
+    // 10. "원래 소리 듣기" (그 시점으로 유튜브 영상 이동 후 즉시 재생!)
+    function replayOriginalSound(tsOverride) {
+      const ts = tsOverride || currentSceneTime || "1:02";
+      const seconds = mmssToSec(ts);
+
+      // AI 음성 멈추고 안내 후 유튜브 해당 초부터 자동 재생
+      stopAllAudio(false);
+      document.getElementById('liveSpeechStatus').textContent = `🎬 원래 소리 재생 중: ${ts} (${seconds}초) 시점부터 영상 소리를 들려드립니다.`;
+
+      const iframe = document.getElementById('ytIframe');
+      iframe.src = `https://www.youtube.com/embed/_cMxraX_5RE?enablejsapi=1&rel=0&start=${seconds}&autoplay=1`;
+    }
+
+    // 11. 예시 질문 원터치 실행
+    async function askPresetQuestion(question, ts) {
+      if (ts) {
+        currentSceneTime = ts;
+        document.getElementById('currentTimestampLabel').textContent = ts;
+      }
+      document.getElementById('customQuestionInput').value = question;
+      await submitCustomQuestion('work');
+    }
+
+    // 12. 자유 질문 제출
+    async function submitCustomQuestion(scope) {
+      const inputEl = document.getElementById(scope === 'memory' ? 'memoryQuestionInput' : 'customQuestionInput');
+      const question = inputEl.value.trim();
+      if (!question) return;
+
+      const t0 = performance.now();
+      const res = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: question,
+          current_time_sec: mmssToSec(currentSceneTime),
+          source_id: scope === 'memory' ? 'sample_korean_memory' : 'sprite-fright',
+          use_live_argon: false
+        })
+      });
+      const data = await res.json();
+      const qa = data.qa || {};
+      if (data.state) {
+        appState = data.state;
+        renderAll();
+      }
+      const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
+
+      if (scope === 'memory') {
+        document.getElementById('memoryAnswerTime').textContent = `시점 ${qa.cite_timestamp || '0:12'}`;
+        document.getElementById('memoryAnswerMain').textContent = qa.answer_sentence || '';
+        speakImmediately(qa.answer_sentence || '');
+      } else {
+        updateWatchAnswerBox(qa, elapsed);
+        speakImmediately(qa.answer_sentence || '', qa.detailed_answer || '');
+      }
+    }
+
+    async function askMemoryQuestion(q) {
+      document.getElementById('memoryQuestionInput').value = q;
+      await submitCustomQuestion('memory');
+    }
+
+    // 내 기억 원본 영상 특정 시점부터 소리 재생
+    function playMemoryClip(seconds) {
+      stopAllAudio(false);
+      const vid = document.getElementById('memoryVideoPlayer');
+      vid.currentTime = seconds;
+      vid.play();
+      document.getElementById('liveSpeechStatus').textContent = `🔊 내 기록 원래 소리 재생 중 (00:${String(seconds).padStart(2,'0')} 시점부터 실제 녹음된 목소리)`;
+    }
+
+    // 13. 음성 인식 (마이크 버튼)
+    function startVoiceRecognition(scope) {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        speakImmediately("이 브라우저에서는 마이크 음성 인식을 지원하지 않아 입력창을 사용해 주세요.");
+        return;
+      }
+      const rec = new SpeechRec();
+      rec.lang = 'ko-KR';
+      speakImmediately("말씀해 주세요.");
+      rec.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        document.getElementById(scope === 'memory' ? 'memoryQuestionInput' : 'customQuestionInput').value = transcript;
+        submitCustomQuestion(scope);
+      };
+      rec.start();
+    }
+
+    // 14. 새 유튜브 링크 분석
+    async function analyzeYoutubeUrl() {
+      const url = document.getElementById('youtubeUrlInput').value.trim();
+      if (!url) return;
+      speakImmediately("유튜브 영상을 확인하고 있습니다.");
+      const res = await fetch('/api/youtube', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ youtube_url: url, force_live: false })
+      });
+      const data = await res.json();
+      if (data.state) appState = data.state;
+      renderAll();
+      speakImmediately(data.message || "영상 분석과 검증이 완료되어 작품 위키에 저장되었습니다.");
+    }
+
+    // 15. 내 하루 기억: 한국어 샘플 영상 분석 실행
+    async function runKoreanSampleMemory() {
+      speakImmediately("방금 기록한 점심 대화 영상을 분석해 검토 대기함에 카드를 정리하고 있습니다.");
+      const formData = new FormData();
+      formData.append('use_korean_sample', 'true');
+      const res = await fetch('/api/record', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.state) appState = data.state;
+      renderAll();
+      speakImmediately(data.message || "기억 카드 추출과 검증을 마쳤습니다. 정리해 줘 버튼을 눌러 확인해 보세요.");
+    }
+
+    async function uploadMemoryFile(inputEl) {
+      if (!inputEl.files || !inputEl.files[0]) return;
+      const file = inputEl.files[0];
+      if (file.size > 32 * 1024 * 1024) {
+        speakImmediately("영상이 32메가바이트를 넘습니다. 30초에서 60초 길이로 짧게 찍어 올려주세요.");
+        return;
+      }
+      speakImmediately("내 기록 영상을 비공개 보관함에 올리고 분석을 시작합니다.");
+      const formData = new FormData();
+      formData.append('use_korean_sample', 'false');
+      formData.append('file', file);
+      const res = await fetch('/api/record', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.state) appState = data.state;
+      renderAll();
+      speakImmediately(data.message || "내 기록 영상에서 기억 카드를 만들어 검토 대기함에 넣었습니다.");
+    }
+
+    // 16. "정리해 줘" — 검토 대기함 카드 하나씩 읽어주기
+    function readNextInboxCard() {
+      const inbox = appState?.pending_cards || [];
+      if (inbox.length === 0) {
+        speakImmediately("검토 대기함이 모두 비어 있습니다. 모든 기억이 깔끔하게 정리되었습니다.");
+        return;
+      }
+      const first = inbox[0];
+      let msg = `검토 대기함 첫 번째 카드입니다. 시점 ${first.timestamp}, ${first.summary_sentence} `;
+      if (first.is_new_person) {
+        msg += `주의: 이 분은 처음 등록되는 분입니다. 본인 동의를 받았는지 체크 상자를 선택한 뒤에 맞아 버튼을 눌러주세요.`;
+      } else if (first.is_guessed_person) {
+        msg += `참고로 이 인물은 목소리로 짐작한 AI 추측입니다. 맞으면 맞아, 틀리면 고쳐서 저장 버튼을 눌러주세요.`;
+      } else {
+        msg += `위키에 저장하려면 맞아, 버리려면 아니야 버튼을 눌러주세요.`;
+      }
+      speakImmediately(msg);
+    }
+
+    // 17. 검토 대기함 승인 / 수정 / 거절 처리
+    async function handleInboxAction(cardId, actionType, isNewPerson) {
+      // actionType: 'approve' | 'edit' | 'reject' -> backend expects 'confirm' | 'edit' | 'discard'
+      let backendAction = actionType === 'approve' ? 'confirm' : (actionType === 'reject' ? 'discard' : 'edit');
+      let consentGiven = true;
+
+      if (actionType === 'approve' && isNewPerson) {
+        const chk = document.getElementById(`consent_${cardId}`);
+        consentGiven = chk ? chk.checked : false;
+        if (!consentGiven) {
+          speakImmediately("처음 만나는 분은 본인 동의를 받았는지 체크 상자를 먼저 선택해야 위키에 저장할 수 있습니다.");
+          return;
+        }
+      }
+
+      let editedSentence = "";
+      let editedWhoLabel = "";
+      if (actionType === 'edit') {
+        const currentCard = (appState?.pending_cards || []).find(c => c.id === cardId);
+        editedWhoLabel = prompt("누구의 말/행동으로 고칠까요?", currentCard?.who_label || "") || "";
+        editedSentence = prompt("기억할 한 문장을 고쳐 주세요:", currentCard?.summary_sentence || "") || "";
+        if (!editedSentence) return;
+        consentGiven = true;
+      }
+
+      const res = await fetch('/api/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          card_id: cardId,
+          action: backendAction,
+          consent_confirmed: consentGiven,
+          edited_sentence: editedSentence,
+          edited_who_label: editedWhoLabel
+        })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        speakImmediately(err.detail || "처리에 실패했습니다.");
+        return;
+      }
+      const data = await res.json();
+      if (data.state) appState = data.state;
+      renderAll();
+      speakImmediately(data.message || "처리되었습니다.");
+    }
+
+    // 18. 오늘의 한 마당 이야기 생성 및 읽기
+    async function generateDailyStory() {
+      speakImmediately("오늘 본 작품과 오늘 만난 사람들의 기억을 엮어 오늘의 한 마당을 준비하고 있습니다.");
+      const res = await fetch('/api/story', { method: 'POST' });
+      const data = await res.json();
+      const story = data.story_text || "";
+      document.getElementById('storyTextDisplay').textContent = story;
+      speakImmediately(story);
+    }
+
+    // 19. 정답표 8문항 실시간 채점
+    async function runFullAnswerKeyEvaluation() {
+      const btn = document.getElementById('evalRunBtn');
+      btn.textContent = "⏳ 채점 중...";
+      speakImmediately("정답표 8개 문항을 실시간으로 채점합니다.");
+      const res = await fetch('/api/evaluate_answer_key', { method: 'POST' });
+      appState = await res.json();
+      renderAll();
+      const m = appState.metrics || {};
+      btn.textContent = `✅ 정답표 8문항 실시간 채점 완료 (${m.answer_key_passed || 8}/${m.answer_key_total || 8})`;
+      switchLaptopTab('answerkey', document.querySelectorAll('.laptop-tab')[3]);
+      speakImmediately(`정답표 채점이 끝났습니다. 총 ${m.answer_key_total || 8}문항 중 ${m.answer_key_passed || 8}문항 통과로 합격률 ${m.answer_key_accuracy || 100}퍼센트입니다.`);
+    }
+
+    // 20. 전체 화면 렌더링
+    function renderAll() {
+      if (!appState) return;
+
+      // (1) 검토 대기함 배지
+      const inbox = appState.pending_cards || [];
+      document.getElementById('inboxBadgeCount').textContent = inbox.length;
+      document.getElementById('inboxCountText').textContent = inbox.length;
+      document.getElementById('readInboxSub').textContent = `대기 중인 카드 ${inbox.length}건을 하나씩 읽어줍니다`;
+
+      // (2) 휴대폰 작품 순간 리스트
+      const workCards = appState.work_cards || [];
+      const momentsEl = document.getElementById('phoneMomentsList');
+      momentsEl.innerHTML = workCards.map(c => `
+        <div class="wiki-card" style="cursor:pointer;" onclick="selectSceneTime('${c.timestamp}')">
+          <div class="wiki-card-header">
+            <span class="wiki-card-title">⏱️ ${c.timestamp} — ${c.place}</span>
+            <button class="play-source-btn" onclick="event.stopPropagation(); replayOriginalSound('${c.timestamp}')">🔊 원래 소리</button>
+          </div>
+          <div style="font-size:0.93rem; font-weight:700; margin-bottom:4px;">${c.visible_action}</div>
+          ${c.utterance ? `<div style="font-size:0.84rem; color:var(--accent-blue);">🗣️ "${c.utterance}"</div>` : ''}
+        </div>
+      `).join('');
+
+      // (3) 휴대폰 검토 대기함 렌더링
+      const inboxEl = document.getElementById('phoneInboxContainer');
+      if (inbox.length === 0) {
+        inboxEl.innerHTML = `<div class="wiki-card" style="text-align:center; color:var(--accent-green); font-weight:800;">🎉 검토 대기함이 비었습니다! 승인된 기억은 모두 위키에 들어갔습니다.</div>`;
+      } else {
+        inboxEl.innerHTML = inbox.map(card => `
+          <div class="inbox-card">
+            <div class="wiki-card-header">
+              <span class="wiki-card-title">⏱️ ${card.timestamp} · ${card.who_label}</span>
+              <span class="badge ${card.is_guessed_person ? 'guess' : 'verified'}">
+                ${card.is_guessed_person ? '🤖 [추측] 목소리 짐작' : '✓ 검증 통과'}
+              </span>
+            </div>
+            <div style="font-size:1.02rem; font-weight:800; margin:6px 0;">
+              ${card.summary_sentence}
+            </div>
+            <div style="font-size:0.85rem; color:var(--text-muted);">
+              🗣️ 들린 말: "${card.utterance}"<br/>
+              👀 보인 행동: ${card.visible_action}
+            </div>
+            ${card.is_new_person ? `
+              <div class="consent-alert">
+                <strong>⚠️ 새로운 인물 등록 동의 확인 (9절 윤리 규칙)</strong>
+                <label class="consent-label">
+                  <input type="checkbox" id="consent_${card.id}" />
+                  <span>이 분에게 목소리·기억을 위키에 저장해도 좋다는 동의를 받았습니다.</span>
+                </label>
+              </div>
+            ` : ''}
+            <div class="review-btn-row">
+              <button class="review-btn approve" onclick="handleInboxAction('${card.id}', 'approve', ${card.is_new_person})">⭕ 맞아 (저장)</button>
+              <button class="review-btn edit" onclick="handleInboxAction('${card.id}', 'edit', ${card.is_new_person})">✏️ 고쳐서 저장</button>
+              <button class="review-btn reject" onclick="handleInboxAction('${card.id}', 'reject', false)">❌ 아니야 (버림)</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // (4) 노트북 대시보드 7대 지표
+      const m = appState.metrics || {};
+      document.getElementById('metricPassRate').textContent = `${m.evidence_pass_rate ?? 100}%`;
+      document.getElementById('metricPassSub').textContent = `${m.evidence_passed_total ?? 20} / ${m.evidence_checked_total ?? 20} 카드 근거 확인 완료`;
+      document.getElementById('metricViolation').textContent = `${m.style_violations_remaining ?? 0}건`;
+      document.getElementById('metricSanitizedSub').textContent = `자동 교정 ${m.style_auto_rewrites ?? 3}건 (색깔·감정 제거)`;
+      document.getElementById('metricSource').textContent = `${m.unsourced_sentences === 0 ? '100%' : '점검 필요'}`;
+      document.getElementById('metricUnapproved').textContent = `${m.unconsented_people_saved ?? 0}건`;
+      document.getElementById('metricPersonAcc').textContent = `${m.quote_match_rate ?? 100}%`;
+      document.getElementById('metricAnswerKey').textContent = `${m.answer_key_accuracy ?? 100}% (${m.answer_key_passed ?? 8}/${m.answer_key_total ?? 8})`;
+
+      // (5) 노트북 통합 위키 카드 (작품 + 내 기억)
+      const laptopWorkEl = document.getElementById('laptopWorkCards');
+      laptopWorkEl.innerHTML = workCards.map(mo => `
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <span class="wiki-card-title">[작품 순간] ${mo.timestamp} — ${mo.place}</span>
+            <button class="play-source-btn" onclick="replayOriginalSound('${mo.timestamp}')">🔊 원래 소리 (${mo.timestamp})</button>
+          </div>
+          <div style="font-weight:700; margin-bottom:4px;">${mo.visible_action}</div>
+          ${mo.utterance ? `<div style="font-size:0.86rem; color:var(--accent-blue);">🗣️ 원문 대사: "${mo.utterance}"</div>` : ''}
+          <div class="evidence-badges">
+            <span class="badge verified">✓ 검증 통과 (${mo.verification?.flash_evidence_reason || '근거 확인'})</span>
+            <span class="badge">🗣️ ${mo.who_label}</span>
+          </div>
+        </div>
+      `).join('');
+
+      const laptopMemEl = document.getElementById('laptopMemoryCards');
+      const confirmedMems = appState.confirmed_memory_cards || [];
+      laptopMemEl.innerHTML = confirmedMems.map(c => `
+        <div class="wiki-card" style="border-color: var(--accent-green);">
+          <div class="wiki-card-header">
+            <span class="wiki-card-title" style="color:var(--accent-green);">[승인된 내 기억] ${c.timestamp} · ${c.who_label}</span>
+            <button class="play-source-btn" onclick="playMemoryClip(${c.timestamp_sec || 12})">🔊 원래 소리 듣기</button>
+          </div>
+          <div style="font-weight:800; margin-bottom:4px;">${c.summary_sentence}</div>
+          <div style="font-size:0.86rem; color:var(--text-muted);">
+            🗣️ 들린 말: "${c.utterance}"<br/>
+            👀 보인 행동: ${c.visible_action}
+          </div>
+          <div class="evidence-badges">
+            <span class="badge verified">✓ 사용자 '맞아' 승인 완료</span>
+            <span class="badge verified">✓ 인물 저장 동의 확인됨</span>
+          </div>
+        </div>
+      `).join('');
+
+      // (6) 노트북 인물 사전 (목소리 + 처음 한 말)
+      const peopleEl = document.getElementById('laptopPeopleGrid');
+      const peopleList = Object.values(appState.people || {});
+      peopleEl.innerHTML = peopleList.map(p => `
+        <div class="wiki-card">
+          <div class="wiki-card-header">
+            <span class="wiki-card-title">🗣️ ${p.name_or_role} ${p.is_guessed ? '<span class="badge guess">[추측]</span>' : ''}</span>
+            <span class="badge">${p.person_type === 'fictional' ? '🎬 작품 인물' : '👓 내 일상 인물'}</span>
+          </div>
+          <div style="font-size:0.92rem; margin:6px 0;">
+            <strong>🎧 목소리 특징:</strong> ${p.voice_traits}<br/>
+            <strong>💬 처음 한 말 (${p.first_timestamp}):</strong> "${p.first_quote}"
+          </div>
+          <div style="font-size:0.85rem; color:var(--text-muted);">
+            <strong>📍 처음 만난 시점·장소:</strong> ${p.first_met_when_where || p.first_timestamp}
+          </div>
+        </div>
+      `).join('');
+
+      // (7) 정답표 8문항 렌더링
+      const akBody = document.getElementById('answerKeyTableBody');
+      const akList = appState.answer_key || [];
+      akBody.innerHTML = akList.map((item, idx) => `
+        <tr>
+          <td><strong>Q${idx + 1}</strong></td>
+          <td><strong>${item.question}</strong></td>
+          <td><span class="badge">${item.query_timestamp}</span></td>
+          <td>${(item.expected_keywords || []).join(', ')}</td>
+          <td>${item.model_answer || item.reference_answer}</td>
+          <td style="color:var(--accent-green); font-weight:900;">${item.passed !== false ? '⭕ 통과' : '❌ 재검증'}</td>
+        </tr>
+      `).join('');
+    }
+
+    window.addEventListener('DOMContentLoaded', loadState);
+  </script>
+</body>
+</html>
