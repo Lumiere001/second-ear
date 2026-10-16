@@ -927,6 +927,7 @@
         <input type="checkbox" id="autoListenToggle" />
         <span>연속 마이크 대기</span>
       </label>
+      <a class="nav-link-btn" href="/graph" target="_blank" rel="noopener">함께 보기</a>
       <button class="nav-link-btn" id="sheetToggleBtn" onclick="toggleStudioSheet(event)">
         시연 및 위키 검증 열기
       </button>
@@ -987,7 +988,7 @@
       미리 처리한 결과 (실행 시각: 2026-10-16 11:56 KST · 대회 중 실제 Argon 실행)
     </div>
 
-    <h1 id="liveCaption" aria-live="assertive">터치 한 번으로 대화를 시작하세요</h1>
+    <h1 id="liveCaption" aria-live="polite">터치 한 번으로 대화를 시작하세요</h1>
     <p id="liveSubCaption">실시간 카메라를 켜면 AI가 먼저 눈앞 상황을 보고 말을 걸어 줍니다</p>
 
     <!-- 장면/기억 시점이 활성화되었을 때만 나타나는 문맥형 원본 소리 재생 알약 버튼 -->
@@ -1476,9 +1477,14 @@
     // =====================================================================
     // 3. Gemini 3.8 Flash TTS (/api/tts) + Speed Control (0.75x ~ 1.50x)
     // =====================================================================
+    // 말하기마다 번호표를 새로 뽑는다. 번호가 바뀐 뒤 늦게 도착한 소리·콜백은 버려서 소리가 겹치지 않게 한다
+    let speechToken = 0;
     function stopAllSpeech() {
+      speechToken++;
       if (activeAudio) {
         try {
+          activeAudio.onended = null;
+          activeAudio.onerror = null;
           activeAudio.pause();
           activeAudio.src = '';
         } catch (e) {}
@@ -1538,16 +1544,19 @@
         return;
       }
       window.speechSynthesis.cancel();
+      const myToken = speechToken;
       const u = new SpeechSynthesisUtterance(spokenText);
       u.lang = 'ko-KR';
       u.rate = currentSpeechRate || 1.0;
-      u.onend = () => finishSpeakingTurn(displayCaption || spokenText, followUpSub, onDoneAction);
-      u.onerror = () => finishSpeakingTurn(displayCaption || spokenText, followUpSub, onDoneAction);
+      u.onend = () => { if (myToken === speechToken) finishSpeakingTurn(displayCaption || spokenText, followUpSub, onDoneAction); };
+      u.onerror = () => { if (myToken === speechToken) finishSpeakingTurn(displayCaption || spokenText, followUpSub, onDoneAction); };
       window.speechSynthesis.speak(u);
     }
 
     async function speakConversational(spokenText, displayCaption, followUpSub, onDoneAction) {
       stopAllSpeech();
+      pauseAllMedia();
+      const myToken = speechToken;
 
       isSpeaking = true;
       setCanvasState(
@@ -1573,6 +1582,7 @@
         });
         if (!res.ok) throw new Error('TTS request failed');
         const data = await res.json();
+        if (myToken !== speechToken) return;
         if (!data || !data.audio_base64) throw new Error('Empty audio_base64');
 
         const audio = new Audio('data:audio/wav;base64,' + data.audio_base64);
@@ -1583,16 +1593,19 @@
         activeAudio = audio;
 
         audio.onended = () => {
+          if (myToken !== speechToken) return;
           if (activeAudio === audio) activeAudio = null;
           finishSpeakingTurn(displayCaption || spokenText, followUpSub, onDoneAction);
         };
         audio.onerror = () => {
+          if (myToken !== speechToken) return;
           if (activeAudio === audio) activeAudio = null;
           speakFallbackBrowserTTS(spokenText, displayCaption, followUpSub, onDoneAction);
         };
 
         await audio.play();
       } catch (e) {
+        if (myToken !== speechToken) return;
         speakFallbackBrowserTTS(spokenText, displayCaption, followUpSub, onDoneAction);
       }
     }
